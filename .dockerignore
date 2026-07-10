@@ -1,0 +1,25 @@
+# Git
+.git
+.github
+.gitignore
+
+# Project backups and scaffolding tools
+.projects/
+scripts/util_dev/project_manager_app/
+
+# Local env files
+.env
+.env.*
+!config/.env.web
+
+# Logs and databases
+*.log
+*.db
+*.sqlite
+
+# Python cache and virtual environment
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/

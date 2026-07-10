@@ -1,0 +1,32 @@
+{
+    "dark": {
+        "DARK_BG": "#080711",
+        "SIDEBAR_BG": "#0f0d25",
+        "CARD_BG": "#1a163a",
+        "TEXT_COLOR": "#f8fafc",
+        "SUBTEXT_COLOR": "#cbd5e1",
+        "ACCENT_COLOR": "#06b6d4",
+        "ACCENT_HOVER": "#a855f7",
+        "SUCCESS_COLOR": "#22c55e",
+        "ERROR_COLOR": "#ef4444",
+        "BORDER_COLOR": "#6366f1",
+        "RADIUS": "16px",
+        "BORDER_WIDTH": "1px",
+        "FONT_FAMILY": "Courier New, Courier, monospace"
+    },
+    "light": {
+        "DARK_BG": "#f5f3ff",
+        "SIDEBAR_BG": "#ede9fe",
+        "CARD_BG": "#ffffff",
+        "TEXT_COLOR": "#1e1b4b",
+        "SUBTEXT_COLOR": "#4338ca",
+        "ACCENT_COLOR": "#8b5cf6",
+        "ACCENT_HOVER": "#7c3aed",
+        "SUCCESS_COLOR": "#10b981",
+        "ERROR_COLOR": "#ef4444",
+        "BORDER_COLOR": "#c084fc",
+        "RADIUS": "16px",
+        "BORDER_WIDTH": "1px",
+        "FONT_FAMILY": "Courier New, Courier, monospace"
+    }
+}

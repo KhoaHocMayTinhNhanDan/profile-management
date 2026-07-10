@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "src/layer_05_bootstrap/app_context_web.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/layer_05_bootstrap/app_context_web.py"
+    }
+  ]
+}

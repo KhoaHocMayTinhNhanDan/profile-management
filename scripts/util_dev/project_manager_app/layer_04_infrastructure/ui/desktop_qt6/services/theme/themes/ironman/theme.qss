@@ -1,0 +1,28 @@
+/* ==========================================================================
+   Ironman Theme Custom Stylesheet Override
+   Tệp này tự động được nạp đè lên base.qss khi theme "ironman" được chọn.
+   ========================================================================== */
+
+/* Ví dụ: Muốn biến nút bấm chính thành hình ảnh tùy chỉnh (như quả đấm của Ironman)
+QPushButton[class="PrimaryButton"] {
+    background-image: url("scripts/util_dev/project_manager_app/layer_04_infrastructure/ui/desktop_qt6/services/theme/themes/ironman/assets/ironman_fist.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    
+    min-width: 80px;
+    min-height: 80px;
+    border: none;
+}
+
+QPushButton[class="PrimaryButton"]:hover {
+    background-image: url("scripts/util_dev/project_manager_app/layer_04_infrastructure/ui/desktop_qt6/services/theme/themes/ironman/assets/ironman_fist_hover.png");
+}
+*/
+
+/* Thêm hiệu ứng phát sáng neon đỏ đặc thù cho các thẻ Card của Stark HUD */
+QFrame#new_project_card, QFrame#load_project_card, QFrame#status_card {
+    border: 2px solid #ff0000;
+    /* Hiệu ứng viền phát sáng nhẹ công nghệ cao */
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}

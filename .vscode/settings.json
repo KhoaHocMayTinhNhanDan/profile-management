@@ -1,0 +1,14 @@
+{
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "."
+    ],
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}",
+        "."
+    ],
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "python.languageServer": "Default",
+    "editor.semanticHighlighting.enabled": true,
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}

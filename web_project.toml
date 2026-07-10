@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "your-project"
+version = "0.1.0"
+description = "A clean architecture project"
+authors = ["Your Name <email>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.100.0"
+uvicorn = "^0.23.0"
+# ... thêm các thư viện khác
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

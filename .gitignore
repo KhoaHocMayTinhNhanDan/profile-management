@@ -1,0 +1,23 @@
+# Clean Architecture Tooling
+.projects/
+
+# Output build
+dist/
+build/
+*.spec
+*.pyc
+__pycache__/
+.venv/
+.env
+
+# PyInstaller / Packaging deployment results
+deployments/desktop/results/build/
+deployments/desktop/results/windows/
+deployments/desktop/results/mac/
+deployments/desktop/results/linux/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+scratch/
+*.log

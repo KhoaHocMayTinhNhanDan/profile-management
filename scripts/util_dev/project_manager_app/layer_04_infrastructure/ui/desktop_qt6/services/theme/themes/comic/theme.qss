@@ -1,0 +1,6 @@
+/* ==========================================================================
+   Comic Theme Custom Stylesheet Override
+   Tệp này tự động được nạp đè lên base.qss khi theme "comic" được chọn.
+   ========================================================================== */
+
+/* Thêm các ghi đè CSS đặc thù cho Comic theme tại đây nếu cần */

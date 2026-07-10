@@ -1,0 +1,35 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/layer_04_infrastructure/ui/web/frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node (Nếu dùng React/Vue)
+        # Bỏ qua nếu là HTML/JS thuần
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Build Frontend
+        working-directory: ./src/layer_04_infrastructure/ui/web/frontend
+        run: |
+          echo "Thực thi các lệnh build frontend (vd: npm run build)"
+          echo "Kết quả build sẽ nằm trong thư mục dist/"
+          mkdir -p dist
+          cp -r * dist/ || true
+          
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./src/layer_04_infrastructure/ui/web/frontend/dist
