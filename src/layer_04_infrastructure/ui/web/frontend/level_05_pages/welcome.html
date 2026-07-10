@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Màn hình Welcome</title>
+    <!-- Thêm các Web Components và script nếu cần thiết -->
+    <!-- <script src="../level_01_atoms/labels.js" defer></script> -->
+</head>
+<body style="background-color: #1e1e2e; padding: 30px; font-family: sans-serif; color: #cdd6f4;">
+    <h1>Màn hình Welcome</h1>
+    <p>Trang Welcome đã sẵn sàng cho giao diện tùy chỉnh của bạn.</p>
+    
+        <!-- Xây dựng cấu trúc HTML tùy chọn tại đây -->
+
+    <!-- UI INSPECTOR FOR CLEAN ARCHITECTURE DEVELOPERS -->
+    <script>
+        // Nhấn giữ phím Alt và Click chuột vào bất kỳ phần tử nào trên trang web để debug
+        document.addEventListener('click', function(e) {
+            if (e.altKey) {
+                e.preventDefault();
+                let path = [];
+                let curr = e.target;
+                while (curr) {
+                    let name = curr.tagName.toLowerCase();
+                    if (curr.id) name += '#' + curr.id;
+                    let clsAttr = curr.getAttribute('class');
+                    if (clsAttr) {
+                        name += '.' + clsAttr.trim().split(/\s+/).join('.');
+                    }
+                    let comp = curr.getAttribute('data-component');
+                    if (comp) {
+                        name += `[data-component="${comp}"]`;
+                    }
+                    path.push(name);
+                    curr = curr.parentElement;
+                }
+                let pathStr = path.reverse().join(" -> ");
+                alert("📋 ĐÃ COPY CẤU TRÚC WIDGET WEB:\n\n" + pathStr);
+                navigator.clipboard.writeText(pathStr);
+                console.log("[UI Inspector Web] " + pathStr);
+            }
+        });
+    </script>
+</body>
+</html>

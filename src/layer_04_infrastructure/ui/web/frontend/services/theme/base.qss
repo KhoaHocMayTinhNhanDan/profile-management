@@ -1,0 +1,138 @@
+/* Main Application Window & Containers */
+QMainWindow {
+    background-color: {DARK_BG};
+}
+QWidget {
+    font-family: {FONT_FAMILY};
+    color: {TEXT_COLOR};
+}
+
+/* Sidebar Styling */
+QFrame#sidebar {
+    background-color: {SIDEBAR_BG};
+    border-right: {BORDER_WIDTH} solid {BORDER_COLOR};
+}
+
+/* Content Container Styling */
+QWidget#content_container {
+    background-color: {DARK_BG};
+}
+
+/* Stat Cards / Group Box Styling */
+QFrame {
+    background-color: {CARD_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+}
+
+/* Line Edits / Text Areas */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: {DARK_BG};
+    color: {TEXT_COLOR};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+    padding: 10px;
+}
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+    border: {BORDER_WIDTH} solid {ACCENT_COLOR};
+}
+
+/* --- Atom Buttons --- */
+QPushButton[class="PrimaryButton"] {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: {RADIUS};
+    border: none;
+}
+QPushButton[class="PrimaryButton"]:hover {
+    background-color: {ACCENT_HOVER};
+}
+
+QPushButton[class="NavButton"] {
+    color: {TEXT_COLOR};
+    background-color: transparent;
+    border: none;
+    border-left: 4px solid transparent;
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 13px;
+    border-radius: 0px;
+}
+QPushButton[class="NavButton"]:hover {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+}
+QPushButton[class="NavButton"]:checked {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+    border-left: 4px solid {ACCENT_COLOR};
+    font-weight: bold;
+}
+
+QPushButton[class="SecondaryButton"] {
+    background-color: transparent;
+    color: {ACCENT_COLOR};
+    border: 2px solid {ACCENT_COLOR};
+    border-radius: {RADIUS};
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 13px;
+}
+QPushButton[class="SecondaryButton"]:hover {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+}
+
+/* --- Atom Inputs & Labels --- */
+QLineEdit[class="FormLineEdit"] {
+    background-color: {DARK_BG};
+    color: {TEXT_COLOR};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+    padding: 8px 12px;
+    font-size: 13px;
+}
+QLineEdit[class="FormLineEdit"]:focus {
+    border: {BORDER_WIDTH} solid {ACCENT_COLOR};
+}
+
+QLabel[class="HeaderLabel"] {
+    font-size: 20px;
+    font-weight: bold;
+    color: {TEXT_COLOR};
+}
+QLabel[class="SubtitleLabel"] {
+    font-size: 15px;
+    font-weight: bold;
+    color: {TEXT_COLOR};
+}
+QLabel[class="BodyLabel"] {
+    font-size: 13px;
+    color: {SUBTEXT_COLOR};
+}
+
+/* --- Settings Container & Combo --- */
+QComboBox {
+    background-color: {SIDEBAR_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    color: {TEXT_COLOR};
+    padding: 4px 6px;
+    font-size: 11px;
+    border-radius: 4px;
+}
+QComboBox QAbstractItemView {
+    background-color: {SIDEBAR_BG};
+    color: {TEXT_COLOR};
+    selection-background-color: {ACCENT_COLOR};
+    selection-color: {SIDEBAR_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+}
+QFrame#settings_container {
+    background-color: {CARD_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+    padding: 6px;
+}

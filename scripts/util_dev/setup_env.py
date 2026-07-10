@@ -40,7 +40,7 @@ def main():
     print("Upgrading pip in virtual environment...")
     run_command([python_bin, "-m", "pip", "install", "--upgrade", "pip"])
 
-    print("Installing required libraries (FastAPI, PyQt6, pytest, black, pyinstaller)...")
+    print("Installing required libraries (FastAPI, PyQt6, pytest, black, pyinstaller, pyright, rope)...")
     requirements = [
         "fastapi",
         "uvicorn",
@@ -49,7 +49,9 @@ def main():
         "pymongo",
         "redis",
         "black",
-        "pyinstaller"
+        "pyinstaller",
+        "pyright",
+        "rope"
     ]
     
     # If a package is locked on Windows, we notify the user.
@@ -57,11 +59,36 @@ def main():
         print("\n[WARNING] Some files are locked by VS Code or another python process.")
         print("Please close VS Code and run: .venv\\Scripts\\pip.exe install " + " ".join(requirements))
 
-    # 4. Configure VS Code Settings
+    # 4. Ensure scripts/__init__.py exists (required for absolute imports)
+    scripts_init = os.path.join("scripts", "__init__.py")
+    if not os.path.exists(scripts_init):
+        os.makedirs("scripts", exist_ok=True)
+        with open(scripts_init, "w") as f:
+            f.write("# Package initializer for scripts directory\n")
+        print("Created scripts/__init__.py")
+    else:
+        print("scripts/__init__.py already exists.")
+
+    # 5. Ensure pyrightconfig.json exists (required for Pyright type analysis)
+    pyright_config = "pyrightconfig.json"
+    if not os.path.exists(pyright_config):
+        pyright_settings = {
+            "include": ["src", "scripts", "tests"],
+            "extraPaths": ["."],
+            "venvPath": ".",
+            "venv": ".venv"
+        }
+        with open(pyright_config, "w") as f:
+            json.dump(pyright_settings, f, indent=2)
+        print("Created pyrightconfig.json")
+    else:
+        print("pyrightconfig.json already exists.")
+
+    # 6. Configure VS Code Settings
     vscode_dir = ".vscode"
     os.makedirs(vscode_dir, exist_ok=True)
     settings_file = os.path.join(vscode_dir, "settings.json")
-    
+
     settings = {}
     if os.path.exists(settings_file):
         try:
@@ -72,9 +99,9 @@ def main():
 
     # Automatically set Python interpreter for VS Code
     settings["python.defaultInterpreterPath"] = "${workspaceFolder}/" + python_bin.replace("\\", "/")
-    settings["python.analysis.extraPaths"] = ["${workspaceFolder}"]
-    settings["python.autoComplete.extraPaths"] = ["${workspaceFolder}"]
-    settings["python.languageServer"] = "Jedi"
+    settings["python.analysis.extraPaths"] = ["${workspaceFolder}", "."]
+    settings["python.autoComplete.extraPaths"] = ["${workspaceFolder}", "."]
+    settings["python.languageServer"] = "Default"
     settings["editor.semanticHighlighting.enabled"] = True
 
     with open(settings_file, "w") as f:

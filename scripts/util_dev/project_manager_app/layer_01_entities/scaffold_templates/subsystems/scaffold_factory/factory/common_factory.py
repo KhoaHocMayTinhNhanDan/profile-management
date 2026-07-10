@@ -58,7 +58,8 @@ class {pascal_name}Controller:
         self._presenter = {pascal_name}Presenter()
 
     async def handle_request(self, request_data: dict) -> dict:
-        input_data = {pascal_name}Input()
+        # Tự động unpack data nếu có tham số, tránh lỗi khi DTO thêm trường bắt buộc
+        input_data = {pascal_name}Input(**request_data) if request_data else {pascal_name}Input()
         output_data = await self._interactor.execute(input_data)
         return self._presenter.present(output_data)
 '''
@@ -330,3 +331,4 @@ DB_POSTGRES_URL = os.getenv("DB_POSTGRES_URL", "postgresql://user:pass@localhost
 DB_MONGODB_URL = os.getenv("DB_MONGODB_URL", "mongodb://localhost:27017")
 DB_REDIS_URL = os.getenv("DB_REDIS_URL", "redis://localhost:6379")
 '''
+
