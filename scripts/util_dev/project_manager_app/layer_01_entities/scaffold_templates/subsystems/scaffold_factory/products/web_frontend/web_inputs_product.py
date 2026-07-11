@@ -1,8 +1,9 @@
 from ..abstract.i_inputs_product import AbstractInputs
 
+
 class WebInputs(AbstractInputs):
     def get_template(self) -> str:
-        return '''class FormInput extends HTMLElement {
+        return """class FormInput extends HTMLElement {
     constructor() {
         super();
         const shadow = this.attachShadow({ mode: 'open' });
@@ -26,4 +27,4 @@ class WebInputs(AbstractInputs):
     }
 }
 customElements.define('form-input', FormInput);
-'''
+"""

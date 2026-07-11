@@ -5,7 +5,7 @@ class CommonFactory:
 
     @staticmethod
     def get_usecase_interactor_template(pascal_name: str, snake_name: str) -> str:
-        return f'''
+        return f"""
 from src.layer_02_usecases.gateways_interface.i_{snake_name}_repository import I{pascal_name}Repository
 from .{snake_name}_dto import {pascal_name}Input, {pascal_name}Output
 
@@ -16,11 +16,11 @@ class {pascal_name}Interactor:
     async def execute(self, input_data: {pascal_name}Input) -> {pascal_name}Output:
         await self._repository.save_db(input_data)
         return {pascal_name}Output(status="success", message="Executed")
-'''
+"""
 
     @staticmethod
     def get_usecase_dto_template(pascal_name: str) -> str:
-        return f'''
+        return f"""
 from dataclasses import dataclass
 
 @dataclass
@@ -31,11 +31,11 @@ class {pascal_name}Input:
 class {pascal_name}Output:
     status: str
     message: str
-'''
+"""
 
     @staticmethod
     def get_usecase_repository_interface_template(pascal_name: str) -> str:
-        return f'''
+        return f"""
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -43,11 +43,13 @@ class I{pascal_name}Repository(ABC):
     @abstractmethod
     async def save_db(self, data: Any) -> None:
         pass
-'''
+"""
 
     @staticmethod
-    def get_controller_template(pascal_name: str, snake_name: str, platform: str) -> str:
-        return f'''
+    def get_controller_template(
+        pascal_name: str, snake_name: str, platform: str
+    ) -> str:
+        return f"""
 from src.layer_02_usecases.usecases.{snake_name}.{snake_name}_dto import {pascal_name}Input
 from src.layer_02_usecases.usecases.{snake_name}.{snake_name}_interactor import {pascal_name}Interactor
 from src.layer_03_interface_adapters.presenters.{platform}.{snake_name} import {pascal_name}Presenter
@@ -62,21 +64,21 @@ class {pascal_name}Controller:
         input_data = {pascal_name}Input(**request_data) if request_data else {pascal_name}Input()
         output_data = await self._interactor.execute(input_data)
         return self._presenter.present(output_data)
-'''
+"""
 
     @staticmethod
     def get_presenter_template(pascal_name: str, snake_name: str) -> str:
-        return f'''
+        return f"""
 from src.layer_02_usecases.usecases.{snake_name}.{snake_name}_dto import {pascal_name}Output
 
 class {pascal_name}Presenter:
     def present(self, output: {pascal_name}Output) -> dict:
         return {{"status": output.status, "message": output.message}}
-'''
+"""
 
     @staticmethod
     def get_outbound_data_source_interface_template(pascal_name: str) -> str:
-        return f'''
+        return f"""
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -84,11 +86,11 @@ class I{pascal_name}DataSource(ABC):
     @abstractmethod
     async def save(self, data: Any) -> Any:
         pass
-'''
+"""
 
     @staticmethod
     def get_repository_template(pascal_name: str, snake_name: str) -> str:
-        return f'''
+        return f"""
 from src.layer_02_usecases.gateways_interface.i_{snake_name}_repository import I{pascal_name}Repository
 from src.layer_03_interface_adapters.gateways.outbound.i_{snake_name}_data_source import I{pascal_name}DataSource
 
@@ -98,10 +100,12 @@ class {pascal_name}Repository(I{pascal_name}Repository):
 
     async def save_db(self, data):
         await self._data_source.save(data)
-'''
+"""
 
     @staticmethod
-    def get_data_source_impl_template(pascal_name: str, snake_name: str, tech: str) -> str:
+    def get_data_source_impl_template(
+        pascal_name: str, snake_name: str, tech: str
+    ) -> str:
         if tech.lower() == "sqlite":
             class_name = f"Sqlite{pascal_name}DataSource"
             import_part = "import sqlite3\nfrom src.config import DB_SQLITE_PATH\n"
@@ -118,7 +122,9 @@ class {pascal_name}Repository(I{pascal_name}Repository):
         return {{'id': 1, **data}}"""
         elif tech.lower() == "postgres":
             class_name = f"Postgres{pascal_name}DataSource"
-            import_part = "from typing import Any\nfrom src.config import DB_POSTGRES_URL\n"
+            import_part = (
+                "from typing import Any\nfrom src.config import DB_POSTGRES_URL\n"
+            )
             init_part = f"""    def __init__(self, conn=None):
         self._conn = conn or DB_POSTGRES_URL
 """
@@ -127,7 +133,9 @@ class {pascal_name}Repository(I{pascal_name}Repository):
         return {{'id': 99, **data}}"""
         elif tech.lower() == "mongodb":
             class_name = f"Mongodb{pascal_name}DataSource"
-            import_part = "from typing import Any\nfrom src.config import DB_MONGODB_URL\n"
+            import_part = (
+                "from typing import Any\nfrom src.config import DB_MONGODB_URL\n"
+            )
             init_part = f"""    def __init__(self, conn=None):
         self._conn = conn or DB_MONGODB_URL
 """
@@ -136,7 +144,9 @@ class {pascal_name}Repository(I{pascal_name}Repository):
         return {{'id': 'mongo_id_1', **data}}"""
         elif tech.lower() == "redis":
             class_name = f"Redis{pascal_name}DataSource"
-            import_part = "from typing import Any\nfrom src.config import DB_REDIS_URL\n"
+            import_part = (
+                "from typing import Any\nfrom src.config import DB_REDIS_URL\n"
+            )
             init_part = f"""    def __init__(self, conn=None):
         self._conn = conn or DB_REDIS_URL
 """
@@ -156,7 +166,7 @@ class {pascal_name}Repository(I{pascal_name}Repository):
             save_logic = f"""        logger.info(f"Saving data for {pascal_name}")
         return True"""
 
-        return f'''{import_part}from src.shared.logger.app_logger import get_logger
+        return f"""{import_part}from src.shared.logger.app_logger import get_logger
 from src.layer_03_interface_adapters.gateways.outbound.i_{snake_name}_data_source import I{pascal_name}DataSource
 
 logger = get_logger(__name__)
@@ -165,11 +175,11 @@ class {class_name}(I{pascal_name}DataSource):
 {init_part}
     async def save(self, data):
 {save_logic}
-'''
+"""
 
     @staticmethod
     def get_test_template(pascal_name: str, snake_name: str) -> str:
-        return f'''
+        return f"""
 import pytest
 import asyncio
 from unittest.mock import Mock
@@ -190,11 +200,11 @@ def test_{snake_name}_success():
     
     assert isinstance(output_dto, {pascal_name}Output)
     assert output_dto.status == "success"
-'''
+"""
 
     @staticmethod
     def get_integration_test_template(pascal_name: str, snake_name: str) -> str:
-        return f'''import unittest
+        return f"""import unittest
 import asyncio
 from unittest.mock import Mock
 from src.layer_02_usecases.usecases.{snake_name}.{snake_name}_interactor import {pascal_name}Interactor
@@ -219,11 +229,11 @@ class Test{pascal_name}IntegrationFlow(unittest.TestCase):
         
         self.assertIsInstance(output_dict, dict)
         self.assertEqual(output_dict.get("status"), "success")
-'''
+"""
 
     @staticmethod
     def get_di_container_template() -> str:
-        return '''class DIContainer:
+        return """class DIContainer:
     def __init__(self):
         self._services = {}
         
@@ -232,11 +242,11 @@ class Test{pascal_name}IntegrationFlow(unittest.TestCase):
         
     def resolve(self, interface):
         return self._services.get(interface)
-'''
+"""
 
     @staticmethod
     def get_app_context_base_template() -> str:
-        return '''import os
+        return """import os
 from .di_container import DIContainer
 
 class AppContextBase:
@@ -247,14 +257,14 @@ class AppContextBase:
     def _register_infrastructure(self):
         # <-- BIND_REPOSITORY_HERE -->
         pass
-'''
+"""
 
     @staticmethod
     def get_app_context_desktop_template() -> str:
-        return '''from .app_context_base import AppContextBase
-from src.layer_04_infrastructure.ui.desktop_qt6.ui_services.theme.theme_manager import ThemeManager
-from src.layer_04_infrastructure.ui.desktop_qt6.ui_services.i18n.i18n_manager import I18nManager
-from src.layer_04_infrastructure.ui.desktop_qt6.ui_services.light_dark_mode_manager import LightDarkModeManager
+        return """from .app_context_base import AppContextBase
+from src.layer_04_infrastructure.ui.desktop_qt6.services.theme.theme_manager import ThemeManager
+from src.layer_04_infrastructure.ui.desktop_qt6.services.i18n.i18n_manager import I18nManager
+from src.layer_04_infrastructure.ui.desktop_qt6.services.light_dark_mode_manager import LightDarkModeManager
 
 class AppContextDesktop(AppContextBase):
     def __init__(self):
@@ -266,11 +276,11 @@ class AppContextDesktop(AppContextBase):
     def _register_infrastructure(self):
         super()._register_infrastructure()
         # <-- BIND_REPOSITORY_HERE -->
-'''
+"""
 
     @staticmethod
     def get_app_context_web_template() -> str:
-        return '''from .app_context_base import AppContextBase
+        return """from .app_context_base import AppContextBase
 
 class AppContextWeb(AppContextBase):
     def __init__(self):
@@ -279,11 +289,11 @@ class AppContextWeb(AppContextBase):
     def _register_infrastructure(self):
         super()._register_infrastructure()
         # <-- BIND_REPOSITORY_HERE -->
-'''
+"""
 
     @staticmethod
     def get_app_context_mobile_template() -> str:
-        return '''from .app_context_base import AppContextBase
+        return """from .app_context_base import AppContextBase
 
 class AppContextMobile(AppContextBase):
     def __init__(self):
@@ -292,11 +302,11 @@ class AppContextMobile(AppContextBase):
     def _register_infrastructure(self):
         super()._register_infrastructure()
         # <-- BIND_REPOSITORY_HERE -->
-'''
+"""
 
     @staticmethod
     def get_app_context_cli_template() -> str:
-        return '''from .app_context_base import AppContextBase
+        return """from .app_context_base import AppContextBase
 
 class AppContextCLI(AppContextBase):
     def __init__(self):
@@ -305,11 +315,11 @@ class AppContextCLI(AppContextBase):
     def _register_infrastructure(self):
         super()._register_infrastructure()
         # <-- BIND_REPOSITORY_HERE -->
-'''
+"""
 
     @staticmethod
     def get_app_logger_template() -> str:
-        return '''import logging
+        return """import logging
 
 def get_logger(name: str):
     logger = logging.getLogger(name)
@@ -320,15 +330,14 @@ def get_logger(name: str):
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
     return logger
-'''
+"""
 
     @staticmethod
     def get_config_template() -> str:
-        return '''import os
+        return """import os
 
 DB_SQLITE_PATH = os.getenv("DB_SQLITE_PATH", "app.db")
 DB_POSTGRES_URL = os.getenv("DB_POSTGRES_URL", "postgresql://user:pass@localhost/db")
 DB_MONGODB_URL = os.getenv("DB_MONGODB_URL", "mongodb://localhost:27017")
 DB_REDIS_URL = os.getenv("DB_REDIS_URL", "redis://localhost:6379")
-'''
-
+"""

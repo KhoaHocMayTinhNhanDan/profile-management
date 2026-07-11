@@ -1,8 +1,9 @@
 from ..abstract.i_hook_product import AbstractHook
 
+
 class WebHook(AbstractHook):
     def get_async_template(self) -> str:
-        return '''/**
+        return """/**
  * Custom Hook tổng quát hóa hỗ trợ chạy bất đồng bộ mọi tác vụ IO/CPU nặng trên Web Frontend.
  */
 export class UseAsync extends EventTarget {
@@ -29,10 +30,10 @@ export class UseAsync extends EventTarget {
         }
     }
 }
-'''
+"""
 
     def get_feature_template(self, pascal_name: str, snake_name: str) -> str:
-        return f'''import {{ {pascal_name}Controller }} from "../../../layer_03_interface_adapters/controllers/web/{snake_name}.js";
+        return f"""import {{ {pascal_name}Controller }} from "../../../layer_03_interface_adapters/controllers/web/{snake_name}.js";
 
 /**
  * Custom Hook quản lý trạng thái hiển thị và luồng công việc cho tính năng {pascal_name}.
@@ -44,4 +45,4 @@ export class Use{pascal_name} extends EventTarget {{
         this.data = {{}};
     }}
 }}
-'''
+"""

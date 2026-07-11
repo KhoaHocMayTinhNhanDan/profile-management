@@ -1,5 +1,6 @@
 from ..abstract.i_hook_product import AbstractHook
 
+
 class Qt6Hook(AbstractHook):
     def get_async_template(self) -> str:
         return '''from PyQt6.QtCore import QObject, pyqtSignal, QThread

@@ -15,7 +15,7 @@ class BasePageTemplate(QWidget):
         
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(20)
+        self.main_layout.setSpacing(24)
         
         self.header = HeaderLabel(self.i18n_manager.translate(self.title_key))
         self.main_layout.addWidget(self.header)
@@ -23,7 +23,7 @@ class BasePageTemplate(QWidget):
         self.content_widget = QWidget()
         self.content_layout = QVBoxLayout(self.content_widget)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.content_layout.setSpacing(15)
+        self.content_layout.setSpacing(16)
         self.main_layout.addWidget(self.content_widget, stretch=1)
         
         self.i18n_manager.subscribe(self._handle_language_changed)

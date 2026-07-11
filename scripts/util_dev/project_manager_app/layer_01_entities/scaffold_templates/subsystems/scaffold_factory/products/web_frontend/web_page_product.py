@@ -1,8 +1,9 @@
 from ..abstract.i_page_product import AbstractPage
 
+
 class WebPage(AbstractPage):
     def get_template(self, pascal_name: str, snake_name: str) -> str:
-        return f'''<!DOCTYPE html>
+        return f"""<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -48,4 +49,4 @@ class WebPage(AbstractPage):
     </script>
 </body>
 </html>
-'''
+"""

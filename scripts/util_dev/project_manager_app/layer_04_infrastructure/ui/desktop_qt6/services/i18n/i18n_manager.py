@@ -2,11 +2,13 @@ import os
 import json
 from PyQt6.QtCore import QObject, pyqtSignal
 
+
 class I18nManager(QObject):
     """
     Dịch vụ quản lý Đa ngôn ngữ (i18n) động.
     Tải từ điển dịch thuật từ các file JSON tương ứng trong thư mục /locales/ khi đổi ngôn ngữ.
     """
+
     language_changed = pyqtSignal(str)
 
     def __init__(self, current_lang: str = "en"):
@@ -50,7 +52,7 @@ class I18nManager(QObject):
         # Tìm đường dẫn đến thư mục chứa các file json locales
         locales_dir = os.path.join(os.path.dirname(__file__), "locales")
         json_path = os.path.join(locales_dir, f"{lang_code}.json")
-        
+
         if os.path.exists(json_path):
             try:
                 with open(json_path, "r", encoding="utf-8") as f:

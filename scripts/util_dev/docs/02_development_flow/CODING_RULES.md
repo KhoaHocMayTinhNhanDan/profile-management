@@ -20,6 +20,28 @@
     def process_data(data: str) -> str:
         return data.strip()
     ```
+*   **Dependency Injection Type Casting & Registration:** 
+    *   **Tại sao cần tránh `.resolve()` lồng nhau:** Khi đăng ký DI (ví dụ: trong `app_context_desktop.py`), việc gọi `.resolve(Interface)` để truyền vào constructor của class khác sẽ làm Pyright hiểu nhầm kiểu trả về là `Unknown` hoặc `None`, sinh lỗi `reportOptionalMemberAccess`.
+    *   **Quy chuẩn Đăng ký (DI Registration - Good):** Khởi tạo tường minh thành các biến cục bộ và đăng ký lần lượt vào container. Cách này đảm bảo Pyright suy luận kiểu chính xác 100%:
+        ```python
+        # Tốt: Instantiation trực tiếp và truyền tham chiếu biến
+        ds_task = SqliteTaskDataSource()
+        self.container.register(ITaskDataSource, ds_task)
+        
+        repo_task = TaskRepository(ds_task)
+        self.container.register(ITaskRepository, repo_task)
+        
+        interactor_task = TaskInteractor(repo_task)
+        self.container.register(TaskInteractor, interactor_task)
+        ```
+    *   **Quy chuẩn Phân giải (DI Resolution - Good):** Khi resolve đối tượng trong UI hoặc Controller, hãy type annotate rõ ràng hoặc sử dụng đối tượng Class làm khóa định vị:
+        ```python
+        from typing import cast
+        # Sử dụng cast hoặc type annotation
+        self.use_case = cast(GetTasksUseCase, container.resolve(GetTasksUseCase))
+        # HOẶC:
+        self.use_case: GetTasksUseCase = container.resolve(GetTasksUseCase)
+        ```
 
 ---
 

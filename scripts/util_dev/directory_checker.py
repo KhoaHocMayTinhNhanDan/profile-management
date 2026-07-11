@@ -17,13 +17,17 @@ import os
 # Hoặc đơn giản hơn - in ra cây thư mục
 
 
-def print_directory_tree(rootdir, prefix=''):
-    print(prefix + os.path.basename(rootdir) + '/')
-    prefix += '    '
+def print_directory_tree(rootdir, prefix=""):
+    print(prefix + os.path.basename(rootdir) + "/")
+    prefix += "    "
     for item in os.listdir(rootdir):
         path = os.path.join(rootdir, item)
         if os.path.isdir(path):
-            if path.endswith('.git') or path.endswith('__pycache__') or item.startswith('node_modules'):
+            if (
+                path.endswith(".git")
+                or path.endswith("__pycache__")
+                or item.startswith("node_modules")
+            ):
                 continue
             print_directory_tree(path, prefix)
         else:
@@ -31,4 +35,4 @@ def print_directory_tree(rootdir, prefix=''):
 
 
 # Sử dụng
-print_directory_tree('.')  # In cây thư mục từ thư mục hiện tại
+print_directory_tree(".")  # In cây thư mục từ thư mục hiện tại

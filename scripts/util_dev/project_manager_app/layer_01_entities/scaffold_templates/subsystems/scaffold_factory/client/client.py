@@ -1,11 +1,13 @@
 from ..factory.abstract_factory import ITemplateFactory
 
+
 class TemplateClient:
     """
     TemplateClient (Client của Abstract Factory Pattern).
-    Nhận một Concrete Factory cụ thể (implementing ITemplateFactory hoặc Protocol) 
+    Nhận một Concrete Factory cụ thể (implementing ITemplateFactory hoặc Protocol)
     và dùng nó để lấy ra các UI products.
     """
+
     def __init__(self, factory: ITemplateFactory):
         self._factory = factory
 

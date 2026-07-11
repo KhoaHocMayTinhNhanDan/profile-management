@@ -2,12 +2,18 @@ import json
 import os
 from typing import Optional
 
-
 CONFIG_FILENAME = "project_config.json"
 
 
 def _config_path(root_dir: str) -> str:
-    return os.path.join(root_dir, "scripts", "project_manager_app", "appdata", CONFIG_FILENAME)
+    return os.path.join(
+        root_dir,
+        "scripts",
+        "util_dev",
+        "project_manager_app",
+        "appdata",
+        CONFIG_FILENAME,
+    )
 
 
 def _legacy_config_path(root_dir: str) -> str:

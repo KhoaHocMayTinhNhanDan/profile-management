@@ -1,5 +1,6 @@
 from ..abstract.i_buttons_product import AbstractButtons
 
+
 class Qt6Buttons(AbstractButtons):
     def get_template(self) -> str:
         return '''from PyQt6.QtWidgets import QPushButton

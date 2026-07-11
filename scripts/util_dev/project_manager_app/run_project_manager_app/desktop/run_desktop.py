@@ -2,7 +2,13 @@ import sys
 import os
 
 # Add project root to python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+    ),
+)
+
 
 def main():
     try:
@@ -11,10 +17,12 @@ def main():
         print("Loi: Thu vien PyQt6 chua duoc cai dat! Vui long chay: pip install PyQt6")
         sys.exit(1)
 
-    from scripts.util_dev.project_manager_app.layer_04_infrastructure.ui.desktop_qt6.main_window import MainWindow
+    from scripts.util_dev.project_manager_app.layer_04_infrastructure.ui.desktop_qt6.main_window import (
+        MainWindow,
+    )
 
     app = QApplication(sys.argv)
-    
+
     # Force QMessageBox to have readable text and light background
     app.setStyleSheet("""
         QMessageBox {
@@ -36,11 +44,14 @@ def main():
             background-color: #d0d0d0;
         }
     """)
-    
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", ".."))
+
+    project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+    )
     window = MainWindow(project_root)
     window.show()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

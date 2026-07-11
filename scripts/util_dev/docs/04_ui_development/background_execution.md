@@ -27,10 +27,11 @@ class AppExecutionDaemon:
         self._thread = threading.Thread(target=self._loop, daemon=True)
         self._thread.start()
 
-    def stop(self):
+    def stop(self, timeout: float = 2.0):
         self._running = False
-        if self._thread:
-            self._thread.join()  # Chờ luồng nền kết thúc an toàn
+        if self._thread and self._thread.is_alive():
+            # ⚠️ Tránh treo UI: Giới hạn thời gian chờ luồng kết thúc, không block vô hạn
+            self._thread.join(timeout=timeout)
 
     def _loop(self):
         while self._running:

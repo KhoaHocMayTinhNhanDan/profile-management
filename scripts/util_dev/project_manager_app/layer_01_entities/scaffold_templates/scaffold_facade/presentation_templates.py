@@ -276,7 +276,7 @@ class ThemeManager:
         }
 '''
 
-BASE_QSS_TEMPLATE = '''/* Main Application Window & Containers */
+BASE_QSS_TEMPLATE = """/* Main Application Window & Containers */
 QMainWindow {
     background-color: {DARK_BG};
 }
@@ -414,9 +414,9 @@ QFrame#settings_container {
     border-radius: {RADIUS};
     padding: 6px;
 }
-'''
+"""
 
-CLASSIC_THEME_JSON_TEMPLATE = '''{
+CLASSIC_THEME_JSON_TEMPLATE = """{
     "dark": {
         "DARK_BG": "#1e1e2e",
         "SIDEBAR_BG": "#11111b",
@@ -447,10 +447,10 @@ CLASSIC_THEME_JSON_TEMPLATE = '''{
         "BORDER_WIDTH": "1px",
         "FONT_FAMILY": "Inter, Roboto, sans-serif"
     }
-}'''
+}"""
 
-CLASSIC_THEME_QSS_TEMPLATE = '''/* Classic Theme Custom Stylesheet Override */
-'''
+CLASSIC_THEME_QSS_TEMPLATE = """/* Classic Theme Custom Stylesheet Override */
+"""
 
 BASE_PAGE_TEMPLATE = '''from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from ..level_01_atoms.labels import HeaderLabel
@@ -490,30 +490,26 @@ class BasePageTemplate(QWidget):
         pass
 '''
 
-EN_JSON_TEMPLATE = '''{
+EN_JSON_TEMPLATE = """{
     "LanguageName": "English",
     "settings": "Settings",
     "theme": "Theme",
     "language": "Language",
     "mode": "Mode"
-}'''
+}"""
 
-VI_JSON_TEMPLATE = '''{
+VI_JSON_TEMPLATE = """{
     "LanguageName": "Tiếng Việt",
     "settings": "Cấu hình",
     "theme": "Chủ đề",
     "language": "Ngôn ngữ",
     "mode": "Chế độ"
-}'''
+}"""
 
-ZH_JSON_TEMPLATE = '''{
+ZH_JSON_TEMPLATE = """{
     "LanguageName": "简体中文",
     "settings": "设置",
     "theme": "主题",
     "language": "语言",
     "mode": "模式"
-}'''
-
-
-
-
+}"""

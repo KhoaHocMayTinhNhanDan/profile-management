@@ -1,5 +1,6 @@
 from ..abstract.i_hook_product import AbstractHook
 
+
 class KivyHook(AbstractHook):
     def get_async_template(self) -> str:
         return '''import threading

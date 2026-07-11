@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from ..level_01_atoms.labels import HeaderLabel
 
+
 class BasePageTemplate(QWidget):
     """
     Template cấp độ 4 (Templates) trong thiết kế Atomic UI.
@@ -10,28 +11,29 @@ class BasePageTemplate(QWidget):
       - Tự động sinh Header tiêu đề trang và hỗ trợ dịch tự động.
       - Cung cấp container `content_layout` cho các trang con tự điền nội dung.
     """
+
     def __init__(self, title_key: str, app_ctx, parent=None):
         super().__init__(parent)
         self.app_ctx = app_ctx
         self.theme_manager = app_ctx.theme_manager
         self.i18n_manager = app_ctx.i18n_manager
         self.title_key = title_key
-        
+
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(20)
-        
+
         # Header Tiêu đề chuẩn hóa hỗ trợ i18n
         self.header = HeaderLabel(self.i18n_manager.translate(self.title_key))
         self.main_layout.addWidget(self.header)
-        
+
         # Container nội dung chính cho Page tự triển khai
         self.content_widget = QWidget()
         self.content_layout = QVBoxLayout(self.content_widget)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(15)
         self.main_layout.addWidget(self.content_widget, stretch=1)
-        
+
         # Kết nối sự kiện thay đổi toàn cục
         self.i18n_manager.language_changed.connect(self._handle_language_changed)
         self.theme_manager.theme_changed.connect(self.update_theme_styles)

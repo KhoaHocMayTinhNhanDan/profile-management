@@ -1,8 +1,9 @@
 from ..abstract.i_buttons_product import AbstractButtons
 
+
 class WebButtons(AbstractButtons):
     def get_template(self) -> str:
-        return '''class PrimaryButton extends HTMLElement {
+        return """class PrimaryButton extends HTMLElement {
     constructor() {
         super();
         const shadow = this.attachShadow({ mode: 'open' });
@@ -25,4 +26,4 @@ class WebButtons(AbstractButtons):
     }
 }
 customElements.define('primary-button', PrimaryButton);
-'''
+"""

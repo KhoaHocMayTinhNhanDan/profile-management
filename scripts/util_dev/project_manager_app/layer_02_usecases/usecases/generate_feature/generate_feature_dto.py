@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
+
 @dataclass
 class GenerateFeatureInput:
     feature_name: str
@@ -8,6 +9,7 @@ class GenerateFeatureInput:
     db_techs: List[str]
     project_root_dir: str
     project_name: str
+
 
 @dataclass
 class GenerateFeatureOutput:

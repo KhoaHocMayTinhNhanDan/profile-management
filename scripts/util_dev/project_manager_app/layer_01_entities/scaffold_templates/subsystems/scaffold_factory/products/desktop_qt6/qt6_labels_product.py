@@ -1,8 +1,9 @@
 from ..abstract.i_labels_product import AbstractLabels
 
+
 class Qt6Labels(AbstractLabels):
     def get_template(self) -> str:
-        return '''from PyQt6.QtWidgets import QLabel
+        return """from PyQt6.QtWidgets import QLabel
 from PyQt6.QtGui import QFont
 
 class HeaderLabel(QLabel):
@@ -16,4 +17,4 @@ class BodyLabel(QLabel):
         super().__init__(text, parent)
         self.setFont(QFont("Inter", 11))
         self.setStyleSheet("color: #cdd6f4;")
-'''
+"""

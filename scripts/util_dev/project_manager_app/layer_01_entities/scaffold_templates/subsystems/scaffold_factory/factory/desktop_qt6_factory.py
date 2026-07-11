@@ -7,10 +7,12 @@ from ..products.desktop_qt6.qt6_main_window_product import Qt6MainWindow
 from ..products.desktop_qt6.qt6_ui_inspector_product import Qt6UiInspector
 from ..products.desktop_qt6.qt6_hook_product import Qt6Hook
 
+
 class DesktopQt6Factory:
     """
     Concrete Factory tạo các UI templates cho Desktop PyQt6.
     """
+
     def create_page(self, pascal_name: str, snake_name: str) -> str:
         return Qt6Page().get_template(pascal_name, snake_name)
 

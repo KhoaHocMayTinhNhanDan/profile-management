@@ -2,9 +2,10 @@ class DesktopQt5Factory:
     """
     Concrete Factory tạo UI templates cho Desktop PyQt5.
     """
+
     @staticmethod
     def get_ui_pyqt5_template(pascal_name: str, snake_name: str) -> str:
-        return f'''
+        return f"""
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 
 class {pascal_name}Page(QWidget):
@@ -19,4 +20,4 @@ class {pascal_name}Page(QWidget):
         layout.addWidget(lbl)
         layout.addWidget(btn)
         self.setLayout(layout)
-'''
+"""

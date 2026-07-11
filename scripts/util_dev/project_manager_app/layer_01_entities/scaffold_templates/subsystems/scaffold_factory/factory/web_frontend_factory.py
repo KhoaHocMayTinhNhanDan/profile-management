@@ -5,10 +5,12 @@ from ..products.web_frontend.web_inputs_product import WebInputs
 from ..products.web_frontend.web_labels_product import WebLabels
 from ..products.web_frontend.web_hook_product import WebHook
 
+
 class WebFrontendFactory:
     """
     Concrete Factory tạo các UI templates cho Web Frontend Components.
     """
+
     def create_page(self, pascal_name: str, snake_name: str) -> str:
         return WebPage().get_template(pascal_name, snake_name)
 

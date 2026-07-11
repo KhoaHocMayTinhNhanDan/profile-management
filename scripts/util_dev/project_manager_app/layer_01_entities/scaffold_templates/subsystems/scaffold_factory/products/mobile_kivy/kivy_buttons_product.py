@@ -1,8 +1,9 @@
 from ..abstract.i_buttons_product import AbstractButtons
 
+
 class KivyButtons(AbstractButtons):
     def get_template(self) -> str:
-        return '''from kivy.uix.button import Button
+        return """from kivy.uix.button import Button
 
 class PrimaryButton(Button):
     def __init__(self, **kwargs):
@@ -23,4 +24,4 @@ class SecondaryButton(Button):
         super().__init__(**kwargs)
         self.background_color = (0.192, 0.196, 0.267, 1)  # #313244
         self.font_size = '14sp'
-'''
+"""

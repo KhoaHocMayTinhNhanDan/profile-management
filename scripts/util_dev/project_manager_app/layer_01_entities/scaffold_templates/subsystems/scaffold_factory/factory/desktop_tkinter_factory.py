@@ -2,9 +2,10 @@ class DesktopTkinterFactory:
     """
     Concrete Factory tạo UI templates cho Desktop Tkinter.
     """
+
     @staticmethod
     def get_ui_tkinter_template(pascal_name: str, snake_name: str) -> str:
-        return f'''
+        return f"""
 import tkinter as tk
 
 class {pascal_name}Page(tk.Frame):
@@ -17,4 +18,4 @@ class {pascal_name}Page(tk.Frame):
         
         btn = tk.Button(self, text="Thực thi {pascal_name}")
         btn.pack()
-'''
+"""

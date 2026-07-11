@@ -3,5 +3,63 @@
     "settings": "Cấu hình",
     "theme": "Chủ đề",
     "language": "Ngôn ngữ",
-    "mode": "Chế độ"
+    "mode": "Chế độ",
+    
+    "welcome": "Tổng Quan Hệ Thống",
+    "welcome_title": "Chào mừng bạn đến với Hệ thống Quản lý Hồ sơ",
+    "total_profiles": "Tổng số hồ sơ",
+    "active_templates": "Mẫu hoạt động",
+    "btn_create_template": "Tạo Mẫu Hồ Sơ",
+    "btn_create_profile": "Tạo Hồ Sơ Mới",
+    "lbl_profiles_list": "Danh sách Hồ sơ Đơn vị (Nhấp đúp dòng để xem tài liệu):",
+    
+    "tbl_profile_id": "Mã Hồ sơ",
+    "tbl_profile_type": "Loại Hồ sơ",
+    "tbl_status": "Trạng thái",
+    "tbl_created_at": "Ngày tạo",
+    "tbl_docs_count": "Số tài liệu",
+    
+    "create_profile": "Tạo Hồ Sơ Mới",
+    "lbl_profile_id_input": "Mã Hồ Sơ (Không dấu, e.g. hs_01):",
+    "lbl_select_template": "Chọn Mẫu Hồ Sơ:",
+    "btn_submit_create": "Tạo Hồ Sơ Mới",
+    "btn_back": "Quay Lại",
+    
+    "msg_failed": "Thất bại",
+    "msg_success": "Thành công",
+    "msg_fill_required": "Vui lòng nhập đầy đủ các trường bắt buộc!",
+    "msg_create_success": "Đã tạo hồ sơ thành công!",
+    
+    "create_profile_template": "Tạo Mẫu Hồ Sơ",
+    "lbl_template_id_input": "Mã Mẫu Hồ Sơ (Không dấu, e.g. nhan_su):",
+    "lbl_template_name_input": "Tên Mẫu Hồ Sơ (e.g. Hồ sơ nhân sự):",
+    "lbl_dynamic_fields": "Cấu hình thuộc tính động:",
+    "btn_add_field": "+ Thêm Thuộc Tính",
+    "btn_save_template": "Lưu Cấu Hình Mẫu",
+    
+    "ph_field_id": "Mã trường (e.g. email)",
+    "ph_field_label": "Nhãn hiển thị (e.g. Email liên hệ)",
+    "lbl_required": "Bắt buộc",
+    "btn_delete": "Xóa",
+    
+    "msg_fill_template_meta": "Vui lòng điền mã và tên mẫu!",
+    "msg_fill_fields_meta": "Vui lòng nhập tên trường và nhãn hiển thị cho tất cả các dòng!",
+    "msg_save_template_success": "Đã lưu mẫu cấu hình thành công!",
+    
+    "document_manager": "Quản Lý Tài Liệu",
+    "lbl_profile_subtitle": "Hồ sơ",
+    "btn_generate_doc": "Sinh Tài liệu từ Mẫu .docx",
+    "btn_back_dashboard": "Quay Lại Dashboard",
+    
+    "tbl_doc_id": "ID Tài liệu",
+    "tbl_doc_name": "Tên Tài liệu",
+    "tbl_doc_version": "Phiên bản",
+    "tbl_doc_lock_status": "Trạng thái Khóa",
+    "tbl_doc_size": "Kích thước",
+    "tbl_doc_action": "Thao tác",
+    
+    "status_locked": "Đang khóa",
+    "status_unlocked": "Mở",
+    "status_viewing": "Đang xem",
+    "status_ready": "Hệ thống sẵn sàng."
 }

@@ -30,7 +30,7 @@
     - Mở file Interactor vừa được tạo ở `layer_02`, viết logic nghiệp vụ dựa trên Entity.
     - Mở file Repository/Adapter vừa được tạo ở `layer_04`, viết code gọi API, Query DB thực tế.
     - Mở file Giao diện ở `layer_04_infrastructure/ui/` để vẽ nút bấm.
-- [ ] **Bước D (Kiểm chứng):** Chạy Unit Test (`pytest`) hoặc test bằng Mock DB trước khi ráp Data thật.
+- [ ] **Bước D (Kiểm chứng):** Chạy Unit Test (`pytest`) hoặc test bằng Mock DB trước khi ráp Data thật. **Quy trình sửa lỗi kiểm thử lặp (Testing Debugging Loop):** Nếu chạy pytest phát hiện bất kỳ test case nào bị lỗi (failed), AI bắt buộc phải tự động debug, chỉnh sửa mã nguồn và chạy lại pytest. Quy trình này phải được lặp lại liên tục cho đến khi đạt kết quả 100% test cases thành công (`passed`) mới được hoàn thành bước kiểm chứng.
 
 ---
 

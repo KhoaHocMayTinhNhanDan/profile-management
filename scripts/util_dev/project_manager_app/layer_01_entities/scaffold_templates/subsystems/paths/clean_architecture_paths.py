@@ -3,10 +3,11 @@ class CleanArchitecturePaths:
     Subsystem component định nghĩa cấu hình cấu trúc thư mục của Clean Architecture.
     Đóng vai trò là Single Source of Truth cho các công cụ Scaffold (sinh mã nguồn) và Bootstrap.
     """
+
     # Core directories names
     SRC = "src"
     TESTS = "tests"
-    
+
     # Layer directories names
     LAYER_01 = "layer_01_entities"
     LAYER_02 = "layer_02_usecases"

@@ -2,9 +2,10 @@ class RunnerFactory:
     """
     Concrete Factory cho runner scripts.
     """
+
     @staticmethod
     def get_run_cli_template(pascal_name: str, snake_name: str) -> str:
-        return f'''import sys
+        return f"""import sys
 import os
 
 # scripts/run/cli/ la 3 cap sau project root -> can ../../../
@@ -14,11 +15,11 @@ from src.layer_04_infrastructure.ui.cli.commands.{snake_name}_cli import run_cli
 
 if __name__ == "__main__":
     run_cli()
-'''
+"""
 
     @staticmethod
     def get_run_desktop_template(pascal_name: str, snake_name: str) -> str:
-        return f'''import sys
+        return f"""import sys
 import os
 
 # scripts/run/desktop/ la 3 cap sau project root -> can ../../../
@@ -43,12 +44,12 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
+"""
 
     @staticmethod
     def get_run_cli_project_template(project_snake: str) -> str:
         """Runner script cho toàn bộ dự án CLI - đặt tên theo project, không theo feature."""
-        return f'''import sys
+        return f"""import sys
 import os
 
 # scripts/run/cli/ la 3 cap sau project root -> can ../../../
@@ -58,12 +59,12 @@ from src.layer_04_infrastructure.ui.cli.commands.welcome_cli import run_cli
 
 if __name__ == "__main__":
     run_cli()
-'''
+"""
 
     @staticmethod
     def get_run_desktop_project_template(project_snake: str) -> str:
         """Runner script cho toàn bộ dự án Desktop - đặt tên theo project, không theo feature."""
-        return f'''import sys
+        return f"""import sys
 import os
 
 # scripts/run/desktop/ la 3 cap sau project root -> can ../../../
@@ -88,4 +89,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
+"""

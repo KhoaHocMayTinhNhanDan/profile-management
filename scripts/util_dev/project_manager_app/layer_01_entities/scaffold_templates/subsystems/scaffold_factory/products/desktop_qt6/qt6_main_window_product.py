@@ -1,8 +1,9 @@
 from ..abstract.i_main_window_product import AbstractMainWindow
 
+
 class Qt6MainWindow(AbstractMainWindow):
     def get_template(self) -> str:
-        return '''import sys
+        return """import sys
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 from .level_05_pages.welcome_page import WelcomePage
 
@@ -56,4 +57,4 @@ class MainWindow(QMainWindow):
         app = QApplication.instance()
         if app:
             app.setStyleSheet(qss)
-'''
+"""

@@ -3,5 +3,63 @@
     "settings": "Settings",
     "theme": "Theme",
     "language": "Language",
-    "mode": "Mode"
+    "mode": "Mode",
+    
+    "welcome": "System Dashboard",
+    "welcome_title": "Welcome to Profile Management System",
+    "total_profiles": "Total Profiles",
+    "active_templates": "Active Templates",
+    "btn_create_template": "Create Template",
+    "btn_create_profile": "Create Profile",
+    "lbl_profiles_list": "Unit Profiles List (Double click row to view documents):",
+    
+    "tbl_profile_id": "Profile ID",
+    "tbl_profile_type": "Profile Type",
+    "tbl_status": "Status",
+    "tbl_created_at": "Created Date",
+    "tbl_docs_count": "Documents Count",
+    
+    "create_profile": "Create New Profile",
+    "lbl_profile_id_input": "Profile ID (Alphanumeric, e.g. hs_01):",
+    "lbl_select_template": "Select Profile Template:",
+    "btn_submit_create": "Create Profile",
+    "btn_back": "Back",
+    
+    "msg_failed": "Failed",
+    "msg_success": "Success",
+    "msg_fill_required": "Please fill in all required fields!",
+    "msg_create_success": "Profile created successfully!",
+    
+    "create_profile_template": "Create Profile Template",
+    "lbl_template_id_input": "Template ID (Alphanumeric, e.g. nhan_su):",
+    "lbl_template_name_input": "Template Name (e.g. Employee Profile):",
+    "lbl_dynamic_fields": "Configure Dynamic Fields:",
+    "btn_add_field": "+ Add Field",
+    "btn_save_template": "Save Template",
+    
+    "ph_field_id": "Field ID (e.g. email)",
+    "ph_field_label": "Display Label (e.g. Contact Email)",
+    "lbl_required": "Required",
+    "btn_delete": "Delete",
+    
+    "msg_fill_template_meta": "Please fill in template ID and name!",
+    "msg_fill_fields_meta": "Please fill in field name and display label for all rows!",
+    "msg_save_template_success": "Template configuration saved successfully!",
+    
+    "document_manager": "Document Management",
+    "lbl_profile_subtitle": "Profile",
+    "btn_generate_doc": "Generate Document from .docx Template",
+    "btn_back_dashboard": "Back to Dashboard",
+    
+    "tbl_doc_id": "Document ID",
+    "tbl_doc_name": "Document Name",
+    "tbl_doc_version": "Version",
+    "tbl_doc_lock_status": "Lock Status",
+    "tbl_doc_size": "Size",
+    "tbl_doc_action": "Actions",
+    
+    "status_locked": "Locked",
+    "status_unlocked": "Unlocked",
+    "status_viewing": "Viewing",
+    "status_ready": "System ready."
 }

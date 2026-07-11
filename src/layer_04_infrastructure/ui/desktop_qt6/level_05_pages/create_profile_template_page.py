@@ -20,22 +20,28 @@ class CreateProfileTemplatePage(BasePageTemplate):
         self.grid = QGridLayout()
         self.grid.setSpacing(10)
         
+        from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
+        from ..level_01_atoms.inputs import FormLineEdit
+        
         # ID Template
-        self.grid.addWidget(QLabel("Mã Mẫu Hồ Sơ (Không dấu, e.g. nhan_su):"), 0, 0)
-        self.txt_id = QLineEdit()
+        self.lbl_id = QLabel(self.i18n_manager.translate("lbl_template_id_input"))
+        self.txt_id = FormLineEdit()
+        self.grid.addWidget(self.lbl_id, 0, 0)
         self.grid.addWidget(self.txt_id, 0, 1)
         
         # Name Template
-        self.grid.addWidget(QLabel("Tên Mẫu Hồ Sơ (e.g. Hồ sơ nhân sự):"), 1, 0)
-        self.txt_name = QLineEdit()
+        self.lbl_name = QLabel(self.i18n_manager.translate("lbl_template_name_input"))
+        self.txt_name = FormLineEdit()
+        self.grid.addWidget(self.lbl_name, 1, 0)
         self.grid.addWidget(self.txt_name, 1, 1)
         
         self.content_layout.addLayout(self.grid)
         
         # Dynamic Fields Title & Button
         self.fields_header = QHBoxLayout()
-        self.fields_header.addWidget(QLabel("<b>Cấu hình thuộc tính động:</b>"))
-        self.btn_add_field = QPushButton("+ Thêm Thuộc Tính")
+        self.lbl_dynamic = QLabel(self.i18n_manager.translate("lbl_dynamic_fields"))
+        self.fields_header.addWidget(self.lbl_dynamic)
+        self.btn_add_field = SecondaryButton(self.i18n_manager.translate("btn_add_field"))
         self.btn_add_field.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_add_field.clicked.connect(self._add_field_row)
         self.fields_header.addWidget(self.btn_add_field)
@@ -54,10 +60,10 @@ class CreateProfileTemplatePage(BasePageTemplate):
         
         # Save & Cancel buttons
         self.buttons_layout = QHBoxLayout()
-        self.btn_save = QPushButton("Lưu Cấu Hình Mẫu")
-        self.btn_cancel = QPushButton("Quay Lại")
-        self.btn_save.setStyleSheet("background-color: #2ecc71; color: white; padding: 8px 16px; font-weight: bold; border-radius: 4px;")
-        self.btn_cancel.setStyleSheet("background-color: #e74c3c; color: white; padding: 8px 16px; font-weight: bold; border-radius: 4px;")
+        self.btn_save = PrimaryButton(self.i18n_manager.translate("btn_save_template"))
+        self.btn_cancel = SecondaryButton(self.i18n_manager.translate("btn_back"))
+        self.btn_save.setShortcut("Ctrl+S")
+        self.btn_cancel.setShortcut("Esc")
         self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         
@@ -79,18 +85,21 @@ class CreateProfileTemplatePage(BasePageTemplate):
         row_lay = QHBoxLayout(row_widget)
         row_lay.setContentsMargins(0, 0, 0, 0)
         
-        name_input = QLineEdit()
-        name_input.setPlaceholderText("Mã trường (e.g. email)")
+        from ..level_01_atoms.inputs import FormLineEdit, FormComboBox
+        from ..level_01_atoms.buttons import DangerButton
         
-        label_input = QLineEdit()
-        label_input.setPlaceholderText("Nhãn hiển thị (e.g. Email liên hệ)")
+        name_input = FormLineEdit()
+        name_input.setPlaceholderText(self.i18n_manager.translate("ph_field_id"))
         
-        type_combo = QComboBox()
+        label_input = FormLineEdit()
+        label_input.setPlaceholderText(self.i18n_manager.translate("ph_field_label"))
+        
+        type_combo = FormComboBox()
         type_combo.addItems(["string", "number", "boolean", "date"])
         
-        req_check = QCheckBox("Bắt buộc")
+        req_check = QCheckBox(self.i18n_manager.translate("lbl_required"))
         
-        btn_del = QPushButton("Xóa")
+        btn_del = DangerButton(self.i18n_manager.translate("btn_delete"))
         btn_del.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_del.clicked.connect(lambda: self._remove_field_row(row_widget))
         
@@ -161,4 +170,19 @@ class CreateProfileTemplatePage(BasePageTemplate):
             main_win.switch_page("welcome")
 
     def retranslate_ui(self, lang_code: str):
-        pass
+        self.lbl_id.setText(self.i18n_manager.translate("lbl_template_id_input"))
+        self.lbl_name.setText(self.i18n_manager.translate("lbl_template_name_input"))
+        self.lbl_dynamic.setText(self.i18n_manager.translate("lbl_dynamic_fields"))
+        self.btn_add_field.setText(self.i18n_manager.translate("btn_add_field"))
+        self.btn_save.setText(self.i18n_manager.translate("btn_save_template"))
+        self.btn_cancel.setText(self.i18n_manager.translate("btn_back"))
+        
+        # Translate current rows
+        for row in self.field_rows:
+            row["name"].setPlaceholderText(self.i18n_manager.translate("ph_field_id"))
+            row["label"].setPlaceholderText(self.i18n_manager.translate("ph_field_label"))
+            row["required"].setText(self.i18n_manager.translate("lbl_required"))
+            # Find the delete button in the row widget and translate it
+            for child in row["widget"].children():
+                if isinstance(child, QPushButton) and child.objectName() == "danger_btn":
+                    child.setText(self.i18n_manager.translate("btn_delete"))

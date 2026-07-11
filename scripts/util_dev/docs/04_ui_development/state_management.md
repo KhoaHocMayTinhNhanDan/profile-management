@@ -39,11 +39,22 @@ class UseConnection(QObject):
     finished = pyqtSignal(bool, str)
     loading = pyqtSignal(bool)
 
+    def __init__(self):
+        super().__init__()
+        self._worker = None
+
     def test_api(self, exchange_id):
+        # ⚠️ Tránh rò rỉ bộ nhớ: Nếu worker cũ đang chạy, không tạo worker mới đè lên
+        if self._worker and self._worker.isRunning():
+            return
+
         self.loading.emit(True)
-        self.worker = ConnectionWorker(exchange_id)
-        self.worker.finished.connect(self._on_finished)
-        self.worker.start()
+        self._worker = ConnectionWorker(exchange_id)
+        
+        # ⚠️ Giải phóng bộ nhớ: Yêu cầu Qt tự động dọn dẹp đối tượng C++ khi luồng kết thúc
+        self._worker.finished.connect(self._worker.deleteLater)
+        self._worker.finished.connect(self._on_finished)
+        self._worker.start()
 
     def _on_finished(self, success, msg):
         self.loading.emit(False)

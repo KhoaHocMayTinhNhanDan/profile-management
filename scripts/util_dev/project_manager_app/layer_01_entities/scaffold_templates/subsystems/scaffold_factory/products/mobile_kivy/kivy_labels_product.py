@@ -1,8 +1,9 @@
 from ..abstract.i_labels_product import AbstractLabels
 
+
 class KivyLabels(AbstractLabels):
     def get_template(self) -> str:
-        return '''from kivy.uix.label import Label
+        return """from kivy.uix.label import Label
 
 class HeaderLabel(Label):
     def __init__(self, **kwargs):
@@ -16,4 +17,4 @@ class BodyLabel(Label):
         super().__init__(**kwargs)
         self.color = (0.804, 0.839, 0.957, 1)  # #cdd6f4
         self.font_size = '14sp'
-'''
+"""

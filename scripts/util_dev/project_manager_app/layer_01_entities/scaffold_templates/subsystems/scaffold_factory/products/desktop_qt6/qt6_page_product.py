@@ -1,8 +1,9 @@
 from ..abstract.i_page_product import AbstractPage
 
+
 class Qt6Page(AbstractPage):
     def get_template(self, pascal_name: str, snake_name: str) -> str:
-        return f'''from PyQt6.QtWidgets import QVBoxLayout
+        return f"""from PyQt6.QtWidgets import QVBoxLayout
 from src.shared.logger.app_logger import get_logger
 from ..level_04_templates.page_template import BasePageTemplate
 
@@ -24,4 +25,4 @@ class {pascal_name}Page(BasePageTemplate):
     def retranslate_ui(self, lang_code: str):
         # Cập nhật ngôn ngữ động cho các thành phần con tại đây nếu cần
         pass
-'''
+"""

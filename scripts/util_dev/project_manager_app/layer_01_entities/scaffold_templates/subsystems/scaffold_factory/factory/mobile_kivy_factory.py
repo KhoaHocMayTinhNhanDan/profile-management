@@ -5,10 +5,12 @@ from ..products.mobile_kivy.kivy_inputs_product import KivyInputs
 from ..products.mobile_kivy.kivy_labels_product import KivyLabels
 from ..products.mobile_kivy.kivy_hook_product import KivyHook
 
+
 class MobileKivyFactory:
     """
     Concrete Factory tạo các UI templates cho Mobile Kivy.
     """
+
     def create_page(self, pascal_name: str, snake_name: str) -> str:
         return KivyPage().get_template(pascal_name, snake_name)
 

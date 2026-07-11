@@ -1,5 +1,6 @@
 from ..abstract.i_inputs_product import AbstractInputs
 
+
 class Qt6Inputs(AbstractInputs):
     def get_template(self) -> str:
         return '''from PyQt6.QtWidgets import QLineEdit, QComboBox

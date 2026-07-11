@@ -1,8 +1,8 @@
-import sys
 from typing import Any
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QStackedWidget,
-    QListWidgetItem, QLabel, QFrame
+    QListWidgetItem, QLabel, QFrame, QMessageBox
 )
 from PyQt6.QtCore import Qt
 from .level_05_pages.welcome_page import WelcomePage
@@ -22,6 +22,22 @@ class MainWindow(QMainWindow):
         self.resize(1024, 768)
         self.setMinimumSize(800, 600)
         
+        # Menu Bar
+        menu_bar = self.menuBar()
+        if menu_bar is not None:
+            file_menu = menu_bar.addMenu("Hệ thống")
+            if file_menu is not None:
+                exit_action = QAction("Thoát", self)
+                exit_action.setShortcut("Ctrl+Q")
+                exit_action.triggered.connect(self.close)
+                file_menu.addAction(exit_action)
+            
+            help_menu = menu_bar.addMenu("Trợ giúp")
+            if help_menu is not None:
+                about_action = QAction("Giới thiệu", self)
+                about_action.triggered.connect(self._show_about_dialog)
+                help_menu.addAction(about_action)
+            
         # Status Bar
         sb = self.statusBar()
         if sb is not None:
@@ -38,55 +54,39 @@ class MainWindow(QMainWindow):
         
         # Sidebar Frame
         sidebar_frame = QFrame()
+        sidebar_frame.setObjectName("sidebar")
         sidebar_frame.setFixedWidth(200)
-        sidebar_frame.setStyleSheet("background-color: #1e1e24; border-right: 1px solid #2d2d34;")
         sidebar_layout = QVBoxLayout(sidebar_frame)
         sidebar_layout.setContentsMargins(10, 20, 10, 20)
         sidebar_layout.setSpacing(15)
         
         # App Title in Sidebar
         title_lbl = QLabel("HỒ SƠ ĐƠN VỊ")
-        title_lbl.setStyleSheet("color: #ffffff; font-size: 16px; font-weight: bold; padding: 5px;")
+        title_lbl.setObjectName("sidebar_title")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         sidebar_layout.addWidget(title_lbl)
         
         # Divider line
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet("background-color: #2d2d34;")
+        line.setObjectName("sidebar_divider")
         sidebar_layout.addWidget(line)
         
         # Navigation List
         self.nav_list = QListWidget()
         self.nav_list.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.nav_list.setStyleSheet("""
-            QListWidget {
-                border: none;
-                background-color: transparent;
-            }
-            QListWidget::item {
-                color: #a0a0a5;
-                padding: 10px 15px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QListWidget::item:hover {
-                background-color: #2b2b36;
-                color: #ffffff;
-            }
-            QListWidget::item:selected {
-                background-color: #2a82da;
-                color: #ffffff;
-            }
-        """)
         
-        item_welcome = QListWidgetItem("📊 Dashboard")
+        welcome_txt = self.i18n_manager.translate("welcome") if self.i18n_manager else "Dashboard"
+        create_profile_txt = self.i18n_manager.translate("create_profile") if self.i18n_manager else "Create New Profile"
+        create_template_txt = self.i18n_manager.translate("create_profile_template") if self.i18n_manager else "Create Profile Template"
+        
+        item_welcome = QListWidgetItem("📊 " + welcome_txt)
         item_welcome.setData(Qt.ItemDataRole.UserRole, "welcome")
         
-        item_create_profile = QListWidgetItem("📝 Tạo Hồ Sơ Mới")
+        item_create_profile = QListWidgetItem("📝 " + create_profile_txt)
         item_create_profile.setData(Qt.ItemDataRole.UserRole, "create_profile")
         
-        item_create_template = QListWidgetItem("⚙️ Tạo Mẫu Hồ Sơ")
+        item_create_template = QListWidgetItem("⚙️ " + create_template_txt)
         item_create_template.setData(Qt.ItemDataRole.UserRole, "create_profile_template")
         
         self.nav_list.addItem(item_welcome)
@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
         
         # Right Stacked Widget for pages
         self.stacked_widget = QStackedWidget()
-        self.stacked_widget.setStyleSheet("background-color: #121214; padding: 20px;")
+        self.stacked_widget.setObjectName("main_stack")
         
         # Pages mapping
         self.pages_map = {
@@ -122,9 +122,11 @@ class MainWindow(QMainWindow):
         self.nav_list.setCurrentRow(0)
         self.switch_page("welcome")
         
-        # Theme subscription
+        # Theme & i18n subscription
         if self.theme_manager is not None:
             self.theme_manager.subscribe(self.apply_theme_stylesheet)
+        if self.i18n_manager is not None:
+            self.i18n_manager.subscribe(self._handle_language_changed)
         
         # UI Inspector (F12) for Debug Mode
         from .level_02_molecules.ui_inspector import UIInspector
@@ -182,3 +184,37 @@ class MainWindow(QMainWindow):
         app = QApplication.instance()
         if isinstance(app, QApplication):
             app.setStyleSheet(qss)
+
+    def _show_about_dialog(self):
+        QMessageBox.about(
+            self,
+            "Giới thiệu",
+            "<h3>Chương Trình Quản Lý Hồ Sơ Đơn Vị</h3>"
+            "<p>Hệ thống quản trị hồ sơ và tài liệu đơn vị tự động theo Kiến trúc Sạch (Clean Architecture).</p>"
+            "<p>Phiên bản: 1.0.0</p>"
+        )
+
+    def _handle_language_changed(self, lang_code: str):
+        self.retranslate_ui(lang_code)
+
+    def retranslate_ui(self, lang_code: str):
+        if self.i18n_manager is None:
+            return
+            
+        # Update navigation list items
+        item_0 = self.nav_list.item(0)
+        if item_0 is not None:
+            item_0.setText("📊 " + self.i18n_manager.translate("welcome"))
+            
+        item_1 = self.nav_list.item(1)
+        if item_1 is not None:
+            item_1.setText("📝 " + self.i18n_manager.translate("create_profile"))
+            
+        item_2 = self.nav_list.item(2)
+        if item_2 is not None:
+            item_2.setText("⚙️ " + self.i18n_manager.translate("create_profile_template"))
+        
+        # Update status bar message
+        sb = self.statusBar()
+        if sb is not None:
+            sb.showMessage(self.i18n_manager.translate("status_ready") or "Ready.")

@@ -1,5 +1,10 @@
-from scripts.util_dev.project_manager_app.layer_02_usecases.usecases.check_imports.check_imports_interactor import CheckImportsInteractor
-from scripts.util_dev.project_manager_app.layer_02_usecases.usecases.check_imports.check_imports_dto import CheckImportsInput
+from scripts.util_dev.project_manager_app.layer_02_usecases.usecases.check_imports.check_imports_interactor import (
+    CheckImportsInteractor,
+)
+from scripts.util_dev.project_manager_app.layer_02_usecases.usecases.check_imports.check_imports_dto import (
+    CheckImportsInput,
+)
+
 
 class DesktopCheckImportsController:
     def __init__(self, interactor: CheckImportsInteractor):

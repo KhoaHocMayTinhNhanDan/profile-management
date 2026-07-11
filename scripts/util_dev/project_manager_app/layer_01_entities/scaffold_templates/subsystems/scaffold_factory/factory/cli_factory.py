@@ -2,9 +2,10 @@ class CliFactory:
     """
     Concrete Factory cho CLI commands.
     """
+
     @staticmethod
     def get_ui_cli_template(pascal_name: str, snake_name: str) -> str:
-        return f'''import argparse
+        return f"""import argparse
 import asyncio
 from src.shared.logger.app_logger import get_logger
 
@@ -25,4 +26,4 @@ def run_cli():
 
 if __name__ == "__main__":
     run_cli()
-'''
+"""

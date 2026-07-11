@@ -1,15 +1,32 @@
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QFrame, QLabel, QListWidget, QListWidgetItem
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QFrame,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
-from ..theme import DARK_BG, CARD_BG, BORDER_COLOR, TEXT_COLOR, ACCENT_COLOR, SUBTEXT_COLOR, SUCCESS_COLOR, ERROR_COLOR
+from ..theme import (
+    DARK_BG,
+    CARD_BG,
+    BORDER_COLOR,
+    TEXT_COLOR,
+    ACCENT_COLOR,
+    SUBTEXT_COLOR,
+    SUCCESS_COLOR,
+    ERROR_COLOR,
+)
 from ..level_01_atoms.labels import HeaderLabel, SubtitleLabel, BodyLabel
 from ..level_01_atoms.inputs import FormLineEdit
 from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
 from ..level_02_molecules.notification_dialog import NotificationDialog
-from scripts.util_dev.project_manager_app.config.project_config import write_project_name
+from scripts.util_dev.project_manager_app.config.project_config import (
+    write_project_name,
+)
 
 
 class WelcomePage(QDialog):
@@ -17,6 +34,7 @@ class WelcomePage(QDialog):
     Dialog chào mừng - hiển thị khi workspace chưa có project nào được kích hoạt.
     Bắt buộc người dùng tạo project mới hoặc load project cũ trước khi vào main window.
     """
+
     def __init__(self, parent, app_ctx, root_dir):
         super().__init__(parent)
         self.app_ctx = app_ctx
@@ -46,13 +64,19 @@ class WelcomePage(QDialog):
         # Title
         title = QLabel("🛠️  Clean Architecture Project Manager")
         title.setFont(QFont("Inter", 14, QFont.Weight.Bold))
-        title.setStyleSheet(f"color: {ACCENT_COLOR}; border: none; background: transparent;")
+        title.setStyleSheet(
+            f"color: {ACCENT_COLOR}; border: none; background: transparent;"
+        )
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
 
-        subtitle = QLabel("Chưa có project nào đang hoạt động trong workspace.\nHãy tạo project mới hoặc load project đã lưu để bắt đầu.")
+        subtitle = QLabel(
+            "Chưa có project nào đang hoạt động trong workspace.\nHãy tạo project mới hoặc load project đã lưu để bắt đầu."
+        )
         subtitle.setFont(QFont("Inter", 10))
-        subtitle.setStyleSheet(f"color: {SUBTEXT_COLOR}; border: none; background: transparent;")
+        subtitle.setStyleSheet(
+            f"color: {SUBTEXT_COLOR}; border: none; background: transparent;"
+        )
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         subtitle.setWordWrap(True)
         layout.addWidget(subtitle)
@@ -60,7 +84,9 @@ class WelcomePage(QDialog):
         # Divider
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet(f"color: {BORDER_COLOR}; border: none; background: {BORDER_COLOR}; max-height: 1px;")
+        line.setStyleSheet(
+            f"color: {BORDER_COLOR}; border: none; background: {BORDER_COLOR}; max-height: 1px;"
+        )
         layout.addWidget(line)
 
         # --- NEW PROJECT CARD ---
@@ -82,7 +108,9 @@ class WelcomePage(QDialog):
         new_title.setStyleSheet(f"color: {ACCENT_COLOR};")
         new_layout.addWidget(new_title)
 
-        self.new_proj_input = FormLineEdit("Tên project (VD: trading_bot, ecommerce_api...)")
+        self.new_proj_input = FormLineEdit(
+            "Tên project (VD: trading_bot, ecommerce_api...)"
+        )
         new_layout.addWidget(self.new_proj_input)
 
         create_btn = PrimaryButton("🚀 Tạo Project")
@@ -148,20 +176,27 @@ class WelcomePage(QDialog):
     def handle_create(self):
         name = self.new_proj_input.text().strip()
         if not name:
-            NotificationDialog.show_message(self, "Warning", "Tên project không được để trống!")
+            NotificationDialog.show_message(
+                self, "Warning", "Tên project không được để trống!"
+            )
             return
         if write_project_name(self.root_dir, name):
             self.accept()
         else:
-            NotificationDialog.show_message(self, "Error", "Không thể lưu cấu hình project!")
+            NotificationDialog.show_message(
+                self, "Error", "Không thể lưu cấu hình project!"
+            )
 
     def handle_load(self):
         selected = self.project_list.currentItem()
         if not selected or not selected.flags() & Qt.ItemFlag.ItemIsSelectable:
-            NotificationDialog.show_message(self, "Warning", "Hãy chọn một project từ danh sách!")
+            NotificationDialog.show_message(
+                self, "Warning", "Hãy chọn một project từ danh sách!"
+            )
             return
         text = selected.text()
         import os
+
         src_dir = os.path.join(self.root_dir, "src")
         tests_dir = os.path.join(self.root_dir, "tests")
         ok = self.app_ctx.load_controller.execute(text, src_dir, tests_dir)
@@ -169,4 +204,6 @@ class WelcomePage(QDialog):
             write_project_name(self.root_dir, text)
             self.accept()
         else:
-            NotificationDialog.show_message(self, "Error", f"Không thể load project '{text}'!")
+            NotificationDialog.show_message(
+                self, "Error", f"Không thể load project '{text}'!"
+            )

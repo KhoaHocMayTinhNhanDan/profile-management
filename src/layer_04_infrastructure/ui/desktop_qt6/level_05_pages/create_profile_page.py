@@ -22,15 +22,20 @@ class CreateProfilePage(BasePageTemplate):
         self.header_lay = QFormLayout()
         self.header_lay.setSpacing(10)
         
+        from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
+        from ..level_01_atoms.inputs import FormLineEdit, FormComboBox
+        
         # Profile ID
-        self.txt_profile_id = QLineEdit()
+        self.txt_profile_id = FormLineEdit()
         self.txt_profile_id.setPlaceholderText("e.g. HS_001")
-        self.header_lay.addRow(QLabel("Mã Hồ Sơ:"), self.txt_profile_id)
+        self.lbl_profile_id = QLabel(self.i18n_manager.translate("lbl_profile_id_input"))
+        self.header_lay.addRow(self.lbl_profile_id, self.txt_profile_id)
         
         # Template selection
-        self.cbo_template = QComboBox()
+        self.cbo_template = FormComboBox()
         self.cbo_template.currentIndexChanged.connect(self._on_template_changed)
-        self.header_lay.addRow(QLabel("Chọn mẫu hồ sơ:"), self.cbo_template)
+        self.lbl_select_template = QLabel(self.i18n_manager.translate("lbl_select_template"))
+        self.header_lay.addRow(self.lbl_select_template, self.cbo_template)
         
         self.content_layout.addLayout(self.header_lay)
         
@@ -46,10 +51,10 @@ class CreateProfilePage(BasePageTemplate):
         
         # Buttons
         self.buttons_lay = QHBoxLayout()
-        self.btn_save = QPushButton("Tạo Hồ Sơ Mới")
-        self.btn_cancel = QPushButton("Quay Lại")
-        self.btn_save.setStyleSheet("background-color: #2ecc71; color: white; padding: 8px 16px; font-weight: bold; border-radius: 4px;")
-        self.btn_cancel.setStyleSheet("background-color: #e74c3c; color: white; padding: 8px 16px; font-weight: bold; border-radius: 4px;")
+        self.btn_save = PrimaryButton(self.i18n_manager.translate("btn_submit_create"))
+        self.btn_cancel = SecondaryButton(self.i18n_manager.translate("btn_back"))
+        self.btn_save.setShortcut("Ctrl+S")
+        self.btn_cancel.setShortcut("Esc")
         from PyQt6.QtCore import Qt
         self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -114,7 +119,8 @@ class CreateProfilePage(BasePageTemplate):
                 widget.setCalendarPopup(True)
                 widget.setDate(QDate.currentDate())
             else:
-                widget = QLineEdit()
+                from ..level_01_atoms.inputs import FormLineEdit
+                widget = FormLineEdit()
                 if f_type == "number":
                     widget.setPlaceholderText("Nhập số")
             
@@ -177,4 +183,7 @@ class CreateProfilePage(BasePageTemplate):
             main_win.switch_page("welcome")
 
     def retranslate_ui(self, lang_code: str):
-        pass
+        self.lbl_profile_id.setText(self.i18n_manager.translate("lbl_profile_id_input"))
+        self.lbl_select_template.setText(self.i18n_manager.translate("lbl_select_template"))
+        self.btn_save.setText(self.i18n_manager.translate("btn_submit_create"))
+        self.btn_cancel.setText(self.i18n_manager.translate("btn_back"))

@@ -30,17 +30,17 @@ class DocumentManagerPage(BasePageTemplate):
         self.profile_id = ""
         
         # Subtitle
-        self.lbl_subtitle = QLabel("Hồ sơ: ")
-        self.lbl_subtitle.setStyleSheet("font-size: 14px; font-weight: bold; color: #888;")
+        self.lbl_subtitle = QLabel(self.i18n_manager.translate("lbl_profile_subtitle") + ": ")
+        self.lbl_subtitle.setObjectName("profile_subtitle_lbl")
         self.content_layout.addWidget(self.lbl_subtitle)
         
         # Buttons layout
         self.actions_layout = QHBoxLayout()
-        self.btn_generate = QPushButton("Sinh Tài liệu từ Mẫu .docx")
-        self.btn_back = QPushButton("Quay Lại Dashboard")
+        from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
+        self.btn_generate = PrimaryButton(self.i18n_manager.translate("btn_generate_doc"))
+        self.btn_back = SecondaryButton(self.i18n_manager.translate("btn_back_dashboard"))
+        self.btn_back.setShortcut("Esc")
         
-        self.btn_generate.setStyleSheet("background-color: #2a82da; color: white; padding: 8px 16px; font-weight: bold; border-radius: 4px;")
-        self.btn_back.setStyleSheet("background-color: #7f8c8d; color: white; padding: 8px 16px; font-weight: bold; border-radius: 4px;")
         self.btn_generate.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_back.setCursor(Qt.CursorShape.PointingHandCursor)
         
@@ -52,7 +52,14 @@ class DocumentManagerPage(BasePageTemplate):
         # Documents Table
         self.table = QTableWidget()
         self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["ID Tài liệu", "Tên Tài liệu", "Phiên bản", "Trạng thái Khóa", "Kích thước", "Thao tác"])
+        self.table.setHorizontalHeaderLabels([
+            self.i18n_manager.translate("tbl_doc_id"),
+            self.i18n_manager.translate("tbl_doc_name"),
+            self.i18n_manager.translate("tbl_doc_version"),
+            self.i18n_manager.translate("tbl_doc_lock_status"),
+            self.i18n_manager.translate("tbl_doc_size"),
+            self.i18n_manager.translate("tbl_doc_action")
+        ])
         header = self.table.horizontalHeader()
         if header is not None:
             header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -96,7 +103,7 @@ class DocumentManagerPage(BasePageTemplate):
             self.table.setItem(row, 1, QTableWidgetItem(name))
             self.table.setItem(row, 2, QTableWidgetItem(f"v{ver}"))
             
-            lock_status = "Đang chỉnh sửa" if is_locked else "Sẵn sàng"
+            lock_status = self.i18n_manager.translate("status_locked") if is_locked else self.i18n_manager.translate("status_unlocked")
             lock_item = QTableWidgetItem(lock_status)
             if is_locked:
                 lock_item.setForeground(Qt.GlobalColor.red)
@@ -108,8 +115,8 @@ class DocumentManagerPage(BasePageTemplate):
             self.table.setItem(row, 4, QTableWidgetItem(f"{size / 1024:.1f} KB"))
             
             # Action button for edit
-            btn_edit = QPushButton("Biên tập")
-            btn_edit.setStyleSheet("padding: 2px 8px; background-color: #34495e; color: white; border-radius: 3px;")
+            from ..level_01_atoms.buttons import SecondaryButton
+            btn_edit = SecondaryButton(self.i18n_manager.translate("status_viewing"))
             btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_edit.clicked.connect(lambda checked, d=d_id: self._start_editing_doc(d))
             self.table.setCellWidget(row, 5, btn_edit)
@@ -255,4 +262,15 @@ class DocumentManagerPage(BasePageTemplate):
             main_win.switch_page("welcome")
 
     def retranslate_ui(self, lang_code: str):
-        pass
+        self.lbl_subtitle.setText(self.i18n_manager.translate("lbl_profile_subtitle") + f": {self.profile_id}")
+        self.btn_generate.setText(self.i18n_manager.translate("btn_generate_doc"))
+        self.btn_back.setText(self.i18n_manager.translate("btn_back_dashboard"))
+        self.table.setHorizontalHeaderLabels([
+            self.i18n_manager.translate("tbl_doc_id"),
+            self.i18n_manager.translate("tbl_doc_name"),
+            self.i18n_manager.translate("tbl_doc_version"),
+            self.i18n_manager.translate("tbl_doc_lock_status"),
+            self.i18n_manager.translate("tbl_doc_size"),
+            self.i18n_manager.translate("tbl_doc_action")
+        ])
+        self.refresh_documents()

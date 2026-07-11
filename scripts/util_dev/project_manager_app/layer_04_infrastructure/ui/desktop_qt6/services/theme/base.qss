@@ -197,3 +197,17 @@ QFrame#warning_card {
     border: 2px solid {ERROR_COLOR};
     border-radius: {RADIUS};
 }
+
+/* --- Log Console Molecules --- */
+QFrame#log_console_frame {
+    background-color: {SIDEBAR_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+}
+QTextEdit#log_console_textarea {
+    background-color: {DARK_BG};
+    color: {TEXT_COLOR};
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+}

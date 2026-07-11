@@ -46,7 +46,9 @@ class CleanArchitectureTemplate:
         return CommonFactory.get_usecase_repository_interface_template(pascal_name)
 
     @staticmethod
-    def get_controller_template(pascal_name: str, snake_name: str, platform: str) -> str:
+    def get_controller_template(
+        pascal_name: str, snake_name: str, platform: str
+    ) -> str:
         return CommonFactory.get_controller_template(pascal_name, snake_name, platform)
 
     @staticmethod
@@ -62,8 +64,12 @@ class CleanArchitectureTemplate:
         return CommonFactory.get_repository_template(pascal_name, snake_name)
 
     @staticmethod
-    def get_data_source_impl_template(pascal_name: str, snake_name: str, tech: str) -> str:
-        return CommonFactory.get_data_source_impl_template(pascal_name, snake_name, tech)
+    def get_data_source_impl_template(
+        pascal_name: str, snake_name: str, tech: str
+    ) -> str:
+        return CommonFactory.get_data_source_impl_template(
+            pascal_name, snake_name, tech
+        )
 
     @staticmethod
     def get_test_template(pascal_name: str, snake_name: str) -> str:
@@ -244,41 +250,53 @@ class CleanArchitectureTemplate:
     @staticmethod
     def get_ui_pyqt6_i18n_manager_template() -> str:
         from .presentation_templates import I18N_MANAGER_TEMPLATE
+
         return I18N_MANAGER_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_light_dark_mode_manager_template() -> str:
         from .presentation_templates import LIGHT_DARK_MODE_MANAGER_TEMPLATE
+
         return LIGHT_DARK_MODE_MANAGER_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_theme_manager_template() -> str:
         from .presentation_templates import THEME_MANAGER_TEMPLATE
+
         return THEME_MANAGER_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_base_qss_template() -> str:
         from .presentation_templates import BASE_QSS_TEMPLATE
+
         return BASE_QSS_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_classic_theme_json_template() -> str:
         from .presentation_templates import CLASSIC_THEME_JSON_TEMPLATE
+
         return CLASSIC_THEME_JSON_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_classic_theme_qss_template() -> str:
         from .presentation_templates import CLASSIC_THEME_QSS_TEMPLATE
+
         return CLASSIC_THEME_QSS_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_base_page_template() -> str:
         from .presentation_templates import BASE_PAGE_TEMPLATE
+
         return BASE_PAGE_TEMPLATE
 
     @staticmethod
     def get_ui_pyqt6_locale_json_template(lang: str) -> str:
-        from .presentation_templates import EN_JSON_TEMPLATE, VI_JSON_TEMPLATE, ZH_JSON_TEMPLATE
+        from .presentation_templates import (
+            EN_JSON_TEMPLATE,
+            VI_JSON_TEMPLATE,
+            ZH_JSON_TEMPLATE,
+        )
+
         if lang == "vi":
             return VI_JSON_TEMPLATE
         elif lang == "zh":
@@ -315,6 +333,121 @@ class CleanArchitectureTemplate:
         client = TemplateClient(WebFrontendFactory())
         return client.get_feature_hook(pascal, snake)
 
+    @staticmethod
+    def get_dockerfile_template() -> str:
+        return """# Stage 1: Builder (Compile dependencies)
+FROM python:3.12-slim AS builder
 
+WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \\
+    build-essential \\
+    && rm -rf /var/lib/apt/lists/*
 
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Stage 2: Runner (Lightweight production runtime)
+FROM python:3.12-slim AS runner
+
+WORKDIR /app
+
+# Run as non-root user for security
+RUN groupadd -g 999 appuser && \\
+    useradd -r -u 999 -g appuser appuser
+
+# Copy installed packages from builder
+COPY --from=builder /root/.local /home/appuser/.local
+COPY . .
+
+# Set environment variables
+ENV PATH=/home/appuser/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+RUN chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 8000
+
+# Default execution starts the Web API (FastAPI)
+CMD ["uvicorn", "src.layer_05_bootstrap.web_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+"""
+
+    @staticmethod
+    def get_github_actions_ci_template() -> str:
+        return """name: CI Quality Gate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install black pyright pytest
+
+    - name: Code Formatting (Black Check)
+      run: |
+        black --check src/
+
+    - name: Static Type Checking (Pyright)
+      run: |
+        mkdir -p src
+        pyright src/
+
+    - name: Run Unit Tests (Pytest)
+      run: |
+        pytest tests/
+"""
+
+    @staticmethod
+    def get_dockerignore_template() -> str:
+        return """# Git and CI configuration
+.git
+.github
+
+# Python virtual environment & cache files
+.venv
+venv
+ENV
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.pyright_cache/
+.ropeproject/
+
+# IDE configurations
+.vscode/
+.idea/
+
+# Testing & technical docs (not needed on production)
+docs/
+tests/
+
+# DEV TOOLS & DESKTOP RUNNERS (Excluded entirely from production web api container)
+scripts/util_dev/
+scripts/run/desktop/
+"""

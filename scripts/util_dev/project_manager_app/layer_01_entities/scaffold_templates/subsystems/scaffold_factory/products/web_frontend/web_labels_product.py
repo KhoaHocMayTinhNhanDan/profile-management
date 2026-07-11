@@ -1,8 +1,9 @@
 from ..abstract.i_labels_product import AbstractLabels
 
+
 class WebLabels(AbstractLabels):
     def get_template(self) -> str:
-        return '''class HeaderLabel extends HTMLElement {
+        return """class HeaderLabel extends HTMLElement {
     constructor() {
         super();
         const shadow = this.attachShadow({ mode: 'open' });
@@ -35,4 +36,4 @@ class BodyLabel extends HTMLElement {
     }
 }
 customElements.define('body-label', BodyLabel);
-'''
+"""

@@ -3,5 +3,63 @@
     "settings": "设置",
     "theme": "主题",
     "language": "语言",
-    "mode": "模式"
+    "mode": "模式",
+    
+    "welcome": "系统仪表盘",
+    "welcome_title": "欢迎使用档案管理系统",
+    "total_profiles": "档案总数",
+    "active_templates": "活跃模板",
+    "btn_create_template": "创建模板",
+    "btn_create_profile": "创建档案",
+    "lbl_profiles_list": "单位档案列表 (双击行查看文件):",
+    
+    "tbl_profile_id": "档案代码",
+    "tbl_profile_type": "档案类型",
+    "tbl_status": "状态",
+    "tbl_created_at": "创建日期",
+    "tbl_docs_count": "文件数量",
+    
+    "create_profile": "创建新档案",
+    "lbl_profile_id_input": "档案代码 (无空格, 例: hs_01):",
+    "lbl_select_template": "选择档案模板:",
+    "btn_submit_create": "创建档案",
+    "btn_back": "返回",
+    
+    "msg_failed": "失败",
+    "msg_success": "成功",
+    "msg_fill_required": "请填写所有必填字段！",
+    "msg_create_success": "档案创建成功！",
+    
+    "create_profile_template": "创建档案模板",
+    "lbl_template_id_input": "模板代码 (无空格, 例: nhan_su):",
+    "lbl_template_name_input": "模板名称 (例: 员工档案):",
+    "lbl_dynamic_fields": "配置动态字段:",
+    "btn_add_field": "+ 添加字段",
+    "btn_save_template": "保存模板",
+    
+    "ph_field_id": "字段代码 (例: email)",
+    "ph_field_label": "显示标签 (例: 联络邮箱)",
+    "lbl_required": "必填",
+    "btn_delete": "删除",
+    
+    "msg_fill_template_meta": "请填写模板代码和名称！",
+    "msg_fill_fields_meta": "请为所有行填写字段名称和显示标签！",
+    "msg_save_template_success": "模板配置保存成功！",
+    
+    "document_manager": "文件管理",
+    "lbl_profile_subtitle": "档案",
+    "btn_generate_doc": "从 .docx 模板生成文件",
+    "btn_back_dashboard": "返回仪表盘",
+    
+    "tbl_doc_id": "文件ID",
+    "tbl_doc_name": "文件名",
+    "tbl_doc_version": "版本",
+    "tbl_doc_lock_status": "锁定状态",
+    "tbl_doc_size": "大小",
+    "tbl_doc_action": "操作",
+    
+    "status_locked": "已锁定",
+    "status_unlocked": "未锁定",
+    "status_viewing": "正在查看",
+    "status_ready": "系统就绪。"
 }

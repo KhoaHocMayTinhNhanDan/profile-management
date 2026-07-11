@@ -1,8 +1,9 @@
 from ..abstract.i_page_product import AbstractPage
 
+
 class KivyPage(AbstractPage):
     def get_template(self, pascal_name: str, snake_name: str) -> str:
-        return f'''from kivy.uix.boxlayout import BoxLayout
+        return f"""from kivy.uix.boxlayout import BoxLayout
 from src.shared.logger.app_logger import get_logger
 
 logger = get_logger(__name__)
@@ -31,4 +32,4 @@ class {pascal_name}Page(BoxLayout):
 #                     print(f"[UI Inspector Mobile] Class: {{child.__class__.__name__}}, Size: {{child.size}}")
 #         return super().on_touch_down(touch)
 # =========================================================================
-'''
+"""
