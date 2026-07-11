@@ -21,15 +21,15 @@ class ThemeManager(QObject):
         self.qss_path = os.path.join(self.base_dir, "base.qss")
 
         self.palettes = {}
-
         self.load_available_themes()
+
         self._current_theme = (
             default_theme if default_theme in self.palettes else "classic"
         )
-
-        self.mode_manager.subscribe(self._handle_mode_change)
+        self.mode_manager.mode_changed.connect(self._handle_mode_change)
 
     def load_available_themes(self):
+        """Quét các thư mục con trong themes/ để nạp động cấu hình theme.json."""
         self.palettes = {}
         if not os.path.exists(self.themes_dir):
             os.makedirs(self.themes_dir, exist_ok=True)
@@ -45,6 +45,7 @@ class ThemeManager(QObject):
                     except Exception as e:
                         print(f"[ThemeManager] Error loading theme {item}: {e}")
 
+        # Đảm bảo luôn có classic theme làm dự phòng tối thiểu
         if "classic" not in self.palettes:
             self.palettes["classic"] = self._get_fallback_classic_palette()
 
@@ -55,10 +56,13 @@ class ThemeManager(QObject):
         return self._current_theme
 
     def get_color(self, color_name: str) -> str:
-        theme_palettes = self.palettes.get(self._current_theme) or self.palettes.get("classic") or {}
+        theme_palettes = (
+            self.palettes.get(self._current_theme) or self.palettes.get("classic") or {}
+        )
         mode = self.mode_manager.get_current_mode()
         mode_palette = theme_palettes.get(mode) or theme_palettes.get("dark") or {}
 
+        # Fallback cơ chế: nếu thiếu từ khóa, tìm trong classic theme
         if color_name not in mode_palette:
             classic_palette = (self.palettes.get("classic") or {}).get(mode) or {}
             return classic_palette.get(color_name, "#ffffff")
@@ -80,14 +84,18 @@ class ThemeManager(QObject):
         if not isinstance(app, QApplication):
             return
 
-        theme_palettes = self.palettes.get(self._current_theme) or self.palettes.get("classic") or {}
+        theme_palettes = (
+            self.palettes.get(self._current_theme) or self.palettes.get("classic") or {}
+        )
         mode = self.mode_manager.get_current_mode()
         palette = theme_palettes.get(mode) or theme_palettes.get("dark") or {}
 
+        # Merge với classic palette làm fallback nếu thiếu keys để tránh KeyError khi format QSS
         classic_dict = self.palettes.get("classic") or {}
         classic_palette = classic_dict.get(mode) or classic_dict.get("dark") or {}
         final_palette = {**classic_palette, **palette}
 
+        # Đọc QSS base
         qss_content = ""
         if os.path.exists(self.qss_path):
             try:
@@ -96,10 +104,12 @@ class ThemeManager(QObject):
             except Exception as e:
                 print(f"[ThemeManager] Error reading base QSS: {e}")
 
+        # Nạp và thay thế các từ khóa trong QSS với palette
         qss = qss_content
         for key, val in final_palette.items():
             qss = qss.replace(f"{{{key}}}", str(val))
 
+        # Nạp thêm QSS tùy chọn đặc thù của theme (nếu có tệp custom)
         custom_qss_path = os.path.join(
             self.themes_dir, self._current_theme, "theme.qss"
         )
