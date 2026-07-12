@@ -451,24 +451,11 @@ class MainWindow(QMainWindow):
         if self.mode_manager is not None:
             mode = self.mode_manager.get_current_mode()
 
-        if mode == "light":
-            colors = {
-                "success": "#10b981",  # Emerald Green (Clear in light mode)
-                "error": "#ef4444",  # Red (Clear in light mode)
-                "info": "#1d4ed8",  # Deep Blue (Clear in light mode)
-                "ready": "#64748b",  # Slate Gray (Readable, distinct, not black!)
-            }
-        else:
-            colors = {
-                "success": "#a6e3a1",  # Catppuccin Green (Clear in dark mode)
-                "error": "#f38ba8",  # Catppuccin Red (Clear in dark mode)
-                "info": "#89b4fa",  # Catppuccin Blue (Clear in dark mode)
-                "ready": "#cdd6f4",  # Catppuccin Gray (Clear in dark mode)
-            }
-
-        color = colors.get(status_type, colors["ready"])
-
-        self.status_msg_label.setStyleSheet(f"color: {color};")
+        self.status_msg_label.setProperty("status", status_type)
+        lbl_style = self.status_msg_label.style()
+        if lbl_style is not None:
+            lbl_style.unpolish(self.status_msg_label)
+            lbl_style.polish(self.status_msg_label)
         self.status_msg_label.setText(msg)
 
         self._remove_status_widget(self.status_msg_label)

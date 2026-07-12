@@ -399,7 +399,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
         lbl_stt = QLabel(str(row + 1))
         lbl_stt.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_stt.setObjectName("body_lbl")
-        lbl_stt.setStyleSheet("font-weight: bold;")
+        lbl_stt.setProperty("class", "stt_label")
 
         # 1. Display Label Input
         txt_label = QLineEdit()
@@ -415,7 +415,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
         initial_placeholder = f"{{{{ {key} }}}}" if key else ""
         lbl_placeholder = ClickableLabel(initial_placeholder)
         lbl_placeholder.setObjectName("body_lbl")
-        lbl_placeholder.setStyleSheet("font-weight: bold; color: #38bdf8;")
+        lbl_placeholder.setProperty("class", "placeholder_label")
         lbl_placeholder.setToolTip("Nhấp chuột để sao chép nhanh mã placeholder này")
         lbl_placeholder.callback = lambda lbl=lbl_placeholder: self._copy_placeholder(
             lbl
@@ -502,7 +502,9 @@ class CreateProfileTemplatePage(BasePageTemplate):
 
             # Modern micro-interaction feedback: temporarily change label text & color
             lbl.setText("✓ Đã copy!")
-            lbl.setStyleSheet("font-weight: bold; color: #10b981;")
+            lbl.setProperty("class", "placeholder_success")
+            lbl.style().unpolish(lbl)
+            lbl.style().polish(lbl)
 
             # Revert after 1.2 seconds
             QTimer.singleShot(
@@ -518,7 +520,9 @@ class CreateProfileTemplatePage(BasePageTemplate):
 
     def _revert_placeholder_label(self, lbl, original_text):
         lbl.setText(original_text)
-        lbl.setStyleSheet("font-weight: bold; color: #38bdf8;")
+        lbl.setProperty("class", "placeholder_label")
+        lbl.style().unpolish(lbl)
+        lbl.style().polish(lbl)
 
     def _get_widget_row(self, widget: QWidget) -> int:
         for r in range(self.table.rowCount()):

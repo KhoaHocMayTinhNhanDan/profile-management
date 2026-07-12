@@ -386,9 +386,34 @@ QLabel#status_msg_label {
     background: transparent;
     padding-right: 10px;
 }
+QLabel#status_msg_label[status="ready"] {
+    color: {TEXT_COLOR};
+}
+QLabel#status_msg_label[status="success"] {
+    color: {SUCCESS_COLOR};
+}
+QLabel#status_msg_label[status="error"] {
+    color: {ERROR_COLOR};
+}
+QLabel#status_msg_label[status="info"] {
+    color: {ACCENT_COLOR};
+}
+
 QLabel#lbl_page_info {
     font-size: 13px;
     font-weight: bold;
     color: {TEXT_COLOR};
     background: transparent;
+}
+
+QLabel[class="stt_label"] {
+    font-weight: bold;
+}
+QLabel[class="placeholder_label"] {
+    font-weight: bold;
+    color: {ACCENT_COLOR};
+}
+QLabel[class="placeholder_success"] {
+    font-weight: bold;
+    color: {SUCCESS_COLOR};
 }
