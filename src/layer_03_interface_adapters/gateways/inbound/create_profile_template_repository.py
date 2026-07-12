@@ -1,7 +1,12 @@
-from src.layer_02_usecases.gateways_interface.i_create_profile_template_repository import ICreateProfileTemplateRepository
-from src.layer_03_interface_adapters.gateways.outbound.i_create_profile_template_data_source import ICreateProfileTemplateDataSource
+from src.layer_02_usecases.gateways_interface.i_create_profile_template_repository import (
+    ICreateProfileTemplateRepository,
+)
+from src.layer_03_interface_adapters.gateways.outbound.i_create_profile_template_data_source import (
+    ICreateProfileTemplateDataSource,
+)
 from src.layer_01_entities.profile_template import ProfileTemplate
 from typing import Optional
+
 
 class CreateProfileTemplateRepository(ICreateProfileTemplateRepository):
     def __init__(self, data_source: ICreateProfileTemplateDataSource):

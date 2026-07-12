@@ -1,5 +1,7 @@
 class AuditLog:
-    def __init__(self, log_id: str, user_id: str, action: str, timestamp: str, details: str):
+    def __init__(
+        self, log_id: str, user_id: str, action: str, timestamp: str, details: str
+    ):
         self.log_id = log_id
         self.user_id = user_id
         self.action = action
@@ -12,15 +14,15 @@ class AuditLog:
             "user_id": self.user_id,
             "action": self.action,
             "timestamp": self.timestamp,
-            "details": self.details
+            "details": self.details,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'AuditLog':
+    def from_dict(cls, data: dict) -> "AuditLog":
         return cls(
             log_id=data.get("log_id", ""),
             user_id=data.get("user_id", ""),
             action=data.get("action", ""),
             timestamp=data.get("timestamp", ""),
-            details=data.get("details", "")
+            details=data.get("details", ""),
         )

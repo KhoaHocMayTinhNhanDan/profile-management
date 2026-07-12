@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+
 class IUpdateProfileDataSource(ABC):
     @abstractmethod
     async def get_template(self, template_id: str) -> Optional[dict]:

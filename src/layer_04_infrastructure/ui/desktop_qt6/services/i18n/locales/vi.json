@@ -60,6 +60,7 @@
     
     "status_locked": "Đang khóa",
     "status_unlocked": "Mở",
-    "status_viewing": "Đang xem",
+    "status_viewing": "Mở file",
+    "status_editing": "Đang sửa...",
     "status_ready": "Hệ thống sẵn sàng."
 }

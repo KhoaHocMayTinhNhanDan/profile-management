@@ -20,4 +20,5 @@ deployments/desktop/results/linux/
 *.db-shm
 *.sqlite
 scratch/
-*.log
+*.log
+appdata/

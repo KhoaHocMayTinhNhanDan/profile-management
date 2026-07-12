@@ -3,8 +3,11 @@ class LightDarkModeManager:
     Dịch vụ quản lý Chế độ Sáng/Tối (Light/Dark Mode) thuần Python.
     Quản lý trạng thái "sáng" hoặc "tối" (light/dark) độc lập với Style Theme.
     """
+
     def __init__(self, default_mode: str = "dark"):
-        self._current_mode = default_mode if default_mode in ["light", "dark"] else "dark"
+        self._current_mode = (
+            default_mode if default_mode in ["light", "dark"] else "dark"
+        )
         self._listeners = []
 
     def subscribe(self, callback):

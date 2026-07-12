@@ -9,7 +9,7 @@ class Document:
         version: str = "1.0",
         is_locked: bool = False,
         locked_by: str = "",
-        checksum: str = ""
+        checksum: str = "",
     ):
         self.document_id = document_id
         self.name = name
@@ -31,11 +31,11 @@ class Document:
             "version": self.version,
             "is_locked": self.is_locked,
             "locked_by": self.locked_by,
-            "checksum": self.checksum
+            "checksum": self.checksum,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Document':
+    def from_dict(cls, data: dict) -> "Document":
         return cls(
             document_id=data.get("document_id", ""),
             name=data.get("name", ""),
@@ -45,5 +45,5 @@ class Document:
             version=data.get("version", "1.0"),
             is_locked=data.get("is_locked", False),
             locked_by=data.get("locked_by", ""),
-            checksum=data.get("checksum", "")
+            checksum=data.get("checksum", ""),
         )

@@ -6,6 +6,7 @@ from src.shared.logger.app_logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class SqliteDocumentStore:
     _instance = None
 
@@ -39,10 +40,13 @@ class SqliteDocumentStore:
         try:
             cursor = self._conn.cursor()
             json_data = json.dumps(data, ensure_ascii=False)
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO collections (collection_name, document_id, data)
                 VALUES (?, ?, ?)
-            """, (collection, doc_id, json_data))
+            """,
+                (collection, doc_id, json_data),
+            )
             self._conn.commit()
             return True
         except Exception as e:
@@ -52,9 +56,12 @@ class SqliteDocumentStore:
     def get_document(self, collection: str, doc_id: str) -> Optional[Dict[str, Any]]:
         try:
             cursor = self._conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT data FROM collections WHERE collection_name = ? AND document_id = ?
-            """, (collection, doc_id))
+            """,
+                (collection, doc_id),
+            )
             row = cursor.fetchone()
             if row:
                 return json.loads(row[0])
@@ -66,9 +73,12 @@ class SqliteDocumentStore:
     def delete_document(self, collection: str, doc_id: str) -> bool:
         try:
             cursor = self._conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 DELETE FROM collections WHERE collection_name = ? AND document_id = ?
-            """, (collection, doc_id))
+            """,
+                (collection, doc_id),
+            )
             self._conn.commit()
             return True
         except Exception as e:
@@ -78,16 +88,21 @@ class SqliteDocumentStore:
     def list_documents(self, collection: str) -> List[Dict[str, Any]]:
         try:
             cursor = self._conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT data FROM collections WHERE collection_name = ?
-            """, (collection,))
+            """,
+                (collection,),
+            )
             rows = cursor.fetchall()
             return [json.loads(row[0]) for row in rows]
         except Exception as e:
             logger.error(f"Error list_documents in {collection}: {e}")
             return []
 
-    def query_documents(self, collection: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def query_documents(
+        self, collection: str, filters: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """
         Simple query helper that filters documents in-memory to simulate Firestore queries.
         """

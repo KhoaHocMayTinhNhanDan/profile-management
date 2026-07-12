@@ -1,6 +1,13 @@
-from src.layer_02_usecases.usecases.checkin_document.checkin_document_dto import CheckinDocumentInput
-from src.layer_02_usecases.usecases.checkin_document.checkin_document_interactor import CheckinDocumentInteractor
-from src.layer_03_interface_adapters.presenters.desktop.checkin_document import CheckinDocumentPresenter
+from src.layer_02_usecases.usecases.checkin_document.checkin_document_dto import (
+    CheckinDocumentInput,
+)
+from src.layer_02_usecases.usecases.checkin_document.checkin_document_interactor import (
+    CheckinDocumentInteractor,
+)
+from src.layer_03_interface_adapters.presenters.desktop.checkin_document import (
+    CheckinDocumentPresenter,
+)
+
 
 class CheckinDocumentController:
     def __init__(self, interactor: CheckinDocumentInteractor):
@@ -14,7 +21,7 @@ class CheckinDocumentController:
             user_id=request_data.get("user_id", ""),
             new_url=request_data.get("new_url", ""),
             new_size=request_data.get("new_size", 0),
-            new_checksum=request_data.get("new_checksum", "")
+            new_checksum=request_data.get("new_checksum", ""),
         )
         output_data = await self._interactor.execute(input_data)
         return self._presenter.present(output_data)

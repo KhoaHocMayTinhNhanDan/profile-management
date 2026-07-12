@@ -1,8 +1,13 @@
-from src.layer_02_usecases.gateways_interface.i_update_profile_repository import IUpdateProfileRepository
-from src.layer_03_interface_adapters.gateways.outbound.i_update_profile_data_source import IUpdateProfileDataSource
+from src.layer_02_usecases.gateways_interface.i_update_profile_repository import (
+    IUpdateProfileRepository,
+)
+from src.layer_03_interface_adapters.gateways.outbound.i_update_profile_data_source import (
+    IUpdateProfileDataSource,
+)
 from src.layer_01_entities.profile import Profile
 from src.layer_01_entities.profile_template import ProfileTemplate
 from typing import Optional
+
 
 class UpdateProfileRepository(IUpdateProfileRepository):
     def __init__(self, data_source: IUpdateProfileDataSource):

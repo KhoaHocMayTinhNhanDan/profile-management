@@ -1,9 +1,11 @@
 from PyQt6.QtCore import QObject, pyqtSignal, QThread
 
+
 class AsyncWorker(QThread):
     """
     Luồng chạy ngầm tổng quát hóa để chạy bất kỳ hàm Python callable nào.
     """
+
     finished = pyqtSignal(bool, object, str)  # success, result, error_msg
 
     def __init__(self, fn, *args, **kwargs):
@@ -19,10 +21,12 @@ class AsyncWorker(QThread):
         except Exception as e:
             self.finished.emit(False, None, str(e))
 
+
 class UseAsync(QObject):
     """
     Custom Hook tổng quát hóa hỗ trợ chạy bất đồng bộ mọi tác vụ IO/CPU nặng trên PyQt6.
     """
+
     finished = pyqtSignal(bool, object, str)
     loading = pyqtSignal(bool)
 

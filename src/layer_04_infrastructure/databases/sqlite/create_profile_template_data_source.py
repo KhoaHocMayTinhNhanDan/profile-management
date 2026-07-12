@@ -1,6 +1,11 @@
-from src.layer_03_interface_adapters.gateways.outbound.i_create_profile_template_data_source import ICreateProfileTemplateDataSource
-from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import SqliteDocumentStore
+from src.layer_03_interface_adapters.gateways.outbound.i_create_profile_template_data_source import (
+    ICreateProfileTemplateDataSource,
+)
+from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import (
+    SqliteDocumentStore,
+)
 from typing import Optional
+
 
 class SqliteCreateProfileTemplateDataSource(ICreateProfileTemplateDataSource):
     def __init__(self, store: Optional[SqliteDocumentStore] = None):

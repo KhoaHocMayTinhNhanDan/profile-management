@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class CheckinDocumentInput:
     profile_id: str
@@ -8,6 +9,7 @@ class CheckinDocumentInput:
     new_url: str
     new_size: int
     new_checksum: str
+
 
 @dataclass
 class CheckinDocumentOutput:

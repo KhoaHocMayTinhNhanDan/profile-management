@@ -1,7 +1,12 @@
-from src.layer_02_usecases.gateways_interface.i_checkin_document_repository import ICheckinDocumentRepository
-from src.layer_03_interface_adapters.gateways.outbound.i_checkin_document_data_source import ICheckinDocumentDataSource
+from src.layer_02_usecases.gateways_interface.i_checkin_document_repository import (
+    ICheckinDocumentRepository,
+)
+from src.layer_03_interface_adapters.gateways.outbound.i_checkin_document_data_source import (
+    ICheckinDocumentDataSource,
+)
 from src.layer_01_entities.profile import Profile
 from typing import Optional
+
 
 class CheckinDocumentRepository(ICheckinDocumentRepository):
     def __init__(self, data_source: ICheckinDocumentDataSource):

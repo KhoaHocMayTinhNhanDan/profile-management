@@ -60,6 +60,7 @@
     
     "status_locked": "已锁定",
     "status_unlocked": "未锁定",
-    "status_viewing": "正在查看",
+    "status_viewing": "打开文件",
+    "status_editing": "正在编辑...",
     "status_ready": "系统就绪。"
 }

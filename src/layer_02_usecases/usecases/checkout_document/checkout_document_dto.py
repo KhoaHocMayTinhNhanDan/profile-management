@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class CheckoutDocumentInput:
     profile_id: str
     document_id: str
     user_id: str
+
 
 @dataclass
 class CheckoutDocumentOutput:

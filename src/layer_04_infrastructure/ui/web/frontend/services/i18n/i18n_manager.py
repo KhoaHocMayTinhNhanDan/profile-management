@@ -1,11 +1,13 @@
 import os
 import json
 
+
 class I18nManager:
     """
     Dịch vụ quản lý Đa ngôn ngữ (i18n) động thuần Python.
     Tải từ điển dịch thuật từ các file JSON tương ứng trong thư mục /locales/ khi đổi ngôn ngữ.
     """
+
     def __init__(self, current_lang: str = "en"):
         self._current_lang = current_lang
         self._dictionary = {}
@@ -31,7 +33,9 @@ class I18nManager:
     def get_available_languages(self) -> dict:
         langs = {}
         # Tìm locales trong thư mục locales của i18n
-        locales_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "locales")
+        locales_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "locales"
+        )
         if os.path.exists(locales_dir):
             for file in os.listdir(locales_dir):
                 if file.endswith(".json"):
@@ -53,7 +57,9 @@ class I18nManager:
 
     def _load_translations(self, lang_code: str):
         self._dictionary = {}
-        locales_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "locales")
+        locales_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "locales"
+        )
         json_path = os.path.join(locales_dir, f"{lang_code}.json")
         if os.path.exists(json_path):
             try:

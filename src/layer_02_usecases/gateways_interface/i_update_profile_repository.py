@@ -3,6 +3,7 @@ from typing import Optional
 from src.layer_01_entities.profile import Profile
 from src.layer_01_entities.profile_template import ProfileTemplate
 
+
 class IUpdateProfileRepository(ABC):
     @abstractmethod
     async def get_template(self, template_id: str) -> Optional[ProfileTemplate]:

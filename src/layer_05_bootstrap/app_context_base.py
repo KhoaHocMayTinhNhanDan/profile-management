@@ -1,6 +1,7 @@
 import os
 from .di_container import DIContainer
 
+
 class AppContextBase:
     def __init__(self):
         self.container = DIContainer()

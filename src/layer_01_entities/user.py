@@ -10,14 +10,14 @@ class User:
             "user_id": self.user_id,
             "email": self.email,
             "display_name": self.display_name,
-            "role": self.role
+            "role": self.role,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'User':
+    def from_dict(cls, data: dict) -> "User":
         return cls(
             user_id=data.get("user_id", ""),
             email=data.get("email", ""),
             display_name=data.get("display_name", ""),
-            role=data.get("role", "viewer")
+            role=data.get("role", "viewer"),
         )
