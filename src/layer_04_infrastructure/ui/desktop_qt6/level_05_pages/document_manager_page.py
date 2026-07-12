@@ -183,6 +183,13 @@ class DocumentManagerPage(BasePageTemplate):
         status_layout.addWidget(self.status_loading_label)
         status_layout.addWidget(self.status_progress_bar)
 
+        # Styled message label for permanent status notifications (right-aligned)
+        self.status_msg_label = QLabel()
+        self.status_msg_label.setStyleSheet(
+            "color: #a6e3a1; font-size: 13px; font-weight: bold; background: transparent;"
+        )
+        self.status_msg_label.hide()
+
     def set_profile(self, profile_id: str):
         self.profile_id = profile_id
         self.lbl_subtitle.setText(f"Hồ sơ: {profile_id}")
@@ -244,9 +251,7 @@ class DocumentManagerPage(BasePageTemplate):
     def _on_generate_finished(self, success_count: int, total_count: int):
         if success_count > 0:
             msg = f"✓ Sinh tài liệu thành công: {success_count}/{total_count} file đã được đồng bộ!"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 5000)
+            self.show_status_message(msg, "#a6e3a1", 5000)
         else:
             QMessageBox.critical(
                 self, "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
@@ -332,12 +337,11 @@ class DocumentManagerPage(BasePageTemplate):
     @pyqtSlot(dict)
     def _on_checkout_success(self, res: dict):
         local_name = res.get("local_filename", "")
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-            main_win.statusBar().showMessage(
-                f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
-                9000,
-            )
+        self.show_status_message(
+            f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
+            "#89b4fa",
+            9000,
+        )
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
@@ -350,9 +354,7 @@ class DocumentManagerPage(BasePageTemplate):
     @pyqtSlot(dict)
     def _on_checkin_success(self, res: dict):
         msg = f"✓ Tự động đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-            main_win.statusBar().showMessage(msg, 6000)
+        self.show_status_message(msg, "#a6e3a1", 6000)
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
@@ -536,3 +538,30 @@ class DocumentManagerPage(BasePageTemplate):
             dynamic_data[f_name] = val
 
         self.use_update_profile.update_profile(self.profile_id, dynamic_data)
+
+    def show_status_message(
+        self, msg: str, color: str = "#a6e3a1", timeout_ms: int = 5000
+    ):
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+            # Style the label according to success (green) or info (blue)
+            self.status_msg_label.setStyleSheet(
+                f"color: {color}; font-size: 13px; font-weight: bold; background: transparent; padding-right: 10px;"
+            )
+            self.status_msg_label.setText(msg)
+
+            # Avoid duplicate addition
+            main_win.statusBar().removeWidget(self.status_msg_label)
+            main_win.statusBar().addPermanentWidget(self.status_msg_label)
+            self.status_msg_label.show()
+
+            # Use QTimer to hide it after timeout_ms
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(timeout_ms, self._clear_status_message)
+
+    def _clear_status_message(self):
+        main_win: Any = self.window()
+        self.status_msg_label.hide()
+        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+            main_win.statusBar().removeWidget(self.status_msg_label)
