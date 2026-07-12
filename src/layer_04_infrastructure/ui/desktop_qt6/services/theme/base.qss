@@ -386,3 +386,9 @@ QLabel#status_msg_label {
     background: transparent;
     padding-right: 10px;
 }
+QLabel#lbl_page_info {
+    font-size: 13px;
+    font-weight: bold;
+    color: {TEXT_COLOR};
+    background: transparent;
+}

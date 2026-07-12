@@ -119,9 +119,13 @@ class DocumentManagerPage(BasePageTemplate):
 
         # Documents Table
         self.table = QTableWidget()
-        self.table.setColumnCount(5)
+        v_header = self.table.verticalHeader()
+        if v_header is not None:
+            v_header.setVisible(False)
+        self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
             [
+                "STT",
                 self.i18n_manager.translate("tbl_doc_id"),
                 self.i18n_manager.translate("tbl_doc_name"),
                 self.i18n_manager.translate("tbl_doc_version"),
@@ -132,6 +136,7 @@ class DocumentManagerPage(BasePageTemplate):
         header = self.table.horizontalHeader()
         if header is not None:
             header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.right_layout.addWidget(self.table)
@@ -250,10 +255,11 @@ class DocumentManagerPage(BasePageTemplate):
             is_locked = doc.get("is_locked", False)
             size = doc.get("size", 0)
 
-            self.table.setItem(row, 0, QTableWidgetItem(d_id))
-            self.table.setItem(row, 1, QTableWidgetItem(name))
-            self.table.setItem(row, 2, QTableWidgetItem(f"v{ver}"))
-            self.table.setItem(row, 3, QTableWidgetItem(f"{size / 1024:.1f} KB"))
+            self.table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
+            self.table.setItem(row, 1, QTableWidgetItem(d_id))
+            self.table.setItem(row, 2, QTableWidgetItem(name))
+            self.table.setItem(row, 3, QTableWidgetItem(f"v{ver}"))
+            self.table.setItem(row, 4, QTableWidgetItem(f"{size / 1024:.1f} KB"))
 
             # Action button for edit
             from ..level_01_atoms.buttons import SecondaryButton
@@ -273,11 +279,11 @@ class DocumentManagerPage(BasePageTemplate):
                 btn_edit.clicked.connect(
                     lambda checked, d=d_id: self._start_editing_doc(d)
                 )
-            self.table.setCellWidget(row, 4, btn_edit)
+            self.table.setCellWidget(row, 5, btn_edit)
 
     def _on_row_double_clicked(self, item: Any):
         row = item.row()
-        item_obj = self.table.item(row, 0)
+        item_obj = self.table.item(row, 1)
         doc_id = item_obj.text() if item_obj is not None else ""
         self._start_editing_doc(doc_id)
 

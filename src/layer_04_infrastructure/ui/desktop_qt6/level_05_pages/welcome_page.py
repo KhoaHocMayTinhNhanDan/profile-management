@@ -79,6 +79,10 @@ class WelcomePage(BasePageTemplate):
         self.actions_layout.addStretch()
         self.content_layout.addLayout(self.actions_layout)
 
+        # Pagination State
+        self.current_page = 1
+        self.items_per_page = 10
+
         # Split Layout for List of Profiles and List of Templates (Vertical stacking)
         # 1. Profiles Section
         self.table_label = QLabel(self.i18n_manager.translate("lbl_profiles_list"))
@@ -86,9 +90,13 @@ class WelcomePage(BasePageTemplate):
         self.content_layout.addWidget(self.table_label)
 
         self.table = QTableWidget()
-        self.table.setColumnCount(5)
+        v_hdr = self.table.verticalHeader()
+        if v_hdr is not None:
+            v_hdr.setVisible(False)
+        self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
             [
+                "STT",
                 self.i18n_manager.translate("tbl_profile_id"),
                 self.i18n_manager.translate("tbl_profile_type"),
                 self.i18n_manager.translate("tbl_status"),
@@ -99,10 +107,38 @@ class WelcomePage(BasePageTemplate):
         p_header = self.table.horizontalHeader()
         if p_header is not None:
             p_header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+            p_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.itemDoubleClicked.connect(self._on_row_double_clicked)
         self.content_layout.addWidget(self.table)
+
+        # Pagination Layout under self.table
+        self.pagination_layout = QHBoxLayout()
+        self.pagination_layout.setContentsMargins(0, 5, 0, 5)
+        self.pagination_layout.setSpacing(15)
+
+        from ..level_01_atoms.buttons import SecondaryButton
+
+        self.btn_prev_page = SecondaryButton("Trang trước")
+        self.btn_prev_page.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_prev_page.clicked.connect(self._go_to_prev_page)
+
+        self.lbl_page_info = QLabel("Trang 1 / 1")
+        self.lbl_page_info.setObjectName("lbl_page_info")
+        self.lbl_page_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.btn_next_page = SecondaryButton("Trang sau")
+        self.btn_next_page.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_next_page.clicked.connect(self._go_to_next_page)
+
+        self.pagination_layout.addStretch()
+        self.pagination_layout.addWidget(self.btn_prev_page)
+        self.pagination_layout.addWidget(self.lbl_page_info)
+        self.pagination_layout.addWidget(self.btn_next_page)
+        self.pagination_layout.addStretch()
+
+        self.content_layout.addLayout(self.pagination_layout)
 
         # 2. Templates Section
         self.templates_label = QLabel("Danh sách mẫu hồ sơ trong hệ thống:")
@@ -110,9 +146,10 @@ class WelcomePage(BasePageTemplate):
         self.content_layout.addWidget(self.templates_label)
 
         self.templates_table = QTableWidget()
-        self.templates_table.setColumnCount(5)
+        self.templates_table.setColumnCount(6)
         self.templates_table.setHorizontalHeaderLabels(
             [
+                "STT",
                 "Mã mẫu",
                 "Tên mẫu hồ sơ",
                 "Số thuộc tính",
@@ -123,7 +160,8 @@ class WelcomePage(BasePageTemplate):
         t_header = self.templates_table.horizontalHeader()
         if t_header is not None:
             t_header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-            t_header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+            t_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            t_header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
         self.templates_table.setSelectionBehavior(
             QTableWidget.SelectionBehavior.SelectRows
         )
@@ -150,11 +188,33 @@ class WelcomePage(BasePageTemplate):
         self.total_profiles_card.value_label.setText(str(len(profiles)))
         self.total_templates_card.value_label.setText(str(len(templates)))
 
-        # Update Profiles table
+        # Update Profiles table with pagination and STT column
         self.table.setRowCount(0)
-        for p in profiles:
+
+        # Calculate pagination parameters
+        total_items = len(profiles)
+        total_pages = max(
+            1, (total_items + self.items_per_page - 1) // self.items_per_page
+        )
+
+        # Clamp current page
+        if self.current_page > total_pages:
+            self.current_page = total_pages
+        if self.current_page < 1:
+            self.current_page = 1
+
+        start_idx = (self.current_page - 1) * self.items_per_page
+        end_idx = min(start_idx + self.items_per_page, total_items)
+
+        sliced_profiles = profiles[start_idx:end_idx]
+
+        # Render sliced items
+        for i, p in enumerate(sliced_profiles):
             row = self.table.rowCount()
             self.table.insertRow(row)
+
+            # Global row number (STT)
+            stt_num = start_idx + i + 1
 
             p_id = p.get("profile_id", "")
             p_type = p.get("template_id", "")
@@ -162,15 +222,21 @@ class WelcomePage(BasePageTemplate):
             created_at = p.get("created_at", "")
             docs_count = str(len(p.get("documents", [])))
 
-            self.table.setItem(row, 0, QTableWidgetItem(p_id))
-            self.table.setItem(row, 1, QTableWidgetItem(p_type))
-            self.table.setItem(row, 2, QTableWidgetItem(status))
-            self.table.setItem(row, 3, QTableWidgetItem(created_at))
-            self.table.setItem(row, 4, QTableWidgetItem(docs_count))
+            self.table.setItem(row, 0, QTableWidgetItem(str(stt_num)))
+            self.table.setItem(row, 1, QTableWidgetItem(p_id))
+            self.table.setItem(row, 2, QTableWidgetItem(p_type))
+            self.table.setItem(row, 3, QTableWidgetItem(status))
+            self.table.setItem(row, 4, QTableWidgetItem(created_at))
+            self.table.setItem(row, 5, QTableWidgetItem(docs_count))
 
-        # Update Templates table
+        # Update pagination controls
+        self.lbl_page_info.setText(f"Trang {self.current_page} / {total_pages}")
+        self.btn_prev_page.setEnabled(self.current_page > 1)
+        self.btn_next_page.setEnabled(self.current_page < total_pages)
+
+        # Update Templates table with STT column
         self.templates_table.setRowCount(0)
-        for t in templates:
+        for i, t in enumerate(templates):
             row = self.templates_table.rowCount()
             self.templates_table.insertRow(row)
 
@@ -190,10 +256,11 @@ class WelcomePage(BasePageTemplate):
                     ]
                 )
 
-            self.templates_table.setItem(row, 0, QTableWidgetItem(t_id))
-            self.templates_table.setItem(row, 1, QTableWidgetItem(t_name))
-            self.templates_table.setItem(row, 2, QTableWidgetItem(fields_count))
-            self.templates_table.setItem(row, 3, QTableWidgetItem(str(docx_count)))
+            self.templates_table.setItem(row, 0, QTableWidgetItem(str(i + 1)))
+            self.templates_table.setItem(row, 1, QTableWidgetItem(t_id))
+            self.templates_table.setItem(row, 2, QTableWidgetItem(t_name))
+            self.templates_table.setItem(row, 3, QTableWidgetItem(fields_count))
+            self.templates_table.setItem(row, 4, QTableWidgetItem(str(docx_count)))
 
             # Action buttons: Edit, Open folder & Delete template
             actions_widget = QWidget()
@@ -222,7 +289,7 @@ class WelcomePage(BasePageTemplate):
             actions_lay.addWidget(btn_edit)
             actions_lay.addWidget(btn_open)
             actions_lay.addWidget(btn_delete)
-            self.templates_table.setCellWidget(row, 4, actions_widget)
+            self.templates_table.setCellWidget(row, 5, actions_widget)
 
     def _edit_template(self, template_id: str):
         main_win: Any = self.window()
@@ -266,7 +333,7 @@ class WelcomePage(BasePageTemplate):
 
     def _on_row_double_clicked(self, item: Any):
         row = item.row()
-        id_item = self.table.item(row, 0)
+        id_item = self.table.item(row, 1)
         if id_item is not None:
             profile_id = id_item.text()
             self._open_document_manager(profile_id)
@@ -286,6 +353,20 @@ class WelcomePage(BasePageTemplate):
         if main_win is not None and hasattr(main_win, "switch_page"):
             main_win.switch_page("create_profile")
 
+    def _go_to_prev_page(self):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.refresh_data()
+
+    def _go_to_next_page(self):
+        profiles = self.store.list_documents("profiles")
+        total_pages = max(
+            1, (len(profiles) + self.items_per_page - 1) // self.items_per_page
+        )
+        if self.current_page < total_pages:
+            self.current_page += 1
+            self.refresh_data()
+
     def retranslate_ui(self, lang_code: str):
         self.total_profiles_card.title_label.setText(
             self.i18n_manager.translate("total_profiles")
@@ -302,6 +383,7 @@ class WelcomePage(BasePageTemplate):
         self.table_label.setText(self.i18n_manager.translate("lbl_profiles_list"))
         self.table.setHorizontalHeaderLabels(
             [
+                "STT",
                 self.i18n_manager.translate("tbl_profile_id"),
                 self.i18n_manager.translate("tbl_profile_type"),
                 self.i18n_manager.translate("tbl_status"),
@@ -314,6 +396,7 @@ class WelcomePage(BasePageTemplate):
         self.templates_label.setText("Danh sách mẫu hồ sơ trong hệ thống:")
         self.templates_table.setHorizontalHeaderLabels(
             [
+                "STT",
                 "Mã mẫu",
                 "Tên mẫu hồ sơ",
                 "Số thuộc tính",
