@@ -268,7 +268,7 @@ class DocumentManagerPage(BasePageTemplate):
             self.table.setEnabled(False)
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
                 main_win.statusBar().removeWidget(self.status_loading_widget)
-                main_win.statusBar().addWidget(self.status_loading_widget)
+                main_win.statusBar().addPermanentWidget(self.status_loading_widget)
                 self.status_loading_widget.show()
                 main_win.statusBar().clearMessage()
         else:
