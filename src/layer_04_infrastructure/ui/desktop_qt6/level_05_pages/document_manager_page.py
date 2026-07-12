@@ -12,6 +12,8 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QLineEdit,
     QWidget,
+    QProgressBar,
+    QFrame,
 )
 from PyQt6.QtCore import Qt, QMetaObject, Q_ARG, pyqtSlot
 from typing import Any
@@ -145,6 +147,42 @@ class DocumentManagerPage(BasePageTemplate):
 
         self.info_widgets_map = {}
 
+        # Styled loading widget for status bar (including a pulsing indeterminate QProgressBar)
+        self.status_loading_widget = QFrame()
+        self.status_loading_widget.setObjectName("status_loading_container")
+        self.status_loading_widget.setStyleSheet(
+            "background: transparent; border: none;"
+        )
+
+        status_layout = QHBoxLayout(self.status_loading_widget)
+        status_layout.setContentsMargins(5, 0, 5, 0)
+        status_layout.setSpacing(10)
+
+        self.status_loading_label = QLabel("Đang xử lý, vui lòng chờ...")
+        self.status_loading_label.setStyleSheet(
+            "color: #cdd6f4; font-size: 13px; font-weight: bold;"
+        )
+
+        self.status_progress_bar = QProgressBar()
+        self.status_progress_bar.setRange(0, 0)  # Pulse animation
+        self.status_progress_bar.setTextVisible(False)
+        self.status_progress_bar.setFixedHeight(12)
+        self.status_progress_bar.setFixedWidth(120)
+        self.status_progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid rgba(137, 180, 250, 0.4);
+                border-radius: 6px;
+                background-color: rgba(30, 41, 59, 0.6);
+            }
+            QProgressBar::chunk {
+                background-color: #89b4fa;
+                border-radius: 5px;
+            }
+        """)
+
+        status_layout.addWidget(self.status_loading_label)
+        status_layout.addWidget(self.status_progress_bar)
+
     def set_profile(self, profile_id: str):
         self.profile_id = profile_id
         self.lbl_subtitle.setText(f"Hồ sơ: {profile_id}")
@@ -229,18 +267,18 @@ class DocumentManagerPage(BasePageTemplate):
             self.btn_back.setEnabled(False)
             self.table.setEnabled(False)
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage("Đang xử lý, vui lòng chờ...", 0)
+                main_win.statusBar().removeWidget(self.status_loading_widget)
+                main_win.statusBar().addWidget(self.status_loading_widget)
+                self.status_loading_widget.show()
+                main_win.statusBar().clearMessage()
         else:
             self.unsetCursor()
             self.btn_save_info.setEnabled(True)
             self.btn_back.setEnabled(True)
             self.table.setEnabled(True)
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                if (
-                    main_win.statusBar().currentMessage()
-                    == "Đang xử lý, vui lòng chờ..."
-                ):
-                    main_win.statusBar().clearMessage()
+                self.status_loading_widget.hide()
+                main_win.statusBar().removeWidget(self.status_loading_widget)
 
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
