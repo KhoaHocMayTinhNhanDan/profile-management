@@ -486,8 +486,19 @@ class MainWindow(QMainWindow):
         if timeout_ms > 0:
             from PyQt6.QtCore import QTimer
 
-            QTimer.singleShot(timeout_ms, self._clear_status_message)
+            QTimer.singleShot(timeout_ms, self._restore_ready_status)
 
     def _clear_status_message(self):
         self.status_msg_label.hide()
         self._remove_status_widget(self.status_msg_label)
+
+    def _restore_ready_status(self):
+        # Only restore to "Hệ thống sẵn sàng" if we are not currently loading
+        if not self.status_loading_widget.isVisible():
+            self._clear_status_message()
+            ready_txt = "Hệ thống sẵn sàng."
+            if self.i18n_manager is not None:
+                ready_txt = (
+                    self.i18n_manager.translate("status_ready") or "Hệ thống sẵn sàng."
+                )
+            self.show_status_message(ready_txt, "ready", 0)
