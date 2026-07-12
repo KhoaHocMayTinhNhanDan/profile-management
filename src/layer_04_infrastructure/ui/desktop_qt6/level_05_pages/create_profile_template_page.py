@@ -118,18 +118,15 @@ class CreateProfileTemplatePage(BasePageTemplate):
         self.fields_header.addWidget(self.lbl_dynamic)
 
         self.btn_add_field = SecondaryButton("+ Thêm thuộc tính")
-        self.btn_add_field.setCursor(Qt.CursorShape.PointingHandCursor)
         self.fields_header.addWidget(self.btn_add_field)
 
         self.btn_move_up = SecondaryButton("▲ Lên")
         self.btn_move_up.setToolTip("Di chuyển dòng đang chọn lên trên")
-        self.btn_move_up.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_move_up.clicked.connect(self._move_selected_row_up)
         self.fields_header.addWidget(self.btn_move_up)
 
         self.btn_move_down = SecondaryButton("▼ Xuống")
         self.btn_move_down.setToolTip("Di chuyển dòng đang chọn xuống dưới")
-        self.btn_move_down.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_move_down.clicked.connect(self._move_selected_row_down)
         self.fields_header.addWidget(self.btn_move_down)
 
@@ -179,18 +176,15 @@ class CreateProfileTemplatePage(BasePageTemplate):
         self.files_header_layout.addWidget(self.lbl_files_title)
 
         self.btn_select_files = SecondaryButton("+ Chọn file Word")
-        self.btn_select_files.setCursor(Qt.CursorShape.PointingHandCursor)
         self.files_header_layout.addWidget(self.btn_select_files)
 
         self.btn_file_up = SecondaryButton("▲ Lên")
         self.btn_file_up.setToolTip("Di chuyển file đang chọn lên trên")
-        self.btn_file_up.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_file_up.clicked.connect(self._move_selected_file_up)
         self.files_header_layout.addWidget(self.btn_file_up)
 
         self.btn_file_down = SecondaryButton("▼ Xuống")
         self.btn_file_down.setToolTip("Di chuyển file đang chọn xuống dưới")
-        self.btn_file_down.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_file_down.clicked.connect(self._move_selected_file_down)
         self.files_header_layout.addWidget(self.btn_file_down)
 
@@ -242,9 +236,6 @@ class CreateProfileTemplatePage(BasePageTemplate):
         self.btn_cancel = SecondaryButton(self.i18n_manager.translate("btn_back"))
         self.btn_save.setShortcut("Ctrl+S")
         self.btn_cancel.setShortcut("Esc")
-        self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-
         self.buttons_layout.addWidget(self.btn_save)
         self.buttons_layout.addWidget(self.btn_cancel)
         self.buttons_layout.addStretch()
@@ -328,13 +319,11 @@ class CreateProfileTemplatePage(BasePageTemplate):
             from ..level_01_atoms.buttons import SecondaryButton, DangerButton
 
             btn_open = SecondaryButton("Mở file")
-            btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_open.clicked.connect(
                 lambda checked, path=fpath: self._open_template_file(path)
             )
 
             btn_remove = DangerButton("Xóa")
-            btn_remove.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_remove.clicked.connect(
                 lambda checked, path=fpath: self._remove_selected_file(path)
             )
@@ -448,7 +437,6 @@ class CreateProfileTemplatePage(BasePageTemplate):
         from ..level_01_atoms.buttons import DangerButton
 
         btn_del = DangerButton("Xóa")
-        btn_del.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_del.clicked.connect(self._delete_table_row)
         actions_lay.addWidget(btn_del)
 

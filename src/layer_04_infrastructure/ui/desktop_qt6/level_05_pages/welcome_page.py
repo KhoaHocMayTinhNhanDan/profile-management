@@ -77,9 +77,6 @@ class WelcomePage(BasePageTemplate):
             self.i18n_manager.translate("btn_create_profile")
         )
 
-        self.btn_create_template.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_create_profile.setCursor(Qt.CursorShape.PointingHandCursor)
-
         self.actions_layout.addWidget(self.btn_create_template)
         self.actions_layout.addWidget(self.btn_create_profile)
         self.actions_layout.addStretch()
@@ -122,7 +119,6 @@ class WelcomePage(BasePageTemplate):
         from ..level_01_atoms.buttons import SecondaryButton
 
         self.btn_prev_page = SecondaryButton("Trang trước")
-        self.btn_prev_page.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_prev_page.clicked.connect(self._go_to_prev_page)
 
         self.lbl_page_info = QLabel("Trang 1 / 1")
@@ -130,7 +126,6 @@ class WelcomePage(BasePageTemplate):
         self.lbl_page_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.btn_next_page = SecondaryButton("Trang sau")
-        self.btn_next_page.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_next_page.clicked.connect(self._go_to_next_page)
 
         self.pagination_layout.addStretch()
@@ -269,17 +264,14 @@ class WelcomePage(BasePageTemplate):
             from ..level_01_atoms.buttons import SecondaryButton, DangerButton
 
             btn_edit = SecondaryButton("Sửa")
-            btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_edit.clicked.connect(lambda checked, tid=t_id: self._edit_template(tid))
 
             btn_open = SecondaryButton("Thư mục mẫu")
-            btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_open.clicked.connect(
                 lambda checked, path=t_dir: self._open_template_dir(path)
             )
 
             btn_delete = DangerButton("Xóa")
-            btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_delete.clicked.connect(
                 lambda checked, tid=t_id, name=t_name: self._delete_template(tid, name)
             )

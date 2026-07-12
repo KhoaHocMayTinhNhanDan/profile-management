@@ -80,9 +80,6 @@ class CreateProfilePage(BasePageTemplate):
         self.btn_cancel.setShortcut("Esc")
         from PyQt6.QtCore import Qt
 
-        self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-
         self.buttons_lay.addWidget(self.btn_save)
         self.buttons_lay.addWidget(self.btn_cancel)
         self.buttons_lay.addStretch()

@@ -83,7 +83,6 @@ class DocumentManagerPage(BasePageTemplate):
         from ..level_01_atoms.buttons import PrimaryButton
 
         self.btn_save_info = PrimaryButton("Lưu thông tin")
-        self.btn_save_info.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_save_info.setShortcut("Ctrl+S")
         self.btn_save_info.setToolTip("Lưu thông tin hồ sơ (Ctrl+S)")
         self.btn_save_info.clicked.connect(self._save_profile_info)
@@ -108,7 +107,6 @@ class DocumentManagerPage(BasePageTemplate):
             self.i18n_manager.translate("btn_back_dashboard")
         )
         self.btn_back.setShortcut("Esc")
-        self.btn_back.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.actions_layout.addWidget(self.btn_back)
         self.actions_layout.addStretch()
@@ -243,7 +241,6 @@ class DocumentManagerPage(BasePageTemplate):
                 else self.i18n_manager.translate("status_viewing")
             )
             btn_edit = SecondaryButton(btn_text)
-            btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
             if is_locked:
                 btn_edit.clicked.connect(
                     lambda checked, d=d_id: self._finish_editing_doc(d)
