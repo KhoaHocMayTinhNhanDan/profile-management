@@ -1,5 +1,5 @@
 import asyncio
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal, Qt
 from src.layer_03_interface_adapters.controllers.desktop.checkin_document import (
     CheckinDocumentController,
 )
@@ -15,6 +15,9 @@ class UseCheckinDocument(QObject):
     finished = pyqtSignal(dict)
     loading = pyqtSignal(bool)
     error = pyqtSignal(str)
+    document_saved_signal = pyqtSignal(
+        str, str, str
+    )  # profile_id, document_id, temp_file_path
 
     def __init__(self, context, parent=None):
         super().__init__(parent)
@@ -24,12 +27,17 @@ class UseCheckinDocument(QObject):
         self._async_helper.loading.connect(self.loading.emit)
         self._async_helper.finished.connect(self._on_async_finished)
 
+        # Kết nối tín hiệu an toàn đa luồng (QueuedConnection) về Main UI Thread
+        getattr(self.document_saved_signal, "connect")(
+            self._on_document_saved, Qt.ConnectionType.QueuedConnection
+        )
+
     def start_watching(
         self, profile_id: str, document_id: str, temp_file_path: str, original_path: str
     ):
         self.watcher.start_watching(
             temp_file_path,
-            lambda path, size, checksum: self._on_document_saved(
+            lambda path, size, checksum: getattr(self.document_saved_signal, "emit")(
                 profile_id, document_id, temp_file_path
             ),
         )
