@@ -54,6 +54,66 @@ QPushButton[class="DangerButton"]:pressed, QPushButton#danger_btn:pressed {
     background-color: #dc2626;
 }
 
+QPushButton[class="NavButton"] {
+    color: {TEXT_COLOR};
+    background-color: transparent;
+    border: none;
+    border-left: 4px solid transparent;
+    text-align: left;
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 0px;
+}
+
+QPushButton[class="NavButton"]:hover {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+}
+
+QPushButton[class="NavButton"]:checked {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+    border-left: 4px solid {ACCENT_COLOR};
+    font-weight: bold;
+}
+
+QPushButton[class="IconButton"] {
+    background-color: transparent;
+    border: none;
+    border-radius: {RADIUS};
+    padding: 6px;
+    min-width: 28px;
+    min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
+}
+
+QPushButton[class="IconButton"]:hover {
+    background-color: rgba(137, 180, 250, 0.12);
+}
+
+QPushButton[class="IconButton"]:pressed {
+    background-color: rgba(137, 180, 250, 0.2);
+}
+
+QPushButton[class="TertiaryButton"] {
+    background-color: transparent;
+    color: {ACCENT_COLOR};
+    border: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: normal;
+}
+
+QPushButton[class="TertiaryButton"]:hover {
+    color: {ACCENT_HOVER};
+    text-decoration: underline;
+}
+
+QPushButton[class="TertiaryButton"]:pressed {
+    color: {ACCENT_HOVER};
+}
+
 QPushButton {
     outline: none;
 }

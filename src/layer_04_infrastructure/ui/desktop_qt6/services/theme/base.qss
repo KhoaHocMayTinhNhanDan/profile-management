@@ -65,27 +65,6 @@ QScrollArea > QWidget > QWidget {
 }
 
 /* --- Atom Buttons --- */
-QPushButton[class="NavButton"] {
-    color: {TEXT_COLOR};
-    background-color: transparent;
-    border: none;
-    border-left: 4px solid transparent;
-    text-align: left;
-    padding: 8px 16px;
-    font-size: 13px;
-    border-radius: 0px;
-}
-QPushButton[class="NavButton"]:hover {
-    background-color: {CARD_BG};
-    color: {ACCENT_COLOR};
-}
-QPushButton[class="NavButton"]:checked {
-    background-color: {CARD_BG};
-    color: {ACCENT_COLOR};
-    border-left: 4px solid {ACCENT_COLOR};
-    font-weight: bold;
-}
-
 QPushButton {
     outline: none;
 }
