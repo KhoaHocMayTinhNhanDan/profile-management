@@ -270,9 +270,11 @@ QTableWidget QPushButton[class="PrimaryButton"],
 QTableWidget QPushButton#secondary_btn,
 QTableWidget QPushButton#danger_btn,
 QTableWidget QPushButton#primary_btn {
-    padding: 2px 8px;
+    padding: 0px 8px;
     font-size: 12px;
-    margin: 1px;
+    min-height: 24px;
+    max-height: 24px;
+    margin: 0px;
 }
 
 /* --- List Widget Navigation Styling --- */
