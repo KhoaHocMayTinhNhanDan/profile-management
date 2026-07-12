@@ -356,3 +356,33 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
+
+/* --- Status Bar Styling --- */
+QStatusBar {
+    background-color: {SIDEBAR_BG};
+    border-top: {BORDER_WIDTH} solid {BORDER_COLOR};
+}
+QFrame#status_loading_container {
+    background: transparent;
+    border: none;
+}
+QLabel#status_loading_label {
+    color: {TEXT_COLOR};
+    font-size: 13px;
+    font-weight: bold;
+}
+QProgressBar#status_progress_bar {
+    border: 1px solid {BORDER_COLOR};
+    border-radius: 6px;
+    background-color: {CARD_BG};
+}
+QProgressBar#status_progress_bar::chunk {
+    background-color: {ACCENT_COLOR};
+    border-radius: 5px;
+}
+QLabel#status_msg_label {
+    font-size: 13px;
+    font-weight: bold;
+    background: transparent;
+    padding-right: 10px;
+}

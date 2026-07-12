@@ -55,35 +55,20 @@ class MainWindow(QMainWindow):
         # Styled loading widget for status bar (including a pulsing indeterminate QProgressBar)
         self.status_loading_widget = QFrame()
         self.status_loading_widget.setObjectName("status_loading_container")
-        self.status_loading_widget.setStyleSheet(
-            "background: transparent; border: none;"
-        )
 
         status_layout = QHBoxLayout(self.status_loading_widget)
         status_layout.setContentsMargins(5, 0, 5, 0)
         status_layout.setSpacing(10)
 
         self.status_loading_label = QLabel("Đang xử lý, vui lòng chờ...")
-        self.status_loading_label.setStyleSheet(
-            "color: #cdd6f4; font-size: 13px; font-weight: bold;"
-        )
+        self.status_loading_label.setObjectName("status_loading_label")
 
         self.status_progress_bar = QProgressBar()
+        self.status_progress_bar.setObjectName("status_progress_bar")
         self.status_progress_bar.setRange(0, 0)  # Pulse animation
         self.status_progress_bar.setTextVisible(False)
         self.status_progress_bar.setFixedHeight(12)
         self.status_progress_bar.setFixedWidth(120)
-        self.status_progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid rgba(137, 180, 250, 0.4);
-                border-radius: 6px;
-                background-color: rgba(30, 41, 59, 0.6);
-            }
-            QProgressBar::chunk {
-                background-color: #89b4fa;
-                border-radius: 5px;
-            }
-        """)
 
         # Add stretch to push text and progress bar close to each other on the right
         status_layout.addStretch(1)
@@ -92,9 +77,7 @@ class MainWindow(QMainWindow):
 
         # Styled message label for permanent status notifications (right-aligned)
         self.status_msg_label = QLabel()
-        self.status_msg_label.setStyleSheet(
-            "color: #cdd6f4; font-size: 13px; font-weight: bold; background: transparent;"
-        )
+        self.status_msg_label.setObjectName("status_msg_label")
 
         sb = self.statusBar()
         if sb is not None:
@@ -473,9 +456,7 @@ class MainWindow(QMainWindow):
         }
         color = colors.get(status_type, "#cdd6f4")
 
-        self.status_msg_label.setStyleSheet(
-            f"color: {color}; font-size: 13px; font-weight: bold; background: transparent; padding-right: 10px;"
-        )
+        self.status_msg_label.setStyleSheet(f"color: {color};")
         self.status_msg_label.setText(msg)
 
         self._remove_status_widget(self.status_msg_label)
