@@ -447,14 +447,26 @@ class MainWindow(QMainWindow):
         self.status_loading_widget.hide()
         self._remove_status_widget(self.status_loading_widget)
 
-        # Determine color based on status_type
-        colors = {
-            "success": "#a6e3a1",  # soft green
-            "error": "#f38ba8",  # soft red
-            "info": "#89b4fa",  # soft blue
-            "ready": "#cdd6f4",  # soft white/gray
-        }
-        color = colors.get(status_type, "#cdd6f4")
+        # Determine color based on status_type dynamically from ThemeManager to ensure high contrast in all themes
+        color = "#ffffff"
+        if self.theme_manager is not None:
+            color_names = {
+                "success": "SUCCESS_COLOR",
+                "error": "ERROR_COLOR",
+                "info": "ACCENT_COLOR",
+                "ready": "TEXT_COLOR",
+            }
+            c_name = color_names.get(status_type, "TEXT_COLOR")
+            color = self.theme_manager.get_color(c_name)
+        else:
+            # Fallback values if theme_manager is not loaded
+            colors = {
+                "success": "#34d399",
+                "error": "#f87171",
+                "info": "#38bdf8",
+                "ready": "#f8fafc",
+            }
+            color = colors.get(status_type, "#f8fafc")
 
         self.status_msg_label.setStyleSheet(f"color: {color};")
         self.status_msg_label.setText(msg)
