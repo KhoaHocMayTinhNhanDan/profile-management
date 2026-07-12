@@ -69,3 +69,9 @@ class UseCheckinDocument(QObject):
                 self.error.emit(result.get("message", "Lỗi checkin không xác định"))
         else:
             self.error.emit("Kết quả trả về không hợp lệ")
+
+    def cleanup(self):
+        if hasattr(self, "_async_helper"):
+            self._async_helper.cleanup()
+        for file_path in list(self.watcher._stop_events.keys()):
+            self.watcher.stop_watching(file_path)

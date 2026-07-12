@@ -1,5 +1,8 @@
 from typing import Any
 from PyQt6.QtGui import QAction
+from src.shared.logger.app_logger import get_logger
+
+logger = get_logger(__name__)
 from PyQt6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -484,3 +487,26 @@ class MainWindow(QMainWindow):
                     self.i18n_manager.translate("status_ready") or "Hệ thống sẵn sàng."
                 )
             self.show_status_message(ready_txt, "ready", 0)
+
+    def closeEvent(self, a0):
+        """
+        Graceful Shutdown: Đảm bảo dừng toàn bộ luồng chạy ngầm (QThread) và
+        tiến trình theo dõi file (file watcher) trước khi thoát chương trình.
+        """
+        logger.info("Ứng dụng đang đóng. Bắt đầu dọn dẹp các luồng chạy ngầm...")
+        if hasattr(self, "pages_map"):
+            for page_name, page in self.pages_map.items():
+                for attr_name in dir(page):
+                    try:
+                        attr = getattr(page, attr_name)
+                        if hasattr(attr, "cleanup") and callable(attr.cleanup):
+                            attr.cleanup()
+                        elif hasattr(attr, "_async_helper"):
+                            attr._async_helper.cleanup()
+                    except Exception as e:
+                        logger.error(
+                            f"Lỗi dọn dẹp thuộc tính {attr_name} ở trang {page_name}: {e}"
+                        )
+        logger.info("Đã dọn dẹp xong toàn bộ luồng. Thoát chương trình.")
+        if a0 is not None:
+            a0.accept()

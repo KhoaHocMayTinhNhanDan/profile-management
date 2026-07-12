@@ -46,3 +46,10 @@ class UseAsync(QObject):
     def _on_finished(self, success, result, error_msg):
         self.loading.emit(False)
         self.finished.emit(success, result, error_msg)
+
+    def cleanup(self):
+        if self.worker and self.worker.isRunning():
+            self.worker.quit()
+            if not self.worker.wait(1000):
+                self.worker.terminate()
+                self.worker.wait(500)
