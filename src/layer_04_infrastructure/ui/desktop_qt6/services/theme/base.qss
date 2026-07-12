@@ -527,3 +527,15 @@ QHeaderView::section {
 QHeaderView::section:last {
     border-right: none;
 }
+
+/* Table Cell Embedded Inputs & Editors */
+QTableWidget QLineEdit, QTableWidget QLineEdit#form_input {
+    padding: 2px 8px;
+    font-size: 13px;
+    border-radius: {RADIUS};
+}
+QTableWidget QComboBox {
+    padding: 2px 24px 2px 8px;
+    font-size: 13px;
+    border-radius: {RADIUS};
+}
