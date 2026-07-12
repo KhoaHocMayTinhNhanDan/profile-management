@@ -152,9 +152,9 @@ class ThemeManager:
     def _get_fallback_classic_palette(self) -> dict:
         return {
             "dark": {
-                "DARK_BG": "#1e1e2e",
-                "SIDEBAR_BG": "#11111b",
-                "CARD_BG": "#181825",
+                "DARK_BG": "#11111b",
+                "SIDEBAR_BG": "#181825",
+                "CARD_BG": "#1e1e2e",
                 "TEXT_COLOR": "#cdd6f4",
                 "SUBTEXT_COLOR": "#a6adc8",
                 "ACCENT_COLOR": "#89b4fa",
