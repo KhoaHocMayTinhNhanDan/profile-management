@@ -1,6 +1,7 @@
 import os
 import time
 import hashlib
+import threading
 from typing import Callable, Dict, Any
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -116,7 +117,8 @@ class FileWatcherService:
         observer = self._observers.pop(file_path_abs, None)
         if observer:
             observer.stop()
-            # Đợi tối đa 1.0 giây để luồng phụ kết thúc an toàn
-            observer.join(timeout=1.0)
+            # ⚠️ Tránh RuntimeError: cannot join current thread
+            if observer != threading.current_thread():
+                observer.join(timeout=1.0)
             logger.info(f"Stopped event-driven file watch for: {file_path_abs}")
         self._handlers.pop(file_path_abs, None)
