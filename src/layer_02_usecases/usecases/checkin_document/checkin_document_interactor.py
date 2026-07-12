@@ -98,9 +98,6 @@ class CheckinDocumentInteractor:
                     )
 
                     for doc in profile.documents:
-                        if doc.document_id == target_doc.document_id:
-                            continue
-
                         o_url = doc.url or ""
                         if o_url.startswith("file:///"):
                             o_path = o_url.replace("file:///", "")
