@@ -259,11 +259,10 @@ QTableWidget QTableCornerButton::section {
     background-color: {SIDEBAR_BG};
     border: 1px solid {BORDER_COLOR};
 }
-
 /* Embedded Widgets inside Tables to prevent text clipping */
 QTableWidget QLineEdit, QTableWidget QComboBox {
-    padding: 4px 8px;
-    margin: 2px;
+    padding: 2px 8px;
+    margin: 1px;
 }
 QTableWidget QPushButton[class="SecondaryButton"],
 QTableWidget QPushButton[class="DangerButton"],
@@ -271,8 +270,9 @@ QTableWidget QPushButton[class="PrimaryButton"],
 QTableWidget QPushButton#secondary_btn,
 QTableWidget QPushButton#danger_btn,
 QTableWidget QPushButton#primary_btn {
-    padding: 4px 8px;
-    margin: 2px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin: 1px;
 }
 
 /* --- List Widget Navigation Styling --- */
