@@ -117,8 +117,7 @@ class FileWatcherService:
         observer = self._observers.pop(file_path_abs, None)
         if observer:
             observer.stop()
-            # ⚠️ Tránh RuntimeError: cannot join current thread
-            if observer != threading.current_thread():
-                observer.join(timeout=1.0)
+            # ⚠️ Không gọi join() đồng bộ ở đây để tránh gây treo (freeze) luồng chính UI.
+            # Luồng watchdog sẽ tự kết thúc ngầm. Việc join sẽ được thực hiện khi tắt app.
             logger.info(f"Stopped event-driven file watch for: {file_path_abs}")
         self._handlers.pop(file_path_abs, None)
