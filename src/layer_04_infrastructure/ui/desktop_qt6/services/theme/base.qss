@@ -367,7 +367,7 @@ QFrame#status_loading_container {
     border: none;
 }
 QLabel#status_loading_label {
-    color: {TEXT_COLOR};
+    color: {ACCENT_COLOR};
     font-size: 13px;
     font-weight: bold;
 }
