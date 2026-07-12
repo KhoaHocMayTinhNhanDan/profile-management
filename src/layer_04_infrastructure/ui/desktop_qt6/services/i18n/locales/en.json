@@ -61,6 +61,6 @@
     "status_locked": "Locked",
     "status_unlocked": "Unlocked",
     "status_viewing": "Open file",
-    "status_editing": "Editing...",
+    "status_editing": "Finish Editing",
     "status_ready": "System ready."
 }
