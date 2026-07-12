@@ -9,11 +9,11 @@ QPushButton[class="PrimaryButton"], QPushButton#primary_btn {
 }
 
 QPushButton[class="PrimaryButton"]:hover, QPushButton#primary_btn:hover {
-    background-color: {ACCENT_HOVER};
+    background-color: {PRIMARY_HOVER};
 }
 
 QPushButton[class="PrimaryButton"]:pressed, QPushButton#primary_btn:pressed {
-    background-color: {ACCENT_HOVER};
+    background-color: {PRIMARY_PRESSED};
 }
 
 QPushButton[class="SecondaryButton"], QPushButton#secondary_btn {
@@ -49,11 +49,11 @@ QPushButton[class="DangerButton"], QPushButton#danger_btn {
 }
 
 QPushButton[class="DangerButton"]:hover, QPushButton#danger_btn:hover {
-    background-color: #ef4444;
+    background-color: {ERROR_HOVER};
 }
 
 QPushButton[class="DangerButton"]:pressed, QPushButton#danger_btn:pressed {
-    background-color: #dc2626;
+    background-color: {ERROR_PRESSED};
 }
 
 QPushButton[class="NavButton"] {
@@ -91,11 +91,11 @@ QPushButton[class="IconButton"] {
 }
 
 QPushButton[class="IconButton"]:hover {
-    background-color: rgba(137, 180, 250, 0.12);
+    background-color: {SECONDARY_HOVER};
 }
 
 QPushButton[class="IconButton"]:pressed {
-    background-color: rgba(137, 180, 250, 0.2);
+    background-color: {SECONDARY_PRESSED};
 }
 
 QPushButton[class="TertiaryButton"] {
@@ -121,8 +121,8 @@ QPushButton {
 }
 
 QPushButton:disabled {
-    background-color: rgba(49, 50, 68, 0.38);
-    color: rgba(205, 214, 244, 0.38);
+    background-color: {DISABLED_BG};
+    color: {DISABLED_TEXT};
     border: 1px solid transparent;
 }
 

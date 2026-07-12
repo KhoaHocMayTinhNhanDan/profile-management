@@ -36,9 +36,9 @@ QComboBox QAbstractItemView {
 }
 
 QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QComboBox:disabled {
-    background-color: rgba(17, 17, 27, 0.38);
-    color: rgba(205, 214, 244, 0.38);
-    border: {BORDER_WIDTH} solid rgba(49, 50, 68, 0.38);
+    background-color: {DISABLED_BG};
+    color: {DISABLED_TEXT};
+    border: {BORDER_WIDTH} solid {DISABLED_BORDER};
 }
 
 /* Constrained inputs inside Table cells */

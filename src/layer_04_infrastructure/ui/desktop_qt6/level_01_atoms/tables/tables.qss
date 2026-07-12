@@ -20,7 +20,7 @@ QTableWidget::item:hover, QTableView::item:hover {
 }
 
 QTableWidget::item:selected, QTableView::item:selected {
-    background-color: rgba(137, 180, 250, 0.15); /* Accent color with opacity */
+    background-color: {SELECTED_BG};
     color: {ACCENT_COLOR};
 }
 
