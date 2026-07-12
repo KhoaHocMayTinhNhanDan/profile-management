@@ -193,14 +193,12 @@ class CreateProfilePage(BasePageTemplate):
     @pyqtSlot(str)
     def _on_profile_created(self, p_id: str):
         msg = f"✓ Đã khởi tạo hồ sơ '{p_id}' và tự động sinh các tài liệu thành công!"
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "show_status_message"):
-            main_win.show_status_message(msg, "success", 5000)
+        self.show_status_message(msg, "success", 5000)
         self._go_back()
 
     @pyqtSlot(str)
     def _on_error(self, err_msg: str):
-        QMessageBox.critical(self, "Lỗi hệ thống", f"Không thể lưu hồ sơ: {err_msg}")
+        self.show_error_message("Lỗi hệ thống", f"Không thể lưu hồ sơ: {err_msg}")
 
     def retranslate_ui(self, lang_code: str):
         self.lbl_profile_id.setText(self.i18n_manager.translate("lbl_profile_id_input"))

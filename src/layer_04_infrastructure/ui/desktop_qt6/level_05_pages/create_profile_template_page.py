@@ -708,14 +708,12 @@ class CreateProfileTemplatePage(BasePageTemplate):
     @pyqtSlot(str)
     def _on_template_saved(self, t_name: str):
         msg = f"✓ Đã lưu mẫu hồ sơ '{t_name}' thành công!"
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "show_status_message"):
-            main_win.show_status_message(msg, "success", 5000)
+        self.show_status_message(msg, "success", 5000)
         self._go_back()
 
     @pyqtSlot(str)
     def _on_error(self, err_msg: str):
-        QMessageBox.critical(self, "Lỗi hệ thống", f"Không thể lưu mẫu: {err_msg}")
+        self.show_error_message("Lỗi hệ thống", f"Không thể lưu mẫu: {err_msg}")
 
     def retranslate_ui(self, lang_code: str):
         self.lbl_id.setText(self.i18n_manager.translate("lbl_template_id_input"))

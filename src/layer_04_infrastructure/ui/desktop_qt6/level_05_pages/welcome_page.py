@@ -344,14 +344,12 @@ class WelcomePage(BasePageTemplate):
     def _on_template_deleted(self, template_id: str):
         del_name = getattr(self, "_deleting_template_name", template_id)
         msg = f"✓ Đã xóa mẫu hồ sơ '{del_name}' khỏi hệ thống thành công!"
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "show_status_message"):
-            main_win.show_status_message(msg, "success", 5000)
+        self.show_status_message(msg, "success", 5000)
         self.use_welcome_data.load_data()
 
     @pyqtSlot(str)
     def _on_error(self, err_msg: str):
-        QMessageBox.critical(self, "Lỗi hệ thống", err_msg)
+        self.show_error_message("Lỗi hệ thống", err_msg)
 
     def retranslate_ui(self, lang_code: str):
         self.total_profiles_card.title_label.setText(

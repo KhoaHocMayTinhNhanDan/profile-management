@@ -198,24 +198,22 @@ class DocumentManagerPage(BasePageTemplate):
 
     @pyqtSlot(str)
     def _on_profile_error(self, err_msg: str):
-        QMessageBox.critical(self, "Lỗi Nghiệp Vụ", err_msg)
+        self.show_error_message("Lỗi Nghiệp Vụ", err_msg)
 
     @pyqtSlot(int, int)
     def _on_generate_finished(self, success_count: int, total_count: int):
         if success_count > 0:
             msg = f"✓ Sinh tài liệu thành công: {success_count}/{total_count} file đã được đồng bộ!"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "show_status_message"):
-                main_win.show_status_message(msg, "success", 5000)
+            self.show_status_message(msg, "success", 5000)
         else:
-            QMessageBox.critical(
-                self, "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
+            self.show_error_message(
+                "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
             )
         self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_generate_error(self, err_msg: str):
-        QMessageBox.critical(self, "Lỗi Sinh Tài Liệu", err_msg)
+        self.show_error_message("Lỗi Sinh Tài Liệu", err_msg)
         self.use_update_profile.load_profile(self.profile_id)
 
     def _render_documents(self, docs: list):
@@ -271,34 +269,30 @@ class DocumentManagerPage(BasePageTemplate):
     @pyqtSlot(dict)
     def _on_checkout_success(self, res: dict):
         local_name = res.get("local_filename", "")
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "show_status_message"):
-            main_win.show_status_message(
-                f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
-                "info",
-                9000,
-            )
+        self.show_status_message(
+            f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
+            "info",
+            9000,
+        )
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_checkout_error(self, error_msg: str):
-        QMessageBox.critical(self, "Lỗi Khóa Tài Liệu", error_msg)
+        self.show_error_message("Lỗi Khóa Tài Liệu", error_msg)
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(dict)
     def _on_checkin_success(self, res: dict):
         msg = f"✓ Tự động đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "show_status_message"):
-            main_win.show_status_message(msg, "success", 6000)
+        self.show_status_message(msg, "success", 6000)
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_checkin_error(self, error_msg: str):
-        QMessageBox.critical(self, "Lỗi Đồng Bộ", error_msg)
+        self.show_error_message("Lỗi Đồng Bộ", error_msg)
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 

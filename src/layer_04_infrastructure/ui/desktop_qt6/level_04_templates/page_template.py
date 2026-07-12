@@ -65,3 +65,29 @@ class BasePageTemplate(QWidget):
         main_win: Any = self.window()
         if main_win is not None and hasattr(main_win, "switch_page"):
             main_win.switch_page("welcome")
+
+    def show_status_message(
+        self, message: str, status_type: str = "info", timeout: int = 5000
+    ):
+        """
+        Hiển thị thông báo trạng thái lên thanh trạng thái (StatusBar) thông qua MainWindow.
+        """
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "show_status_message"):
+            main_win.show_status_message(message, status_type, timeout)
+
+    def show_error_message(self, title: str, message: str):
+        """
+        Hiển thị hộp thoại cảnh báo lỗi (QMessageBox).
+        """
+        from PyQt6.QtWidgets import QMessageBox
+
+        QMessageBox.critical(self, title, message)
+
+    def show_info_message(self, title: str, message: str):
+        """
+        Hiển thị hộp thoại thông báo thông tin (QMessageBox).
+        """
+        from PyQt6.QtWidgets import QMessageBox
+
+        QMessageBox.information(self, title, message)
