@@ -20,7 +20,7 @@ class DynamicForm(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.form_layout = QFormLayout(self)
-        self.form_layout.setSpacing(10)
+        self.form_layout.setSpacing(12)
         self.form_layout.setContentsMargins(0, 0, 0, 0)
         self.widgets_map = {}  # f_name -> (widget, f_type, required, f_label)
 

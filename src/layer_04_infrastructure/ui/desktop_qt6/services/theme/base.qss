@@ -226,7 +226,7 @@ QFrame#settings_container {
     background-color: {CARD_BG};
     border: {BORDER_WIDTH} solid {BORDER_COLOR};
     border-radius: {RADIUS};
-    padding: 6px;
+    padding: 8px;
 }
 
 /* --- Table Widget Styling --- */
@@ -251,7 +251,7 @@ QTableWidget::item:selected, QTableView::item:selected {
 QHeaderView::section {
     background-color: {SIDEBAR_BG};
     color: {TEXT_COLOR};
-    padding: 6px;
+    padding: 8px;
     border: 1px solid {BORDER_COLOR};
     font-weight: bold;
 }

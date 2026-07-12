@@ -59,7 +59,7 @@ class DocumentManagerPage(BasePageTemplate):
 
         # Main horizontal split layout
         self.main_split_layout = QHBoxLayout()
-        self.main_split_layout.setSpacing(15)
+        self.main_split_layout.setSpacing(16)
 
         # ----------------- LEFT PANEL: PROFILE INFO & DYNAMIC INPUTS -----------------
         self.left_panel = CardContainer(self)

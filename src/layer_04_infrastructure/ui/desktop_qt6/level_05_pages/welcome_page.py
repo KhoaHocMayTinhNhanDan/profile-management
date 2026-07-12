@@ -103,8 +103,8 @@ class WelcomePage(BasePageTemplate):
 
         # Pagination Layout under self.table
         self.pagination_layout = QHBoxLayout()
-        self.pagination_layout.setContentsMargins(0, 5, 0, 5)
-        self.pagination_layout.setSpacing(15)
+        self.pagination_layout.setContentsMargins(0, 8, 0, 8)
+        self.pagination_layout.setSpacing(16)
 
         from ..level_01_atoms.buttons import SecondaryButton
 
@@ -246,8 +246,8 @@ class WelcomePage(BasePageTemplate):
             # Action buttons: Edit, Open folder & Delete template
             actions_widget = QWidget()
             actions_lay = QHBoxLayout(actions_widget)
-            actions_lay.setContentsMargins(4, 2, 4, 2)
-            actions_lay.setSpacing(6)
+            actions_lay.setContentsMargins(8, 8, 8, 8)
+            actions_lay.setSpacing(8)
 
             from ..level_01_atoms.buttons import SecondaryButton, DangerButton
 

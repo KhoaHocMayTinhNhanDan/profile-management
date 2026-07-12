@@ -164,7 +164,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
 
         v_hdr = self.table.verticalHeader()
         if v_hdr is not None:
-            v_hdr.setDefaultSectionSize(42)
+            v_hdr.setDefaultSectionSize(40)
 
         left_layout.addWidget(self.table)
 
@@ -208,7 +208,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
 
         f_v_hdr = self.files_table.verticalHeader()
         if f_v_hdr is not None:
-            f_v_hdr.setDefaultSectionSize(42)
+            f_v_hdr.setDefaultSectionSize(40)
 
         self.files_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         right_layout.addWidget(self.files_table)
@@ -322,8 +322,8 @@ class CreateProfileTemplatePage(BasePageTemplate):
             # Action buttons widget
             actions_widget = QWidget()
             actions_lay = QHBoxLayout(actions_widget)
-            actions_lay.setContentsMargins(4, 2, 4, 2)
-            actions_lay.setSpacing(6)
+            actions_lay.setContentsMargins(8, 8, 8, 8)
+            actions_lay.setSpacing(8)
 
             from ..level_01_atoms.buttons import SecondaryButton, DangerButton
 
@@ -442,7 +442,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
         # 5. Actions Layout (Delete button only)
         actions_widget = QWidget()
         actions_lay = QHBoxLayout(actions_widget)
-        actions_lay.setContentsMargins(4, 2, 4, 2)
+        actions_lay.setContentsMargins(8, 8, 8, 8)
         actions_lay.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         from ..level_01_atoms.buttons import DangerButton

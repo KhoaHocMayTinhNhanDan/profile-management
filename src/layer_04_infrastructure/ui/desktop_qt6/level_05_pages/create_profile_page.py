@@ -39,7 +39,7 @@ class CreateProfilePage(BasePageTemplate):
 
         # Header Layout
         self.header_lay = QFormLayout()
-        self.header_lay.setSpacing(10)
+        self.header_lay.setSpacing(12)
 
         from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
         from ..level_01_atoms.inputs import FormLineEdit, FormComboBox

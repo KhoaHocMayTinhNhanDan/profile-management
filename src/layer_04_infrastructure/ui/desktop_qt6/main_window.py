@@ -60,8 +60,8 @@ class MainWindow(QMainWindow):
         self.status_loading_widget.setObjectName("status_loading_container")
 
         status_layout = QHBoxLayout(self.status_loading_widget)
-        status_layout.setContentsMargins(5, 0, 5, 0)
-        status_layout.setSpacing(10)
+        status_layout.setContentsMargins(8, 0, 8, 0)
+        status_layout.setSpacing(12)
         status_layout.setSizeConstraint(QHBoxLayout.SizeConstraint.SetFixedSize)
 
         self.status_loading_label = QLabel("Đang xử lý, vui lòng chờ...")
@@ -100,8 +100,8 @@ class MainWindow(QMainWindow):
         sidebar_frame.setObjectName("sidebar")
         sidebar_frame.setFixedWidth(200)
         sidebar_layout = QVBoxLayout(sidebar_frame)
-        sidebar_layout.setContentsMargins(10, 20, 10, 20)
-        sidebar_layout.setSpacing(15)
+        sidebar_layout.setContentsMargins(12, 24, 12, 24)
+        sidebar_layout.setSpacing(16)
 
         # App Title in Sidebar
         title_lbl = QLabel("HỒ SƠ ĐƠN VỊ")
