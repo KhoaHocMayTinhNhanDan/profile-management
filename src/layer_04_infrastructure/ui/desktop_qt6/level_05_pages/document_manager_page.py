@@ -477,12 +477,13 @@ class DocumentManagerPage(BasePageTemplate):
         self.refresh_documents()
 
     def refresh_dynamic_inputs(self):
-        # Clear previous layout widgets
-        for i in reversed(range(self.info_form_layout.count())):
-            item = self.info_form_layout.itemAt(i)
+        # Clear previous layout widgets safely
+        while self.info_form_layout.count() > 0:
+            item = self.info_form_layout.takeAt(0)
             if item is not None:
                 w = item.widget()
                 if w is not None:
+                    w.setParent(None)
                     w.deleteLater()
         self.info_widgets_map = {}
 

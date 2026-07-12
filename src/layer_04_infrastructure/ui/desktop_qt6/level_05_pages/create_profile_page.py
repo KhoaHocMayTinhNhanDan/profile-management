@@ -107,12 +107,13 @@ class CreateProfilePage(BasePageTemplate):
             )
 
     def _on_template_changed(self, idx):
-        # Clear previous layout widgets
-        for i in reversed(range(self.form_layout.count())):
-            item = self.form_layout.itemAt(i)
+        # Clear previous layout widgets safely
+        while self.form_layout.count() > 0:
+            item = self.form_layout.takeAt(0)
             if item is not None:
                 w = item.widget()
                 if w is not None:
+                    w.setParent(None)
                     w.deleteLater()
         self.widgets_map = {}
 
