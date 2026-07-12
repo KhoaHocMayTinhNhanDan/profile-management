@@ -17,7 +17,7 @@ QPushButton[class="PrimaryButton"]:pressed, QPushButton#primary_btn:pressed {
 }
 
 QPushButton[class="SecondaryButton"], QPushButton#secondary_btn {
-    background-color: rgba(30, 41, 59, 0.4);
+    background-color: transparent;
     color: {ACCENT_COLOR};
     border: 1px solid {BORDER_COLOR};
     border-radius: {RADIUS};
