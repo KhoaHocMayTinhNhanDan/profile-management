@@ -225,21 +225,56 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
     w_ns = nsmap["w"]
 
     def process_paragraph(p):
-        # 1. Clean split runs first by merging if needed
+        import copy
+
+        # 1. Clean split runs first by merging ONLY the split placeholder runs
         for field in fields:
             pattern = re.compile(r"\{\{\s*" + re.escape(field) + r"\s*\}\}")
             if pattern.search(p.text):
                 has_single_run = False
                 for run in p.runs:
-                    if pattern.search(run.text):
+                    if pattern.search(run.text or ""):
                         has_single_run = True
                         break
                 if not has_single_run:
-                    if len(p.runs) > 1:
-                        full_text = "".join([r.text for r in p.runs])
-                        p.runs[0].text = full_text
-                        for r in p.runs[1:]:
-                            r.text = ""
+                    n = len(p.runs)
+                    found_range = False
+                    for start_idx in range(n):
+                        for end_idx in range(start_idx, n):
+                            joined_text = "".join(
+                                [
+                                    p.runs[k].text or ""
+                                    for k in range(start_idx, end_idx + 1)
+                                ]
+                            )
+                            if pattern.search(joined_text):
+                                # Found the split sequence! Get style run containing field name
+                                style_run = p.runs[start_idx]
+                                for k in range(start_idx, end_idx + 1):
+                                    r_text = p.runs[k].text or ""
+                                    if field in r_text:
+                                        style_run = p.runs[k]
+                                        break
+
+                                p.runs[start_idx].text = joined_text
+                                for k in range(start_idx + 1, end_idx + 1):
+                                    p.runs[k].text = ""
+
+                                if p.runs[start_idx] != style_run:
+                                    rPr = style_run._r.find(f"{{{w_ns}}}rPr")
+                                    if rPr is not None:
+                                        existing_rPr = p.runs[start_idx]._r.find(
+                                            f"{{{w_ns}}}rPr"
+                                        )
+                                        if existing_rPr is not None:
+                                            p.runs[start_idx]._r.remove(existing_rPr)
+                                        p.runs[start_idx]._r.insert(
+                                            0, copy.deepcopy(rPr)
+                                        )
+                                found_range = True
+                                break
+                        if found_range:
+                            break
 
         # 2. Find and replace with Content Controls
         runs = p.runs
@@ -279,11 +314,19 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
                         sdt, f"{{{w_ns}}}sdtContent", nsmap=nsmap
                     )
                     r_node = etree.SubElement(sdtContent, f"{{{w_ns}}}r", nsmap=nsmap)
+
+                    # Copy run properties from the matched run to the sdt Content run
+                    run_el = getattr(run, "_r", None)
+                    rPr = None
+                    if run_el is not None:
+                        rPr = run_el.find(f"{{{w_ns}}}rPr")
+                        if rPr is not None:
+                            r_node.append(copy.deepcopy(rPr))
+
                     t_node = etree.SubElement(r_node, f"{{{w_ns}}}t", nsmap=nsmap)
                     t_node.text = f"[{field}]"
 
                     # Insert sdt after current run in paragraph XML element
-                    run_el = getattr(run, "_r", None)
                     if run_el is not None:
                         parent = run_el.getparent()
                         if parent is not None:
@@ -292,6 +335,8 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
 
                             if suffix:
                                 new_r_el = etree.Element(f"{{{w_ns}}}r", nsmap=nsmap)
+                                if rPr is not None:
+                                    new_r_el.append(copy.deepcopy(rPr))
                                 new_t_el = etree.SubElement(
                                     new_r_el, f"{{{w_ns}}}t", nsmap=nsmap
                                 )
