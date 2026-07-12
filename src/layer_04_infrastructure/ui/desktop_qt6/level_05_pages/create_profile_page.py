@@ -202,14 +202,6 @@ class CreateProfilePage(BasePageTemplate):
     def _on_error(self, err_msg: str):
         QMessageBox.critical(self, "Lỗi hệ thống", f"Không thể lưu hồ sơ: {err_msg}")
 
-    def _go_back(self):
-        main_win: Any = self.window()
-        if main_win is not None and hasattr(main_win, "switch_page"):
-            welcome = main_win.pages_map.get("welcome")
-            if welcome is not None and hasattr(welcome, "use_welcome_data"):
-                welcome.use_welcome_data.load_data()
-            main_win.switch_page("welcome")
-
     def retranslate_ui(self, lang_code: str):
         self.lbl_profile_id.setText(self.i18n_manager.translate("lbl_profile_id_input"))
         self.lbl_select_template.setText(

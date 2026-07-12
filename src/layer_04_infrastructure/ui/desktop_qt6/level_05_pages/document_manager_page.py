@@ -377,14 +377,6 @@ class DocumentManagerPage(BasePageTemplate):
         # Trigger asynchronous generation via hook!
         self.use_generate.generate_documents(reqs)
 
-    def _go_back(self):
-        main_win: Any = self.window()
-        if main_win is not None and hasattr(main_win, "switch_page"):
-            welcome = main_win.pages_map.get("welcome")
-            if welcome is not None and hasattr(welcome, "refresh_data"):
-                welcome.refresh_data()
-            main_win.switch_page("welcome")
-
     def retranslate_ui(self, lang_code: str):
         self.lbl_subtitle.setText(
             self.i18n_manager.translate("lbl_profile_subtitle") + f": {self.profile_id}"

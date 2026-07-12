@@ -57,3 +57,11 @@ class BasePageTemplate(QWidget):
             self.setEnabled(True)
             if main_win and hasattr(main_win, "set_loading"):
                 main_win.set_loading(False)
+
+    def _go_back(self):
+        """
+        Quay lại trang chủ (welcome page) bằng cách gọi switch_page của MainWindow.
+        """
+        main_win: Any = self.window()
+        if main_win is not None and hasattr(main_win, "switch_page"):
+            main_win.switch_page("welcome")
