@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QMetaObject, Q_ARG, pyqtSlot
 from typing import Any
 from src.shared.logger.app_logger import get_logger
+from ..level_01_atoms.containers import CardContainer
 from ..level_04_templates.page_template import BasePageTemplate
 from ..hooks.use_checkout_document import UseCheckoutDocument
 from ..hooks.use_checkin_document import UseCheckinDocument
@@ -60,10 +61,8 @@ class DocumentManagerPage(BasePageTemplate):
         self.main_split_layout.setSpacing(15)
 
         # ----------------- LEFT PANEL: PROFILE INFO & DYNAMIC INPUTS -----------------
-        self.left_panel = QWidget()
-        self.left_layout = QVBoxLayout(self.left_panel)
-        self.left_layout.setContentsMargins(0, 0, 0, 0)
-        self.left_layout.setSpacing(10)
+        self.left_panel = CardContainer(self)
+        self.left_layout = self.left_panel.container_layout
 
         self.lbl_info_title = QLabel("Thông tin biểu mẫu")
         self.lbl_info_title.setObjectName("table_title_lbl")
@@ -91,10 +90,8 @@ class DocumentManagerPage(BasePageTemplate):
         self.left_layout.addWidget(self.btn_save_info)
 
         # ----------------- RIGHT PANEL: ACTIONS & DOCUMENTS TABLE -----------------
-        self.right_panel = QWidget()
-        self.right_layout = QVBoxLayout(self.right_panel)
-        self.right_layout.setContentsMargins(0, 0, 0, 0)
-        self.right_layout.setSpacing(10)
+        self.right_panel = CardContainer(self)
+        self.right_layout = self.right_panel.container_layout
 
         # Subtitle
         self.lbl_subtitle = QLabel(

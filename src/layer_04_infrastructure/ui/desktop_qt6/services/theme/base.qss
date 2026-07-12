@@ -63,15 +63,6 @@ QScrollArea {
 QScrollArea > QWidget > QWidget {
     background-color: transparent;
 }
-QScrollArea#profile_info_scroll, QScrollArea#profile_info_scroll > QWidget {
-    background-color: {CARD_BG};
-    border: 1px solid {BORDER_COLOR};
-    border-radius: {RADIUS};
-}
-QScrollArea#profile_info_scroll QWidget {
-    background-color: transparent;
-    border: none;
-}
 
 /* --- Atom Buttons --- */
 QPushButton[class="PrimaryButton"], QPushButton#primary_btn {
@@ -485,4 +476,16 @@ QMenu::separator {
     height: 1px;
     background-color: {BORDER_COLOR};
     margin: 4px 0px;
+}
+
+/* Container Atoms Styling */
+QFrame[class="CardContainer"] {
+    background-color: {CARD_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+}
+QFrame[class="PanelContainer"] {
+    background-color: {SIDEBAR_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
 }

@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QDate, pyqtSlot, Qt
 from src.shared.logger.app_logger import get_logger
+from ..level_01_atoms.containers import CardContainer
 from ..level_04_templates.page_template import BasePageTemplate
 from ..hooks.use_create_profile import UseCreateProfile
 import os
@@ -31,6 +32,9 @@ class CreateProfilePage(BasePageTemplate):
         self.use_create_profile.profile_created.connect(self._on_profile_created)
         self.use_create_profile.loading.connect(self._set_loading)
         self.use_create_profile.error.connect(self._on_error)
+
+        # Wrapper Card Container
+        self.card = CardContainer(self)
 
         # Header Layout
         self.header_lay = QFormLayout()
@@ -55,7 +59,7 @@ class CreateProfilePage(BasePageTemplate):
         )
         self.header_lay.addRow(self.lbl_select_template, self.cbo_template)
 
-        self.content_layout.addLayout(self.header_lay)
+        self.card.addLayout(self.header_lay)
 
         # Dynamic inputs area
         self.form_widget = QWidget()
@@ -65,7 +69,9 @@ class CreateProfilePage(BasePageTemplate):
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.form_widget)
-        self.content_layout.addWidget(self.scroll_area)
+        self.card.addWidget(self.scroll_area)
+
+        self.content_layout.addWidget(self.card)
 
         # Buttons
         self.buttons_lay = QHBoxLayout()

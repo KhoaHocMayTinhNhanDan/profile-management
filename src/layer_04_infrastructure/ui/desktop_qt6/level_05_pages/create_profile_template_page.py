@@ -28,6 +28,7 @@ from typing import Any
 logger = get_logger(__name__)
 
 
+from ..level_01_atoms.containers import CardContainer
 from ..level_01_atoms.labels import ClickableLabel
 
 
@@ -85,10 +86,8 @@ class CreateProfileTemplatePage(BasePageTemplate):
         split_layout.setSpacing(20)
 
         # --- LEFT COLUMN (Configs & Fields table) ---
-        left_widget = QWidget()
-        left_layout = QVBoxLayout(left_widget)
-        left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.setSpacing(15)
+        left_widget = CardContainer(self)
+        left_layout = left_widget.container_layout
 
         # Config Form Grid
         self.grid = QGridLayout()
@@ -172,10 +171,8 @@ class CreateProfileTemplatePage(BasePageTemplate):
         left_layout.addWidget(self.table)
 
         # --- RIGHT COLUMN (Template files management) ---
-        right_widget = QWidget()
-        right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(10)
+        right_widget = CardContainer(self)
+        right_layout = right_widget.container_layout
 
         # Scanned files list title & action button
         self.files_header_layout = QHBoxLayout()
