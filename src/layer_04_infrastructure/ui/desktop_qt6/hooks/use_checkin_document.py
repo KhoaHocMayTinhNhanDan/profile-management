@@ -82,7 +82,14 @@ class UseCheckinDocument(QObject):
         if hasattr(self, "_async_helper"):
             self._async_helper.cleanup()
         # QFileSystemWatcher tự động giải phóng khi parent bị hủy,
-        # nhưng chúng ta vẫn chủ động gỡ bỏ các thư mục theo dõi
-        for dir_path in list(self.watcher._watch_configs.keys()):
-            self.watcher._watcher.removePath(dir_path)
+        # nhưng chúng ta vẫn chủ động gỡ bỏ các thư mục và file đang theo dõi
+        for config in list(self.watcher._watch_configs.values()):
+            try:
+                self.watcher._watcher.removePath(config["dir_path"])
+            except Exception:
+                pass
+            try:
+                self.watcher._watcher.removePath(config["file_path"])
+            except Exception:
+                pass
         self.watcher._watch_configs.clear()

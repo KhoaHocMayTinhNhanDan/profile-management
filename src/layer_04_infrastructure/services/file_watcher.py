@@ -12,15 +12,20 @@ class FileWatcherService(QObject):
     Dịch vụ theo dõi file sử dụng QFileSystemWatcher của PyQt6.
     Không tạo thêm luồng phụ (no threading/QThread), loại bỏ hoàn toàn mọi rủi ro
     deadlock, rò rỉ bộ nhớ luồng, và hoàn toàn tích hợp vào Qt Event Loop gốc.
+
+    Cơ chế giám sát kép (Dual-Watching):
+    - Giám sát thư mục chứa (Directory Watch): Bắt sự kiện xóa/đổi tên tạm thời khi MS Word thực hiện save (safe-save).
+    - Giám sát tệp tin trực tiếp (File Watch): Bắt sự kiện ghi đè trực tiếp (in-place write) của các phần mềm khác (Notepad, VS Code...).
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._watcher = QFileSystemWatcher(self)
-        self._watcher.directoryChanged.connect(self._on_directory_changed)
+        self._watcher.directoryChanged.connect(self._on_path_changed)
+        self._watcher.fileChanged.connect(self._on_path_changed)
 
-        # Cấu hình theo dõi: dir_path -> list of config dicts
-        self._watch_configs: Dict[str, list] = {}
+        # Cấu hình theo dõi: file_path_abs -> config dict
+        self._watch_configs: Dict[str, dict] = {}
 
     def _get_file_hash(self, file_path: str) -> str:
         if not os.path.exists(file_path):
@@ -68,50 +73,72 @@ class FileWatcherService(QObject):
 
         config = {
             "file_path": file_path_abs,
+            "dir_path": dir_to_watch,
             "word_lock_path": word_lock_path,
             "libre_lock_path": libre_lock_path,
             "on_change": on_change,
             "triggered": False,
         }
 
-        if dir_to_watch not in self._watch_configs:
-            self._watch_configs[dir_to_watch] = []
+        # Đăng ký giám sát kép với QFileSystemWatcher
+        try:
             self._watcher.addPath(dir_to_watch)
+            if os.path.exists(file_path_abs):
+                self._watcher.addPath(file_path_abs)
+        except Exception as e:
+            logger.error(f"Error registering paths to QFileSystemWatcher: {e}")
 
-        self._watch_configs[dir_to_watch].append(config)
+        self._watch_configs[file_path_abs] = config
         logger.info(
-            f"Started native QFileSystemWatcher for directory: {dir_to_watch} (file: {base_name})"
+            f"Started dual-watching native QFileSystemWatcher for: {file_path_abs}"
         )
 
     def stop_watching(self, file_path: str):
         file_path_abs = os.path.abspath(file_path)
-        dir_path = os.path.dirname(file_path_abs)
+        config = self._watch_configs.pop(file_path_abs, None)
+        if config:
+            dir_path = config["dir_path"]
 
-        if dir_path in self._watch_configs:
-            self._watch_configs[dir_path] = [
-                c
-                for c in self._watch_configs[dir_path]
-                if c["file_path"] != file_path_abs
-            ]
-            if not self._watch_configs[dir_path]:
-                self._watch_configs.pop(dir_path)
-                self._watcher.removePath(dir_path)
-                logger.info(
-                    f"Stopped native QFileSystemWatcher for directory: {dir_path}"
-                )
+            # Kiểm tra xem có file nào khác đang cần giám sát thư mục này không
+            dir_still_needed = any(
+                c["dir_path"] == dir_path for c in self._watch_configs.values()
+            )
+            if not dir_still_needed:
+                try:
+                    self._watcher.removePath(dir_path)
+                except Exception:
+                    pass
+
+            # Kiểm tra xem file này có còn cần giám sát trực tiếp không
+            file_still_needed = any(
+                c["file_path"] == file_path_abs for c in self._watch_configs.values()
+            )
+            if not file_still_needed:
+                try:
+                    self._watcher.removePath(file_path_abs)
+                except Exception:
+                    pass
+
+            logger.info(
+                f"Stopped dual-watching native QFileSystemWatcher for: {file_path_abs}"
+            )
 
     @pyqtSlot(str)
-    def _on_directory_changed(self, path: str):
-        dir_path = os.path.abspath(path)
-        if dir_path not in self._watch_configs:
-            return
+    def _on_path_changed(self, path: str):
+        changed_path = os.path.abspath(path)
 
-        # Sử dụng list() để copy danh sách cấu hình, tránh lỗi sửa đổi list khi đang lặp (RuntimeError)
-        # do hàm callback on_change có thể gọi stop_watching làm thay đổi size của list.
-        for config in list(self._watch_configs[dir_path]):
+        # Lọc danh sách các cấu hình cần kiểm tra dựa trên đường dẫn thay đổi
+        configs_to_check = []
+        for config in list(self._watch_configs.values()):
             if config["triggered"]:
                 continue
+            if (
+                config["file_path"] == changed_path
+                or config["dir_path"] == changed_path
+            ):
+                configs_to_check.append(config)
 
+        for config in configs_to_check:
             # Kiểm tra xem các file khóa tạm thời còn tồn tại không
             has_lock = os.path.exists(config["word_lock_path"]) or os.path.exists(
                 config["libre_lock_path"]
@@ -123,6 +150,8 @@ class FileWatcherService(QObject):
 
                     new_hash = self._get_file_hash(file_path)
                     size = os.path.getsize(file_path)
-                    logger.info(f"QFileSystemWatcher trigger fired for: {file_path}")
+                    logger.info(
+                        f"QFileSystemWatcher trigger fired for: {file_path} (via change on: {changed_path})"
+                    )
                     # Gọi callback trực tiếp trên main thread
                     config["on_change"](file_path, size, new_hash)
