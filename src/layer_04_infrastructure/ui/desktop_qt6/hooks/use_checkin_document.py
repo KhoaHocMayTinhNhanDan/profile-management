@@ -22,7 +22,7 @@ class UseCheckinDocument(QObject):
     def __init__(self, context, parent=None):
         super().__init__(parent)
         self._controller = context.container.resolve(CheckinDocumentController)
-        self.watcher = FileWatcherService()
+        self.watcher = FileWatcherService(self)
         self._async_helper = UseAsync(self)
         self._async_helper.loading.connect(self.loading.emit)
         self._async_helper.finished.connect(self._on_async_finished)
@@ -81,8 +81,8 @@ class UseCheckinDocument(QObject):
     def cleanup(self):
         if hasattr(self, "_async_helper"):
             self._async_helper.cleanup()
-        for file_path, observer in list(self.watcher._observers.items()):
-            observer.stop()
-            observer.join(timeout=1.0)
-        self.watcher._observers.clear()
-        self.watcher._handlers.clear()
+        # QFileSystemWatcher tự động giải phóng khi parent bị hủy,
+        # nhưng chúng ta vẫn chủ động gỡ bỏ các thư mục theo dõi
+        for dir_path in list(self.watcher._watch_configs.keys()):
+            self.watcher._watcher.removePath(dir_path)
+        self.watcher._watch_configs.clear()
