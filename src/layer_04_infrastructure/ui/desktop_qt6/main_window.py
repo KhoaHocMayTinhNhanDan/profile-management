@@ -85,6 +85,8 @@ class MainWindow(QMainWindow):
             }
         """)
 
+        # Add stretch to push text and progress bar close to each other on the right
+        status_layout.addStretch(1)
         status_layout.addWidget(self.status_loading_label)
         status_layout.addWidget(self.status_progress_bar)
 
