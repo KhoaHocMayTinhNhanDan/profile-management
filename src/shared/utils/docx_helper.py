@@ -25,6 +25,14 @@ def fill_document_content_controls(
                     "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val"
                 )
                 if tag_val and tag_val in data:
+                    # Remove showingPlc flag to let MS Word render normal run formatting
+                    sdtPr_elems = sdt.xpath(".//*[local-name()='sdtPr']")
+                    if sdtPr_elems:
+                        sdtPr = sdtPr_elems[0]
+                        plc_elems = sdtPr.xpath(".//*[local-name()='showingPlc']")
+                        for plc in plc_elems:
+                            sdtPr.remove(plc)
+
                     text_elems = sdt.xpath(
                         ".//*[local-name()='sdtContent']//*[local-name()='t']"
                     )
@@ -96,7 +104,15 @@ def extract_document_content_controls(
     If a tag is present multiple times, it resolves duplicates by preferring values that
     differ from the old database value (the edited fields).
     """
+    from src.shared.logger.app_logger import get_logger
+
+    logger = get_logger(__name__)
+
+    logger.info(f"--- START EXTRACT CONTENT CONTROLS for {doc_path} ---")
+    logger.info(f"Old database dynamic_data reference: {old_data}")
+
     if not os.path.exists(doc_path):
+        logger.warning(f"File not found: {doc_path}")
         return {}
 
     doc = DocxDocument(doc_path)
@@ -121,6 +137,10 @@ def extract_document_content_controls(
                         not text_val
                         or text_val == "Click here to enter text."
                         or text_val == f"[{tag_val}]"
+                    )
+
+                    logger.info(
+                        f"Found content control tag: '{tag_val}', raw value: '{text_val}', is_placeholder: {is_placeholder}"
                     )
 
                     if not is_placeholder:
@@ -152,6 +172,10 @@ def extract_document_content_controls(
                 if f_elem is not None:
                     extract_sdt_elements(f_elem)
 
+    logger.info(
+        f"All extracted non-placeholder values before deduplication: {tag_to_values}"
+    )
+
     # Resolve duplicate values surgically
     extracted = {}
     for tag, vals in tag_to_values.items():
@@ -159,18 +183,32 @@ def extract_document_content_controls(
             continue
         if len(vals) == 1:
             extracted[tag] = vals[0]
+            logger.info(f"Tag '{tag}': Single value found: '{vals[0]}'")
         else:
             if old_data and tag in old_data:
                 old_val = str(old_data[tag]).strip()
                 # Find the value that has changed from the database record
                 new_vals = [v for v in vals if v != old_val]
+                logger.info(
+                    f"Tag '{tag}': Duplicate values: {vals}. Old DB value: '{old_val}'. Different values: {new_vals}"
+                )
                 if new_vals:
                     extracted[tag] = new_vals[0]
+                    logger.info(f"Tag '{tag}': Selected edited value: '{new_vals[0]}'")
                 else:
                     extracted[tag] = old_val
+                    logger.info(
+                        f"Tag '{tag}': No changed values, fallback to old DB value: '{old_val}'"
+                    )
             else:
                 extracted[tag] = vals[0]
+                logger.info(
+                    f"Tag '{tag}': No old data reference, fallback to first value: '{vals[0]}'"
+                )
 
+    logger.info(
+        f"--- END EXTRACT CONTENT CONTROLS. Final resolved dict: {extracted} ---"
+    )
     return extracted
 
 
