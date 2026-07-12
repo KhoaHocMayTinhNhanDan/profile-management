@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSlot
 from ..level_01_atoms.labels import HeaderLabel
+from typing import Any
 
 
 class BasePageTemplate(QWidget):
@@ -38,3 +39,21 @@ class BasePageTemplate(QWidget):
 
     def retranslate_ui(self, lang_code: str):
         pass
+
+    @pyqtSlot(bool)
+    def _set_loading(self, is_loading: bool):
+        """
+        Quản lý trạng thái tải (loading) của trang con:
+        Khóa/mở khóa trang con, thay đổi con trỏ chuột và kích hoạt spinner của MainWindow.
+        """
+        main_win: Any = self.window()
+        if is_loading:
+            self.setCursor(Qt.CursorShape.WaitCursor)
+            self.setEnabled(False)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(True)
+        else:
+            self.unsetCursor()
+            self.setEnabled(True)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(False)

@@ -218,24 +218,6 @@ class DocumentManagerPage(BasePageTemplate):
         QMessageBox.critical(self, "Lỗi Sinh Tài Liệu", err_msg)
         self.use_update_profile.load_profile(self.profile_id)
 
-    @pyqtSlot(bool)
-    def _set_loading(self, is_loading: bool):
-        main_win: Any = self.window()
-        if is_loading:
-            self.setCursor(Qt.CursorShape.WaitCursor)
-            self.btn_save_info.setEnabled(False)
-            self.btn_back.setEnabled(False)
-            self.table.setEnabled(False)
-            if main_win and hasattr(main_win, "set_loading"):
-                main_win.set_loading(True)
-        else:
-            self.unsetCursor()
-            self.btn_save_info.setEnabled(True)
-            self.btn_back.setEnabled(True)
-            self.table.setEnabled(True)
-            if main_win and hasattr(main_win, "set_loading"):
-                main_win.set_loading(False)
-
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
         for doc in docs:

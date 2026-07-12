@@ -349,22 +349,6 @@ class WelcomePage(BasePageTemplate):
             main_win.show_status_message(msg, "success", 5000)
         self.use_welcome_data.load_data()
 
-    @pyqtSlot(bool)
-    def _set_loading(self, is_loading: bool):
-        main_win: Any = self.window()
-        if is_loading:
-            self.setCursor(Qt.CursorShape.WaitCursor)
-            self.btn_create_template.setEnabled(False)
-            self.btn_create_profile.setEnabled(False)
-            if main_win and hasattr(main_win, "set_loading"):
-                main_win.set_loading(True)
-        else:
-            self.unsetCursor()
-            self.btn_create_template.setEnabled(True)
-            self.btn_create_profile.setEnabled(True)
-            if main_win and hasattr(main_win, "set_loading"):
-                main_win.set_loading(False)
-
     @pyqtSlot(str)
     def _on_error(self, err_msg: str):
         QMessageBox.critical(self, "Lỗi hệ thống", err_msg)
