@@ -442,3 +442,47 @@ QDialog QPushButton:hover, QMessageBox QPushButton:hover {
     color: {SIDEBAR_BG};
     border-color: {ACCENT_COLOR};
 }
+
+/* Menu Bar & Dropdown Menus */
+QMenuBar {
+    background-color: {SIDEBAR_BG};
+    color: {TEXT_COLOR};
+    border-bottom: 1px solid {BORDER_COLOR};
+    font-family: {FONT_FAMILY};
+    font-size: 13px;
+}
+QMenuBar::item {
+    background-color: transparent;
+    padding: 6px 12px;
+    color: {TEXT_COLOR};
+}
+QMenuBar::item:selected {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+}
+QMenuBar::item:pressed {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+}
+
+QMenu {
+    background-color: {SIDEBAR_BG};
+    color: {TEXT_COLOR};
+    border: 1px solid {BORDER_COLOR};
+    font-family: {FONT_FAMILY};
+    font-size: 13px;
+    padding: 4px 0px;
+}
+QMenu::item {
+    padding: 6px 24px;
+    color: {TEXT_COLOR};
+}
+QMenu::item:selected {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+}
+QMenu::separator {
+    height: 1px;
+    background-color: {BORDER_COLOR};
+    margin: 4px 0px;
+}
