@@ -73,5 +73,5 @@ class UseCheckinDocument(QObject):
     def cleanup(self):
         if hasattr(self, "_async_helper"):
             self._async_helper.cleanup()
-        for file_path in list(self.watcher._stop_events.keys()):
+        for file_path in list(self.watcher._observers.keys()):
             self.watcher.stop_watching(file_path)

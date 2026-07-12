@@ -1,17 +1,73 @@
 import os
 import time
-import threading
 import hashlib
-from typing import Callable
+from typing import Callable, Dict, Any
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 from src.shared.logger.app_logger import get_logger
 
 logger = get_logger(__name__)
 
 
+class FileWatchHandler(FileSystemEventHandler):
+    """
+    Handler xử lý sự kiện thay đổi file system của thư mục chứa tài liệu chỉnh sửa.
+    """
+
+    def __init__(
+        self, file_path: str, on_change: Callable[[str, int, str], None], service
+    ):
+        super().__init__()
+        self.file_path = os.path.abspath(file_path)
+        self.dir_name = os.path.dirname(self.file_path)
+        self.base_name = os.path.basename(self.file_path)
+        self.on_change = on_change
+        self.service = service
+        self.triggered = False
+
+        # Precompute file khóa tạm của Word/LibreOffice để theo dõi
+        if len(self.base_name) > 2:
+            self.word_lock_name = "~$" + self.base_name[2:]
+        else:
+            self.word_lock_name = "~$"
+        self.word_lock_path = os.path.abspath(
+            os.path.join(self.dir_name, self.word_lock_name)
+        )
+        self.libre_lock_path = os.path.abspath(
+            os.path.join(self.dir_name, ".~lock." + self.base_name + "#")
+        )
+
+    def on_any_event(self, event):
+        if self.triggered:
+            return
+
+        # Check xem các file khóa tạm thời còn tồn tại không
+        has_lock = os.path.exists(self.word_lock_path) or os.path.exists(
+            self.libre_lock_path
+        )
+        if not has_lock:
+            # File chính tồn tại và có thể ghi được (đã được giải phóng bởi editor)
+            if os.path.exists(self.file_path) and self.service._is_file_writable(
+                self.file_path
+            ):
+                self.triggered = True
+                # Chờ 0.5s để chắc chắn OS đã hoàn thành đóng file và giải phóng handle
+                time.sleep(0.5)
+                new_hash = self.service._get_file_hash(self.file_path)
+                size = os.path.getsize(self.file_path)
+                logger.info(f"File system event trigger fired for: {self.file_path}")
+                self.on_change(self.file_path, size, new_hash)
+
+
 class FileWatcherService:
+    """
+    Dịch vụ theo dõi file dựa trên sự kiện hệ điều hành (watchdog) thay vì quét định kỳ (polling).
+    Giảm thiểu tối đa CPU, loại bỏ lãng phí tài nguyên hệ thống và tối ưu trải nghiệm tương tác.
+    """
+
     def __init__(self):
-        self._watch_threads = {}
-        self._stop_events = {}
+        self._observers: Dict[str, Any] = {}
+        self._handlers: Dict[str, Any] = {}
 
     def _get_file_hash(self, file_path: str) -> str:
         if not os.path.exists(file_path):
@@ -29,118 +85,38 @@ class FileWatcherService:
             return ""
 
     def _is_file_writable(self, file_path: str) -> bool:
-        """
-        Checks if the file is writable (not locked by MS Word/Excel).
-        """
         if not os.path.exists(file_path):
             return False
         try:
-            # Try to open in append mode to check if it's locked by another process
             with open(file_path, "a+"):
                 pass
             return True
         except IOError:
             return False
 
-    def _is_editor_lock_present(self, file_path: str) -> bool:
-        dir_name = os.path.dirname(file_path)
-        base_name = os.path.basename(file_path)
-
-        # Word owner/lock file: replaces the first 2 characters of the filename with ~$
-        if len(base_name) > 2:
-            word_lock_name = "~$" + base_name[2:]
-        else:
-            word_lock_name = "~$"
-
-        word_lock = os.path.join(dir_name, word_lock_name)
-        # LibreOffice lock file e.g., .~lock.Document.docx#
-        libre_lock = os.path.join(dir_name, ".~lock." + base_name + "#")
-
-        return os.path.exists(word_lock) or os.path.exists(libre_lock)
-
-    def _watch_loop(
-        self,
-        file_path: str,
-        stop_event: threading.Event,
-        on_change: Callable[[str, int, str], None],
-    ):
-        initial_hash = self._get_file_hash(file_path)
-        last_modified = os.path.getmtime(file_path) if os.path.exists(file_path) else 0
-        seen_lock = False
-        waiting_for_lock = True
-        lock_absent_count = 0
-        import time
-
-        start_time = time.time()
-
-        logger.info(f"Started watching file: {file_path}")
-
-        while not stop_event.is_set():
-            time.sleep(0.5)
-            if not os.path.exists(file_path):
-                continue
-
-            has_lock = self._is_editor_lock_present(file_path)
-            if has_lock:
-                seen_lock = True
-                waiting_for_lock = False
-
-            # Timeout after 10 seconds waiting for lock file to appear (for non-Word editors)
-            if waiting_for_lock and (time.time() - start_time > 10.0):
-                waiting_for_lock = False
-                logger.info(
-                    f"Timeout waiting for lock file of: {file_path}. Falling back to modification time checks."
-                )
-
-            if waiting_for_lock:
-                continue
-
-            trigger = False
-            if seen_lock:
-                if has_lock:
-                    lock_absent_count = 0
-                else:
-                    lock_absent_count += 1
-                    # Debounce: require lock file to be absent for 3 consecutive checks (1.5 seconds)
-                    # to prevent premature triggers during Word's startup/temp file re-creation sequence.
-                    if lock_absent_count >= 3:
-                        trigger = True
-            else:
-                curr_modified = os.path.getmtime(file_path)
-                if curr_modified != last_modified:
-                    trigger = True
-
-            if trigger:
-                # Wait 0.5s to let the OS release any remaining handles
-                time.sleep(0.5)
-                if self._is_file_writable(file_path):
-                    new_hash = self._get_file_hash(file_path)
-                    size = os.path.getsize(file_path)
-                    logger.info(f"File watch trigger fired for: {file_path}")
-                    on_change(file_path, size, new_hash)
-                    break
-
     def start_watching(
         self, file_path: str, on_change: Callable[[str, int, str], None]
     ):
-        self.stop_watching(file_path)
+        file_path_abs = os.path.abspath(file_path)
+        self.stop_watching(file_path_abs)
 
-        stop_event = threading.Event()
-        self._stop_events[file_path] = stop_event
+        dir_to_watch = os.path.dirname(file_path_abs)
 
-        thread = threading.Thread(
-            target=self._watch_loop,
-            args=(file_path, stop_event, on_change),
-            daemon=True,
-        )
-        self._watch_threads[file_path] = thread
-        thread.start()
+        handler = FileWatchHandler(file_path_abs, on_change, self)
+        observer = Observer()
+        observer.schedule(handler, path=dir_to_watch, recursive=False)
+        observer.start()
+
+        self._observers[file_path_abs] = observer
+        self._handlers[file_path_abs] = handler
+        logger.info(f"Started event-driven file watch for: {file_path_abs}")
 
     def stop_watching(self, file_path: str):
-        if file_path in self._stop_events:
-            self._stop_events[file_path].set()
-            thread = self._watch_threads.pop(file_path, None)
-            if thread and thread != threading.current_thread():
-                thread.join(timeout=1.0)
-            self._stop_events.pop(file_path, None)
-            logger.info(f"Stopped watching file: {file_path}")
+        file_path_abs = os.path.abspath(file_path)
+        observer = self._observers.pop(file_path_abs, None)
+        if observer:
+            observer.stop()
+            # Đợi tối đa 1.0 giây để luồng phụ kết thúc an toàn
+            observer.join(timeout=1.0)
+            logger.info(f"Stopped event-driven file watch for: {file_path_abs}")
+        self._handlers.pop(file_path_abs, None)
