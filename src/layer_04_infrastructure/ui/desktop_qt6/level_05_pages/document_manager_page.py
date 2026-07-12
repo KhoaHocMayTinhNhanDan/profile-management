@@ -63,7 +63,7 @@ class DocumentManagerPage(BasePageTemplate):
         self.left_layout.setSpacing(10)
 
         self.lbl_info_title = QLabel("Thông tin biểu mẫu")
-        self.lbl_info_title.setStyleSheet("font-weight: bold; font-size: 14px;")
+        self.lbl_info_title.setObjectName("table_title_lbl")
         self.left_layout.addWidget(self.lbl_info_title)
 
         from PyQt6.QtWidgets import QScrollArea, QFormLayout
