@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QMetaObject, Q_ARG, pyqtSlot
 from typing import Any
 from src.shared.logger.app_logger import get_logger
-from ..level_01_atoms.containers import CardContainer
+from ..level_01_atoms import CardContainer, AppTable
 from ..level_04_templates.page_template import BasePageTemplate
 from ..hooks.use_checkout_document import UseCheckoutDocument
 from ..hooks.use_checkin_document import UseCheckinDocument
@@ -115,10 +115,7 @@ class DocumentManagerPage(BasePageTemplate):
         self.right_layout.addLayout(self.actions_layout)
 
         # Documents Table
-        self.table = QTableWidget()
-        v_header = self.table.verticalHeader()
-        if v_header is not None:
-            v_header.setVisible(False)
+        self.table = AppTable(self)
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
             [
@@ -132,10 +129,7 @@ class DocumentManagerPage(BasePageTemplate):
         )
         header = self.table.horizontalHeader()
         if header is not None:
-            header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.right_layout.addWidget(self.table)
 
         # Assemble main split layout

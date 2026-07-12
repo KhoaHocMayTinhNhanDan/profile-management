@@ -489,3 +489,41 @@ QFrame[class="PanelContainer"] {
     border: {BORDER_WIDTH} solid {BORDER_COLOR};
     border-radius: {RADIUS};
 }
+
+/* Table Widget Styling */
+QTableWidget {
+    background-color: transparent;
+    color: {TEXT_COLOR};
+    gridline-color: {BORDER_COLOR};
+    border: none;
+    font-family: {FONT_FAMILY};
+    font-size: 13px;
+}
+QTableWidget::item {
+    padding: 8px;
+    border-bottom: 1px solid {BORDER_COLOR};
+}
+QTableWidget::item:selected {
+    background-color: rgba(137, 180, 250, 0.15); /* Accent color with opacity */
+    color: {ACCENT_COLOR};
+}
+QTableWidget QTableCornerButton::section {
+    background-color: {SIDEBAR_BG};
+    border: none;
+    border-bottom: 2px solid {BORDER_COLOR};
+}
+
+QHeaderView::section {
+    background-color: {SIDEBAR_BG};
+    color: {SUBTEXT_COLOR};
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 2px solid {BORDER_COLOR};
+    border-right: 1px solid {BORDER_COLOR};
+    font-weight: bold;
+    font-size: 12px;
+    text-align: left;
+}
+QHeaderView::section:last {
+    border-right: none;
+}

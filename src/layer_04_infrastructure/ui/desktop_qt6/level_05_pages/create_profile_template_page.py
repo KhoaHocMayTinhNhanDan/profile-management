@@ -28,7 +28,7 @@ from typing import Any
 logger = get_logger(__name__)
 
 
-from ..level_01_atoms.containers import CardContainer
+from ..level_01_atoms import CardContainer, AppTable
 from ..level_01_atoms.labels import ClickableLabel
 
 
@@ -137,7 +137,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
         left_layout.addLayout(self.fields_header)
 
         # Table of fields (placeholders)
-        self.table = QTableWidget()
+        self.table = AppTable(self)
         self.table.setColumnCount(6)  # STT + 5 columns
         self.table.setHorizontalHeaderLabels(
             [
@@ -165,9 +165,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
         v_hdr = self.table.verticalHeader()
         if v_hdr is not None:
             v_hdr.setDefaultSectionSize(42)
-            v_hdr.setVisible(False)  # Hide default raw vertical row headers
 
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         left_layout.addWidget(self.table)
 
         # --- RIGHT COLUMN (Template files management) ---

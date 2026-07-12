@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 
 from ..level_02_molecules.stat_card import StatCard
-from ..level_01_atoms.containers import CardContainer
+from ..level_01_atoms import CardContainer, AppTable
 
 
 class WelcomePage(BasePageTemplate):
@@ -83,10 +83,7 @@ class WelcomePage(BasePageTemplate):
         self.table_label.setObjectName("table_title_lbl")
         self.profiles_card.addWidget(self.table_label)
 
-        self.table = QTableWidget()
-        v_hdr = self.table.verticalHeader()
-        if v_hdr is not None:
-            v_hdr.setVisible(False)
+        self.table = AppTable(self)
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
             [
@@ -100,10 +97,7 @@ class WelcomePage(BasePageTemplate):
         )
         p_header = self.table.horizontalHeader()
         if p_header is not None:
-            p_header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
             p_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.itemDoubleClicked.connect(self._on_row_double_clicked)
         self.profiles_card.addWidget(self.table)
 
@@ -142,7 +136,7 @@ class WelcomePage(BasePageTemplate):
         self.templates_label.setObjectName("table_title_lbl")
         self.templates_card.addWidget(self.templates_label)
 
-        self.templates_table = QTableWidget()
+        self.templates_table = AppTable(self)
         self.templates_table.setColumnCount(6)
         self.templates_table.setHorizontalHeaderLabels(
             [
@@ -156,19 +150,8 @@ class WelcomePage(BasePageTemplate):
         )
         t_header = self.templates_table.horizontalHeader()
         if t_header is not None:
-            t_header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
             t_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
             t_header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
-        self.templates_table.setSelectionBehavior(
-            QTableWidget.SelectionBehavior.SelectRows
-        )
-        self.templates_table.setEditTriggers(
-            QAbstractItemView.EditTrigger.NoEditTriggers
-        )
-        v_hdr = self.templates_table.verticalHeader()
-        if v_hdr is not None:
-            v_hdr.setDefaultSectionSize(38)
-            v_hdr.setVisible(False)
         self.templates_card.addWidget(self.templates_table)
         self.content_layout.addWidget(self.templates_card)
 
