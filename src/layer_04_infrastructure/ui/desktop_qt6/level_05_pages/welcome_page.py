@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QAbstractItemView,
     QWidget,
+    QScrollArea,
 )
 from PyQt6.QtCore import Qt, pyqtSlot
 from typing import Any
@@ -38,6 +39,18 @@ class WelcomePage(BasePageTemplate):
         self.use_welcome_data.loading.connect(self._set_loading)
         self.use_welcome_data.error.connect(self._on_error)
 
+        # Create page-level QScrollArea
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.scroll_area.setObjectName("welcome_scroll_area")
+
+        self.scroll_content = QWidget()
+        self.scroll_content.setObjectName("welcome_scroll_content")
+        self.scroll_content_layout = QVBoxLayout(self.scroll_content)
+        self.scroll_content_layout.setContentsMargins(0, 0, 0, 0)
+        self.scroll_content_layout.setSpacing(16)
+
         # Quick stats layout
         self.stats_layout = QHBoxLayout()
         self.stats_layout.setSpacing(24)
@@ -51,7 +64,7 @@ class WelcomePage(BasePageTemplate):
 
         self.stats_layout.addWidget(self.total_profiles_card)
         self.stats_layout.addWidget(self.total_templates_card)
-        self.content_layout.addLayout(self.stats_layout)
+        self.scroll_content_layout.addLayout(self.stats_layout)
 
         # Action Buttons Layout
         self.actions_layout = QHBoxLayout()
@@ -70,7 +83,7 @@ class WelcomePage(BasePageTemplate):
         self.actions_layout.addWidget(self.btn_create_template)
         self.actions_layout.addWidget(self.btn_create_profile)
         self.actions_layout.addStretch()
-        self.content_layout.addLayout(self.actions_layout)
+        self.scroll_content_layout.addLayout(self.actions_layout)
 
         # Pagination State
         self.current_page = 1
@@ -127,7 +140,7 @@ class WelcomePage(BasePageTemplate):
         self.pagination_layout.addStretch()
 
         self.profiles_card.addLayout(self.pagination_layout)
-        self.content_layout.addWidget(self.profiles_card)
+        self.scroll_content_layout.addWidget(self.profiles_card)
 
         # 2. Templates Section (Wrapped in CardContainer)
         self.templates_card = CardContainer(self)
@@ -153,7 +166,11 @@ class WelcomePage(BasePageTemplate):
             t_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
             t_header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
         self.templates_card.addWidget(self.templates_table)
-        self.content_layout.addWidget(self.templates_card)
+        self.scroll_content_layout.addWidget(self.templates_card)
+
+        # Wrap everything in scroll area and add to the main layout
+        self.scroll_area.setWidget(self.scroll_content)
+        self.content_layout.addWidget(self.scroll_area)
 
         # Connect Actions
         self.btn_create_template.clicked.connect(self._go_to_create_template)
@@ -271,6 +288,9 @@ class WelcomePage(BasePageTemplate):
             actions_lay.addWidget(btn_open)
             actions_lay.addWidget(btn_delete)
             self.templates_table.setCellWidget(row, 5, actions_widget)
+
+        self.table.adjust_height_to_contents()
+        self.templates_table.adjust_height_to_contents()
 
     def _edit_template(self, template_id: str):
         main_win: Any = self.window()

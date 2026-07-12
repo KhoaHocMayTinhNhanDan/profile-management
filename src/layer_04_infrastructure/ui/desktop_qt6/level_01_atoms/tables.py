@@ -26,3 +26,31 @@ class AppTable(QTableWidget):
         h_hdr = self.horizontalHeader()
         if h_hdr is not None:
             h_hdr.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
+    def adjust_height_to_contents(self):
+        """
+        Tự động điều chỉnh chiều cao tối thiểu của bảng dựa trên số lượng dòng hiện có
+        để tránh hiện tượng thanh cuộn dọc xuất hiện bên trong bảng.
+        """
+        # Header height
+        h_hdr = self.horizontalHeader()
+        h_height = h_hdr.height() if h_hdr is not None else 40
+        if h_height < 30:
+            h_height = 40
+
+        # Row heights
+        r_height = 0
+        r_count = self.rowCount()
+        for i in range(r_count):
+            r_height += self.rowHeight(i) or 40
+
+        if r_count > 0 and r_height == 0:
+            r_height = r_count * 40
+
+        if r_count == 0:
+            total_height = 100
+        else:
+            total_height = h_height + r_height + 2 * self.frameWidth() + 4
+
+        self.setMinimumHeight(total_height)
+        self.setMaximumHeight(total_height)
