@@ -439,6 +439,10 @@ class MainWindow(QMainWindow):
             return
 
         if is_loading:
+            # 1. Hide and remove any existing message label to avoid overlap
+            self._clear_status_message()
+
+            # 2. Show loading widget
             self._remove_status_widget(self.status_loading_widget)
             self._add_status_widget(self.status_loading_widget)
             self.status_loading_widget.show()
@@ -453,6 +457,10 @@ class MainWindow(QMainWindow):
         sb = self.statusBar()
         if sb is None:
             return
+
+        # 1. Hide and remove loading widget to avoid overlap
+        self.status_loading_widget.hide()
+        self._remove_status_widget(self.status_loading_widget)
 
         # Determine color based on status_type
         colors = {
