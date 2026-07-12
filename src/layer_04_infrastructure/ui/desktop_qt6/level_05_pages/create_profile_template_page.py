@@ -17,13 +17,10 @@ from PyQt6.QtWidgets import (
     QFrame,
     QScrollArea,
 )
-from PyQt6.QtCore import Qt, QTimer, QEvent, QObject
+from PyQt6.QtCore import Qt, QTimer, QEvent, QObject, pyqtSlot
 from src.shared.logger.app_logger import get_logger
 from ..level_04_templates.page_template import BasePageTemplate
-from src.layer_03_interface_adapters.controllers.desktop.create_profile_template import (
-    CreateProfileTemplateController,
-)
-import asyncio
+from ..hooks.use_create_profile_template import UseCreateProfileTemplate
 import os
 import re
 from typing import Any
@@ -86,7 +83,13 @@ class RowSelectorFilter(QObject):
 class CreateProfileTemplatePage(BasePageTemplate):
     def __init__(self, context):
         super().__init__("create_profile_template", context)
-        self.controller = context.container.resolve(CreateProfileTemplateController)
+        self.use_create_profile_template = UseCreateProfileTemplate(context, self)
+        self.use_create_profile_template.template_loaded.connect(
+            self._on_template_loaded
+        )
+        self.use_create_profile_template.template_saved.connect(self._on_template_saved)
+        self.use_create_profile_template.loading.connect(self._set_loading)
+        self.use_create_profile_template.error.connect(self._on_error)
 
         # State variables
         self.edit_mode = False
@@ -292,39 +295,7 @@ class CreateProfileTemplatePage(BasePageTemplate):
             self.txt_id.setText(template_id)
             self.txt_id.setReadOnly(True)
 
-            # Load template from DB
-            from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import (
-                SqliteDocumentStore,
-            )
-
-            store = SqliteDocumentStore()
-            t_data = store.get_document("profile_templates", template_id)
-
-            if t_data:
-                self.txt_name.setText(t_data.get("name", ""))
-
-                # Load fields schema
-                fields = t_data.get("fields_schema", [])
-                for f in fields:
-                    self._add_field_row_with_data(
-                        label=f.get("label", ""),
-                        key=f.get("name", ""),
-                        field_type=f.get("type", "string"),
-                        required=f.get("required", True),
-                    )
-
-                # Load imported files
-                t_dir = t_data.get("template_dir", "")
-                self.selected_files = []
-                if t_dir and os.path.exists(t_dir):
-                    docx_files = [
-                        os.path.join(t_dir, f)
-                        for f in os.listdir(t_dir)
-                        if f.endswith(".docx") and not f.startswith("~$")
-                    ]
-                    self.selected_files = sorted(docx_files)
-
-                self._refresh_files_list_table()
+            self.use_create_profile_template.load_template(template_id)
         else:
             # CREATE MODE
             self.edit_mode = False
@@ -718,33 +689,72 @@ class CreateProfileTemplatePage(BasePageTemplate):
                     }
                 )
 
-        req = {
-            "template_id": t_id,
-            "name": t_name,
-            "fields_schema": fields_schema,
-            "selected_files": self.selected_files,
-            "is_update": self.edit_mode,
-        }
+        self.use_create_profile_template.save_template(
+            t_id, t_name, fields_schema, self.selected_files, self.edit_mode
+        )
 
-        res = asyncio.run(self.controller.handle_request(req))
+    @pyqtSlot(dict)
+    def _on_template_loaded(self, t_data: dict):
+        if t_data:
+            self.txt_name.setText(t_data.get("name", ""))
 
-        if res.get("status") == "success":
-            msg = f"✓ Đã lưu mẫu hồ sơ '{t_name}' thành công!"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 5000)
-            self._go_back()
+            # Load fields schema
+            fields = t_data.get("fields_schema", [])
+            for f in fields:
+                self._add_field_row_with_data(
+                    label=f.get("label", ""),
+                    key=f.get("name", ""),
+                    field_type=f.get("type", "string"),
+                    required=f.get("required", True),
+                )
+
+            # Load imported files
+            t_dir = t_data.get("template_dir", "")
+            self.selected_files = []
+            if t_dir and os.path.exists(t_dir):
+                docx_files = [
+                    os.path.join(t_dir, f)
+                    for f in os.listdir(t_dir)
+                    if f.endswith(".docx") and not f.startswith("~$")
+                ]
+                self.selected_files = sorted(docx_files)
+
+            self._refresh_files_list_table()
+
+    @pyqtSlot(str)
+    def _on_template_saved(self, t_name: str):
+        msg = f"✓ Đã lưu mẫu hồ sơ '{t_name}' thành công!"
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "show_status_message"):
+            main_win.show_status_message(msg, "success", 5000)
+        self._go_back()
+
+    @pyqtSlot(bool)
+    def _set_loading(self, is_loading: bool):
+        main_win: Any = self.window()
+        if is_loading:
+            self.setCursor(Qt.CursorShape.WaitCursor)
+            self.btn_save.setEnabled(False)
+            self.btn_cancel.setEnabled(False)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(True)
         else:
-            QMessageBox.critical(
-                self, "Lỗi", f"Không thể lưu mẫu: {res.get('message')}"
-            )
+            self.unsetCursor()
+            self.btn_save.setEnabled(True)
+            self.btn_cancel.setEnabled(True)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(False)
+
+    @pyqtSlot(str)
+    def _on_error(self, err_msg: str):
+        QMessageBox.critical(self, "Lỗi hệ thống", f"Không thể lưu mẫu: {err_msg}")
 
     def _go_back(self):
         main_win: Any = self.window()
         if main_win is not None and hasattr(main_win, "switch_page"):
             welcome = main_win.pages_map.get("welcome")
-            if welcome is not None and hasattr(welcome, "refresh_data"):
-                welcome.refresh_data()
+            if welcome is not None and hasattr(welcome, "use_welcome_data"):
+                welcome.use_welcome_data.load_data()
             main_win.switch_page("welcome")
 
     def retranslate_ui(self, lang_code: str):

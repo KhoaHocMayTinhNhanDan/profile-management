@@ -12,16 +12,10 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QDateEdit,
 )
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, pyqtSlot, Qt
 from src.shared.logger.app_logger import get_logger
 from ..level_04_templates.page_template import BasePageTemplate
-from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import (
-    SqliteDocumentStore,
-)
-from src.layer_03_interface_adapters.controllers.desktop.create_profile import (
-    CreateProfileController,
-)
-import asyncio
+from ..hooks.use_create_profile import UseCreateProfile
 import os
 from typing import Any
 
@@ -31,8 +25,12 @@ logger = get_logger(__name__)
 class CreateProfilePage(BasePageTemplate):
     def __init__(self, context):
         super().__init__("create_profile", context)
-        self.store = SqliteDocumentStore()
-        self.controller = context.container.resolve(CreateProfileController)
+        self.templates_map = {}
+        self.use_create_profile = UseCreateProfile(context, self)
+        self.use_create_profile.templates_loaded.connect(self._on_templates_loaded)
+        self.use_create_profile.profile_created.connect(self._on_profile_created)
+        self.use_create_profile.loading.connect(self._set_loading)
+        self.use_create_profile.error.connect(self._on_error)
 
         # Header Layout
         self.header_lay = QFormLayout()
@@ -97,14 +95,7 @@ class CreateProfilePage(BasePageTemplate):
 
     def refresh_templates(self):
         self.cbo_template.clear()
-        templates = self.store.list_documents("profile_templates")
-        self.templates_map = {t["template_id"]: t for t in templates}
-
-        self.cbo_template.addItem("--- Chọn mẫu ---", "")
-        for t in templates:
-            self.cbo_template.addItem(
-                t.get("name", t.get("template_id")), t["template_id"]
-            )
+        self.use_create_profile.load_templates()
 
     def _on_template_changed(self, idx):
         # Clear previous layout widgets safely
@@ -182,62 +173,51 @@ class CreateProfilePage(BasePageTemplate):
 
             dynamic_data[f_name] = val
 
-        req_body = {
-            "profile_id": p_id,
-            "template_id": t_id,
-            "dynamic_data": dynamic_data,
-            "documents": [],
-        }
+        self.use_create_profile.create_profile(p_id, t_id, dynamic_data)
 
-        res = asyncio.run(self.controller.handle_request(req_body))
-
-        if res.get("status") == "success":
-            # Automatically generate documents from template
-            template = self.store.get_document("profile_templates", t_id)
-            if template:
-                t_dir = template.get("template_dir", "")
-                if t_dir and os.path.exists(t_dir):
-                    docx_files = sorted(
-                        [
-                            f
-                            for f in os.listdir(t_dir)
-                            if f.endswith(".docx") and not f.startswith("~$")
-                        ]
-                    )
-                    from src.layer_03_interface_adapters.controllers.desktop.generate_document_from_template import (
-                        GenerateDocumentFromTemplateController,
-                    )
-
-                    gen_controller = self.app_ctx.container.resolve(
-                        GenerateDocumentFromTemplateController
-                    )
-                    for f in docx_files:
-                        gen_req = {
-                            "profile_id": p_id,
-                            "template_doc_path": os.path.join(t_dir, f),
-                            "output_doc_name": f,
-                        }
-                        asyncio.run(gen_controller.handle_request(gen_req))
-
-            msg = (
-                f"✓ Đã khởi tạo hồ sơ '{p_id}' và tự động sinh các tài liệu thành công!"
+    @pyqtSlot(list)
+    def _on_templates_loaded(self, templates: list):
+        self.templates_map = {t["template_id"]: t for t in templates}
+        self.cbo_template.addItem("--- Chọn mẫu ---", "")
+        for t in templates:
+            self.cbo_template.addItem(
+                t.get("name", t.get("template_id")), t["template_id"]
             )
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 5000)
-            self._go_back()
+
+    @pyqtSlot(str)
+    def _on_profile_created(self, p_id: str):
+        msg = f"✓ Đã khởi tạo hồ sơ '{p_id}' và tự động sinh các tài liệu thành công!"
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "show_status_message"):
+            main_win.show_status_message(msg, "success", 5000)
+        self._go_back()
+
+    @pyqtSlot(bool)
+    def _set_loading(self, is_loading: bool):
+        main_win: Any = self.window()
+        if is_loading:
+            self.setCursor(Qt.CursorShape.WaitCursor)
+            self.btn_save.setEnabled(False)
+            self.btn_cancel.setEnabled(False)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(True)
         else:
-            msg = res.get("message", "Lỗi không xác định")
-            if res.get("errors"):
-                msg += "\n- " + "\n- ".join(res.get("errors"))
-            QMessageBox.critical(self, "Lỗi", f"Không thể lưu hồ sơ: {msg}")
+            self.unsetCursor()
+            self.btn_save.setEnabled(True)
+            self.btn_cancel.setEnabled(True)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(False)
+
+    @pyqtSlot(str)
+    def _on_error(self, err_msg: str):
+        QMessageBox.critical(self, "Lỗi hệ thống", f"Không thể lưu hồ sơ: {err_msg}")
 
     def _go_back(self):
         main_win: Any = self.window()
         if main_win is not None and hasattr(main_win, "switch_page"):
             welcome = main_win.pages_map.get("welcome")
-            if welcome is not None and hasattr(welcome, "refresh_data"):
-                welcome.refresh_data()
+            if welcome is not None and hasattr(welcome, "use_welcome_data"):
+                welcome.use_welcome_data.load_data()
             main_win.switch_page("welcome")
 
     def retranslate_ui(self, lang_code: str):
