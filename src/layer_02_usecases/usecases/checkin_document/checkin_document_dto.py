@@ -6,9 +6,9 @@ class CheckinDocumentInput:
     profile_id: str
     document_id: str
     user_id: str
-    new_url: str
-    new_size: int
-    new_checksum: str
+    new_url: str = ""
+    new_size: int = 0
+    new_checksum: str = ""
 
 
 @dataclass

@@ -38,8 +38,70 @@ class CheckinDocumentInteractor:
                 message=f"Document is locked by user '{target_doc.locked_by}', not you.",
             )
 
-        # Check if file has actually changed based on checksum (optional validation but useful)
-        if target_doc.checksum == input_data.new_checksum:
+        # Resolve original and temp file paths
+        import os
+        import urllib.parse
+        import shutil
+        import hashlib
+
+        doc_url = target_doc.url or ""
+        if doc_url.startswith("file:///"):
+            original_path = doc_url.replace("file:///", "")
+        else:
+            original_path = doc_url
+        original_path = os.path.abspath(urllib.parse.unquote(original_path))
+
+        temp_dir = os.path.join("appdata", "temp_editing", input_data.profile_id)
+        temp_path = os.path.abspath(os.path.join(temp_dir, target_doc.name))
+
+        # Check if caller passed metadata or if we should auto-sync from temp path
+        new_url = input_data.new_url
+        new_size = input_data.new_size
+        new_checksum = input_data.new_checksum
+
+        if not new_size:
+            # Auto-sync flow: copy temp file back, calculate size/checksum
+            if os.path.exists(temp_path):
+                copied = False
+                for attempt in range(5):
+                    try:
+                        shutil.copy2(temp_path, original_path)
+                        copied = True
+                        break
+                    except Exception:
+                        import time
+
+                        time.sleep(0.5)
+
+                if not copied:
+                    return CheckinDocumentOutput(
+                        status="error",
+                        message="Không thể đồng bộ vì tệp đang bị MS Word khóa độc quyền. Vui lòng đóng Word và thử lại!",
+                    )
+
+                # Clean up temp file
+                try:
+                    os.remove(temp_path)
+                except Exception:
+                    pass
+
+                new_size = os.path.getsize(original_path)
+                with open(original_path, "rb") as f:
+                    new_checksum = hashlib.sha256(f.read()).hexdigest()
+                new_url = "file:///" + os.path.abspath(original_path).replace("\\", "/")
+            else:
+                # Temp file does not exist, and caller didn't pass new_size -> Force Unlock (Recovery)
+                target_doc.is_locked = False
+                target_doc.locked_by = ""
+                await self._repository.save_db(profile)
+                return CheckinDocumentOutput(
+                    status="success",
+                    message="Document unlocked (force checkout recovery).",
+                    new_version=target_doc.version,
+                )
+
+        # Check if file has actually changed based on checksum
+        if target_doc.checksum == new_checksum:
             # Unlock without version bump if no change occurred
             target_doc.is_locked = False
             target_doc.locked_by = ""
@@ -59,23 +121,16 @@ class CheckinDocumentInteractor:
 
         # Update metadata and unlock
         target_doc.version = next_ver
-        target_doc.url = input_data.new_url
-        target_doc.size = input_data.new_size
-        target_doc.checksum = input_data.new_checksum
+        target_doc.url = new_url
+        target_doc.size = new_size
+        target_doc.checksum = new_checksum
         target_doc.is_locked = False
         target_doc.locked_by = ""
 
         # 2-way sync: extract Content Control values from the saved Word file and update profile's dynamic_data
-        import os
-        import urllib.parse
         from src.shared.utils.docx_helper import extract_document_content_controls
 
-        doc_url = input_data.new_url or ""
-        if doc_url.startswith("file:///"):
-            file_path = doc_url.replace("file:///", "")
-        else:
-            file_path = doc_url
-        file_path = os.path.abspath(urllib.parse.unquote(file_path))
+        file_path = original_path
 
         if os.path.isfile(file_path):
             try:

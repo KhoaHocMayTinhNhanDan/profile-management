@@ -20,19 +20,13 @@ from ..level_04_templates.page_template import BasePageTemplate
 from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import (
     SqliteDocumentStore,
 )
-from src.layer_03_interface_adapters.controllers.desktop.checkout_document import (
-    CheckoutDocumentController,
-)
-from src.layer_03_interface_adapters.controllers.desktop.checkin_document import (
-    CheckinDocumentController,
-)
 from src.layer_03_interface_adapters.controllers.desktop.generate_document_from_template import (
     GenerateDocumentFromTemplateController,
 )
-from src.layer_04_infrastructure.services.file_watcher import FileWatcherService
-import asyncio
+from ..hooks.use_checkout_document import UseCheckoutDocument
+from ..hooks.use_checkin_document import UseCheckinDocument
 import os
-import shutil
+import asyncio
 
 logger = get_logger(__name__)
 
@@ -41,10 +35,15 @@ class DocumentManagerPage(BasePageTemplate):
     def __init__(self, context):
         super().__init__("document_manager", context)
         self.store = SqliteDocumentStore()
-        self.watcher = FileWatcherService()
 
-        self.checkout_controller = context.container.resolve(CheckoutDocumentController)
-        self.checkin_controller = context.container.resolve(CheckinDocumentController)
+        self.use_checkout = UseCheckoutDocument(context, self)
+        self.use_checkin = UseCheckinDocument(context, self)
+
+        self.use_checkout.finished.connect(self._on_checkout_success)
+        self.use_checkout.error.connect(self._on_checkout_error)
+        self.use_checkin.finished.connect(self._on_checkin_success)
+        self.use_checkin.error.connect(self._on_checkin_error)
+
         self.generate_controller = context.container.resolve(
             GenerateDocumentFromTemplateController
         )
@@ -200,293 +199,39 @@ class DocumentManagerPage(BasePageTemplate):
         self._start_editing_doc(doc_id)
 
     def _start_editing_doc(self, doc_id: str):
-        # Execute checkout
-        req = {
-            "profile_id": self.profile_id,
-            "document_id": doc_id,
-            "user_id": "user_dong",  # current user
-        }
-
-        res = asyncio.run(self.checkout_controller.handle_request(req))
-
-        if res.get("status") == "success":
-            doc_url = res.get("document_url", "")
-            local_name = res.get("local_filename", "")
-
-            # Since local document store sets file:/// absolute paths:
-            if not doc_url:
-                QMessageBox.critical(
-                    self, "Lỗi", "Đường dẫn tài liệu (URL) trống hoặc không hợp lệ."
-                )
-                return
-
-            if doc_url.startswith("file:///"):
-                file_path = doc_url.replace("file:///", "")
-            else:
-                file_path = doc_url
-
-            # Convert Windows slash
-            file_path = os.path.abspath(file_path)
-
-            if not os.path.isfile(file_path):
-                QMessageBox.critical(
-                    self, "Lỗi", f"Không tìm thấy file tài liệu tại: {file_path}"
-                )
-                return
-
-            # Create a temporary working copy in appdata/temp_editing/
-            temp_dir = os.path.join("appdata", "temp_editing", self.profile_id)
-            os.makedirs(temp_dir, exist_ok=True)
-            temp_file_path = os.path.abspath(os.path.join(temp_dir, local_name))
-
-            # Copy to temp path
-            try:
-                shutil.copy2(file_path, temp_file_path)
-            except Exception as e:
-                QMessageBox.critical(self, "Lỗi", f"Không thể tạo file tạm: {e}")
-                return
-
-            # Open MS Word
-            try:
-                os.startfile(temp_file_path)
-                main_win: Any = self.window()
-                if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                    main_win.statusBar().showMessage(
-                        f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
-                        9000,
-                    )
-            except Exception as e:
-                QMessageBox.critical(self, "Lỗi", f"Không thể mở file bằng Word: {e}")
-                return
-
-            # Start Watching the temp file for automatic sync
-            self.watcher.start_watching(
-                temp_file_path,
-                lambda path, size, checksum: self._on_document_saved_watcher(
-                    doc_id, file_path, path, size, checksum
-                ),
-            )
-            self.refresh_documents()
-        else:
-            QMessageBox.critical(self, "Lỗi Khóa Tài Liệu", res.get("message"))
+        self.use_checkout.checkout(self.profile_id, doc_id)
 
     def _finish_editing_doc(self, doc_id: str):
-        logger.info(f"--- START _finish_editing_doc for doc_id: {doc_id} ---")
-        profile = self.store.get_document("profiles", self.profile_id)
-        if not profile:
-            logger.warning(f"Profile {self.profile_id} not found in store.")
-            return
-
-        target_doc = None
-        for doc in profile.get("documents", []):
-            if doc["document_id"] == doc_id:
-                target_doc = doc
-                break
-
-        if not target_doc:
-            logger.warning(f"Document {doc_id} not found in profile documents.")
-            return
-
-        doc_url = target_doc.get("url", "")
-        name = target_doc.get("name", "")
-
-        if doc_url.startswith("file:///"):
-            original_path = doc_url.replace("file:///", "")
-        else:
-            original_path = doc_url
-        original_path = os.path.abspath(original_path)
-
-        temp_dir = os.path.join("appdata", "temp_editing", self.profile_id)
-        temp_path = os.path.abspath(os.path.join(temp_dir, name))
-
-        logger.info(f"Resolved original_path: {original_path}")
-        logger.info(f"Resolved temp_path: {temp_path}")
-
-        if not os.path.exists(temp_path):
-            logger.warning(
-                f"Temp file does not exist: {temp_path}. Showing force-unlock dialog."
-            )
-            reply = QMessageBox.question(
-                self,
-                "Không tìm thấy file tạm",
-                f"Không tìm thấy file tạm để đồng bộ tại:\n{temp_path}\n\n"
-                "Bạn có muốn gỡ khóa (Unlock) tài liệu này để chuyển về trạng thái 'Mở file' bình thường không?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-            if reply == QMessageBox.StandardButton.Yes:
-                logger.info(f"User chose to force unlock doc_id: {doc_id}")
-                profile = self.store.get_document("profiles", self.profile_id)
-                if profile:
-                    for doc in profile.get("documents", []):
-                        if doc["document_id"] == doc_id:
-                            doc["is_locked"] = False
-                            doc["locked_by"] = ""
-                            break
-                    self.store.set_document("profiles", self.profile_id, profile)
-                self.refresh_dynamic_inputs()
-                self.refresh_documents()
-            return
-
-        # Attempt to copy file back
-        import time
-
-        copied = False
-        last_err = None
-        logger.info(f"Attempting to copy {temp_path} to {original_path}...")
-        for attempt in range(3):
-            try:
-                shutil.copy2(temp_path, original_path)
-                copied = True
-                logger.info("shutil.copy2 succeeded.")
-                break
-            except Exception as e:
-                last_err = e
-                logger.warning(f"Attempt {attempt+1} failed: {e}")
-                time.sleep(0.5)
-
-        if not copied:
-            logger.error(f"Failed to copy back temp file: {last_err}")
-            QMessageBox.warning(
-                self,
-                "Lỗi Khóa File",
-                "Không thể đồng bộ vì tệp đang bị MS Word khóa độc quyền.\n\n"
-                "Vui lòng nhấn Lưu (Ctrl+S) trong Word, đóng Word lại rồi bấm 'Hoàn thành sửa' thử lại!",
-            )
-            return
-
-        # Calculate new size and checksum
-        import hashlib
-
-        new_size = os.path.getsize(original_path)
-        with open(original_path, "rb") as f:
-            new_checksum = hashlib.sha256(f.read()).hexdigest()
-
-        new_url = "file:///" + os.path.abspath(original_path).replace("\\", "/")
-
-        req = {
-            "profile_id": self.profile_id,
-            "document_id": doc_id,
-            "user_id": "user_dong",
-            "new_url": new_url,
-            "new_size": new_size,
-            "new_checksum": new_checksum,
-        }
-
-        logger.info(f"Executing checkin request with params: {req}")
-
-        # Run checkin
-        res = asyncio.run(self.checkin_controller.handle_request(req))
-
-        logger.info(f"Checkin result status: {res.get('status')}")
-
-        if res.get("status") == "success":
-            msg = f"✓ Đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 6000)
-        else:
-            QMessageBox.critical(self, "Lỗi Đồng Bộ", res.get("message"))
-
-        # Clean up temp file
-        try:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-                logger.info(f"Cleaned up temp file: {temp_path}")
-        except Exception as e:
-            logger.warning(f"Could not delete temp file: {e}")
-
-        logger.info("Refreshing dynamic inputs and documents list...")
-        self.refresh_dynamic_inputs()
-        self.refresh_documents()
-        logger.info("--- END _finish_editing_doc ---")
-
-    def _on_document_saved_watcher(
-        self,
-        doc_id: str,
-        original_path: str,
-        temp_path: str,
-        new_size: int,
-        new_checksum: str,
-    ):
-        logger.info(
-            f"--- WATCHER TRIGGERED: _on_document_saved_watcher for doc_id: {doc_id} ---"
-        )
-
-        # 1. Copy the file back on the background thread
-        import shutil
-        import time
-
-        copied = False
-        last_err = None
-        for attempt in range(5):
-            try:
-                shutil.copy2(temp_path, original_path)
-                copied = True
-                logger.info(f"Background thread copy2 succeeded on attempt {attempt+1}")
-                break
-            except Exception as e:
-                last_err = e
-                logger.warning(
-                    f"Background thread copy2 failed (attempt {attempt+1}): {e}"
-                )
-                time.sleep(0.5)
-
-        if not copied:
-            logger.error(f"Failed to copy back changed file: {last_err}")
-            QMetaObject.invokeMethod(
-                self,
-                "_on_watcher_sync_failed",
-                Qt.ConnectionType.QueuedConnection,
-                Q_ARG(str, f"Không thể đồng bộ vì tệp đang bị khóa: {last_err}"),
-            )
-            return
-
-        # 2. Run checkin on the background thread
-        new_url = "file:///" + os.path.abspath(original_path).replace("\\", "/")
-        req = {
-            "profile_id": self.profile_id,
-            "document_id": doc_id,
-            "user_id": "user_dong",
-            "new_url": new_url,
-            "new_size": new_size,
-            "new_checksum": new_checksum,
-        }
-
-        logger.info(f"Background thread executing checkin controller with: {req}")
-        res = asyncio.run(self.checkin_controller.handle_request(req))
-        logger.info(f"Background thread checkin result: {res.get('status')}")
-
-        # Stop watching after change detected
-        self.watcher.stop_watching(temp_path)
-
-        # 3. Clean up temp file
-        try:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-                logger.info(f"Cleaned up temp file: {temp_path}")
-        except Exception as e:
-            logger.warning(f"Could not delete temp file: {e}")
-
-        # 4. Safely trigger GUI refresh on the main thread
-        QMetaObject.invokeMethod(
-            self,
-            "_on_watcher_sync_completed",
-            Qt.ConnectionType.QueuedConnection,
-            Q_ARG(dict, res),
-        )
+        self.use_checkin.force_unlock(self.profile_id, doc_id)
 
     @pyqtSlot(dict)
-    def _on_watcher_sync_completed(self, res: dict):
-        logger.info("Main thread: _on_watcher_sync_completed received signal.")
-        if res.get("status") == "success":
-            msg = f"✓ Tự động đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 6000)
-        else:
-            QMessageBox.critical(self, "Lỗi Đồng Bộ Tự Động", res.get("message"))
+    def _on_checkout_success(self, res: dict):
+        local_name = res.get("local_filename", "")
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+            main_win.statusBar().showMessage(
+                f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
+                9000,
+            )
+        self.refresh_documents()
+
+    @pyqtSlot(str)
+    def _on_checkout_error(self, error_msg: str):
+        QMessageBox.critical(self, "Lỗi Khóa Tài Liệu", error_msg)
+        self.refresh_documents()
+
+    @pyqtSlot(dict)
+    def _on_checkin_success(self, res: dict):
+        msg = f"✓ Tự động đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+            main_win.statusBar().showMessage(msg, 6000)
         self.refresh_dynamic_inputs()
+        self.refresh_documents()
+
+    @pyqtSlot(str)
+    def _on_checkin_error(self, error_msg: str):
+        QMessageBox.critical(self, "Lỗi Đồng Bộ", error_msg)
         self.refresh_documents()
 
     @pyqtSlot(str)
