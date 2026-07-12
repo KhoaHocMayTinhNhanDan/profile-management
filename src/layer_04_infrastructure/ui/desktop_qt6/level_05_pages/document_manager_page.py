@@ -264,8 +264,10 @@ class DocumentManagerPage(BasePageTemplate):
             QMessageBox.critical(self, "Lỗi Khóa Tài Liệu", res.get("message"))
 
     def _finish_editing_doc(self, doc_id: str):
+        logger.info(f"--- START _finish_editing_doc for doc_id: {doc_id} ---")
         profile = self.store.get_document("profiles", self.profile_id)
         if not profile:
+            logger.warning(f"Profile {self.profile_id} not found in store.")
             return
 
         target_doc = None
@@ -275,6 +277,7 @@ class DocumentManagerPage(BasePageTemplate):
                 break
 
         if not target_doc:
+            logger.warning(f"Document {doc_id} not found in profile documents.")
             return
 
         doc_url = target_doc.get("url", "")
@@ -289,7 +292,13 @@ class DocumentManagerPage(BasePageTemplate):
         temp_dir = os.path.join("appdata", "temp_editing", self.profile_id)
         temp_path = os.path.abspath(os.path.join(temp_dir, name))
 
+        logger.info(f"Resolved original_path: {original_path}")
+        logger.info(f"Resolved temp_path: {temp_path}")
+
         if not os.path.exists(temp_path):
+            logger.warning(
+                f"Temp file does not exist: {temp_path}. Showing force-unlock dialog."
+            )
             reply = QMessageBox.question(
                 self,
                 "Không tìm thấy file tạm",
@@ -299,6 +308,7 @@ class DocumentManagerPage(BasePageTemplate):
                 QMessageBox.StandardButton.No,
             )
             if reply == QMessageBox.StandardButton.Yes:
+                logger.info(f"User chose to force unlock doc_id: {doc_id}")
                 profile = self.store.get_document("profiles", self.profile_id)
                 if profile:
                     for doc in profile.get("documents", []):
@@ -316,16 +326,20 @@ class DocumentManagerPage(BasePageTemplate):
 
         copied = False
         last_err = None
+        logger.info(f"Attempting to copy {temp_path} to {original_path}...")
         for attempt in range(3):
             try:
                 shutil.copy2(temp_path, original_path)
                 copied = True
+                logger.info("shutil.copy2 succeeded.")
                 break
             except Exception as e:
                 last_err = e
+                logger.warning(f"Attempt {attempt+1} failed: {e}")
                 time.sleep(0.5)
 
         if not copied:
+            logger.error(f"Failed to copy back temp file: {last_err}")
             QMessageBox.warning(
                 self,
                 "Lỗi Khóa File",
@@ -352,8 +366,12 @@ class DocumentManagerPage(BasePageTemplate):
             "new_checksum": new_checksum,
         }
 
+        logger.info(f"Executing checkin request with params: {req}")
+
         # Run checkin
         res = asyncio.run(self.checkin_controller.handle_request(req))
+
+        logger.info(f"Checkin result status: {res.get('status')}")
 
         if res.get("status") == "success":
             msg = f"✓ Đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
@@ -367,11 +385,14 @@ class DocumentManagerPage(BasePageTemplate):
         try:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-        except Exception:
-            pass
+                logger.info(f"Cleaned up temp file: {temp_path}")
+        except Exception as e:
+            logger.warning(f"Could not delete temp file: {e}")
 
+        logger.info("Refreshing dynamic inputs and documents list...")
         self.refresh_dynamic_inputs()
         self.refresh_documents()
+        logger.info("--- END _finish_editing_doc ---")
 
     def _generate_from_template(self):
         # Get profile
