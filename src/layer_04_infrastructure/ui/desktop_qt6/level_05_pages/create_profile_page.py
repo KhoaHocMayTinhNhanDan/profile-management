@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QDate, pyqtSlot, Qt
 from src.shared.logger.app_logger import get_logger
 from ..level_01_atoms.containers import CardContainer
+from ..level_02_molecules import DynamicForm
 from ..level_04_templates.page_template import BasePageTemplate
 from ..hooks.use_create_profile import UseCreateProfile
 import os
@@ -61,14 +62,12 @@ class CreateProfilePage(BasePageTemplate):
 
         self.card.addLayout(self.header_lay)
 
-        # Dynamic inputs area
-        self.form_widget = QWidget()
-        self.form_layout = QFormLayout(self.form_widget)
-        self.form_layout.setSpacing(10)
+        # Dynamic inputs area (using DynamicForm molecule)
+        self.dynamic_form = DynamicForm(self)
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(self.form_widget)
+        self.scroll_area.setWidget(self.dynamic_form)
         self.card.addWidget(self.scroll_area)
 
         self.content_layout.addWidget(self.card)
@@ -104,80 +103,30 @@ class CreateProfilePage(BasePageTemplate):
         self.use_create_profile.load_templates()
 
     def _on_template_changed(self, idx):
-        # Clear previous layout widgets safely
-        while self.form_layout.count() > 0:
-            item = self.form_layout.takeAt(0)
-            if item is not None:
-                w = item.widget()
-                if w is not None:
-                    w.setParent(None)
-                    w.deleteLater()
-        self.widgets_map = {}
-
         t_id = self.cbo_template.currentData()
         if not t_id or t_id not in self.templates_map:
             self.current_template = None
+            self.dynamic_form.render_fields([])
             return
 
         self.current_template = self.templates_map[t_id]
         schema = self.current_template.get("fields_schema", [])
-
-        for field in schema:
-            f_name = field["name"]
-            f_label = field.get("label", f_name)
-            f_type = field.get("type", "string")
-            req = field.get("required", False)
-
-            label_text = f"{f_label}:"
-            if req:
-                label_text = f"{f_label} (*):"
-            lbl = QLabel(label_text)
-
-            if f_type == "boolean":
-                widget = QCheckBox()
-            elif f_type == "date":
-                widget = QDateEdit()
-                widget.setCalendarPopup(True)
-                widget.setDate(QDate.currentDate())
-            else:
-                from ..level_01_atoms.inputs import FormLineEdit
-
-                widget = FormLineEdit()
-                if f_type == "number":
-                    widget.setPlaceholderText("Nhập số")
-
-            self.form_layout.addRow(lbl, widget)
-            self.widgets_map[f_name] = (widget, f_type, req)
+        self.dynamic_form.render_fields(schema)
 
     def _save_profile(self):
         p_id = self.txt_profile_id.text().strip()
         t_id = self.cbo_template.currentData()
 
         if not p_id:
-            QMessageBox.warning(self, "Cảnh báo", "Vui lòng nhập Mã hồ sơ!")
+            self.show_error_message("Cảnh báo", "Vui lòng nhập Mã hồ sơ!")
             return
         if not t_id:
-            QMessageBox.warning(self, "Cảnh báo", "Vui lòng chọn Mẫu hồ sơ!")
+            self.show_error_message("Cảnh báo", "Vui lòng chọn Mẫu hồ sơ!")
             return
 
-        dynamic_data = {}
-        for f_name, (widget, f_type, req) in self.widgets_map.items():
-            if f_type == "boolean":
-                val = widget.isChecked()
-            elif f_type == "date":
-                val = widget.date().toString("yyyy-MM-dd")
-            else:
-                val = widget.text().strip()
-                if f_type == "number" and val:
-                    try:
-                        val = float(val)
-                    except ValueError:
-                        QMessageBox.warning(
-                            self, "Cảnh báo", f"Trường '{f_name}' phải nhập kiểu số!"
-                        )
-                        return
-
-            dynamic_data[f_name] = val
+        dynamic_data = self.dynamic_form.get_values()
+        if dynamic_data is None:
+            return
 
         self.use_create_profile.create_profile(p_id, t_id, dynamic_data)
 

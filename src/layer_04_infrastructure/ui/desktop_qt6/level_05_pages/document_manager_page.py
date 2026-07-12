@@ -19,6 +19,7 @@ from PyQt6.QtCore import Qt, QMetaObject, Q_ARG, pyqtSlot
 from typing import Any
 from src.shared.logger.app_logger import get_logger
 from ..level_01_atoms import CardContainer, AppTable
+from ..level_02_molecules import DynamicForm
 from ..level_04_templates.page_template import BasePageTemplate
 from ..hooks.use_checkout_document import UseCheckoutDocument
 from ..hooks.use_checkin_document import UseCheckinDocument
@@ -68,16 +69,15 @@ class DocumentManagerPage(BasePageTemplate):
         self.lbl_info_title.setObjectName("table_title_lbl")
         self.left_layout.addWidget(self.lbl_info_title)
 
-        from PyQt6.QtWidgets import QScrollArea, QFormLayout
+        from PyQt6.QtWidgets import QScrollArea
 
         self.info_scroll = QScrollArea()
         self.info_scroll.setWidgetResizable(True)
         self.info_scroll.setObjectName("profile_info_scroll")
 
-        self.info_form_widget = QWidget()
-        self.info_form_layout = QFormLayout(self.info_form_widget)
-        self.info_form_layout.setSpacing(10)
-        self.info_scroll.setWidget(self.info_form_widget)
+        # Dynamic inputs area (using DynamicForm molecule)
+        self.dynamic_form = DynamicForm(self)
+        self.info_scroll.setWidget(self.dynamic_form)
         self.left_layout.addWidget(self.info_scroll)
 
         from ..level_01_atoms.buttons import PrimaryButton
@@ -389,76 +389,16 @@ class DocumentManagerPage(BasePageTemplate):
             self.use_update_profile.load_profile(self.profile_id)
 
     def _render_dynamic_inputs(self, profile: dict, template: dict):
-        # Clear previous layout widgets safely
-        while self.info_form_layout.count() > 0:
-            item = self.info_form_layout.takeAt(0)
-            if item is not None:
-                w = item.widget()
-                if w is not None:
-                    w.setParent(None)
-                    w.deleteLater()
-        self.info_widgets_map = {}
-
         schema = template.get("fields_schema", [])
         dynamic_data = profile.get("dynamic_data", {})
-
-        from PyQt6.QtCore import QDate
-        from PyQt6.QtWidgets import QDateEdit, QCheckBox, QLabel
-        from ..level_01_atoms.inputs import FormLineEdit
-
-        for field in schema:
-            f_name = field["name"]
-            f_label = field.get("label", f_name)
-            f_type = field.get("type", "string")
-            req = field.get("required", False)
-
-            label_text = f"{f_label}:"
-            if req:
-                label_text = f"{f_label} (*):"
-            lbl = QLabel(label_text)
-
-            val = dynamic_data.get(f_name, None)
-
-            if f_type == "boolean":
-                widget = QCheckBox()
-                widget.setChecked(bool(val) if val is not None else False)
-            elif f_type == "date":
-                widget = QDateEdit()
-                widget.setCalendarPopup(True)
-                if val:
-                    widget.setDate(QDate.fromString(str(val), "yyyy-MM-dd"))
-                else:
-                    widget.setDate(QDate.currentDate())
-            else:
-                widget = FormLineEdit()
-                widget.setText(str(val) if val is not None else "")
-                if f_type == "number":
-                    widget.setPlaceholderText("Nhập số")
-
-            self.info_form_layout.addRow(lbl, widget)
-            self.info_widgets_map[f_name] = (widget, f_type, req)
+        self.dynamic_form.render_fields(schema, dynamic_data)
 
     def _save_profile_info(self):
         if not self.profile_id:
             return
 
-        dynamic_data = {}
-        for f_name, (widget, f_type, req) in self.info_widgets_map.items():
-            if f_type == "boolean":
-                val = widget.isChecked()
-            elif f_type == "date":
-                val = widget.date().toString("yyyy-MM-dd")
-            else:
-                val = widget.text().strip()
-                if f_type == "number" and val:
-                    try:
-                        val = float(val)
-                    except ValueError:
-                        QMessageBox.warning(
-                            self, "Cảnh báo", f"Trường '{f_name}' phải nhập kiểu số!"
-                        )
-                        return
-
-            dynamic_data[f_name] = val
+        dynamic_data = self.dynamic_form.get_values()
+        if dynamic_data is None:
+            return
 
         self.use_update_profile.update_profile(self.profile_id, dynamic_data)
