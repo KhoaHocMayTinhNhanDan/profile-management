@@ -447,26 +447,27 @@ class MainWindow(QMainWindow):
         self.status_loading_widget.hide()
         self._remove_status_widget(self.status_loading_widget)
 
-        # Determine color based on status_type dynamically from ThemeManager to ensure high contrast in all themes
-        color = "#ffffff"
-        if self.theme_manager is not None:
-            color_names = {
-                "success": "SUCCESS_COLOR",
-                "error": "ERROR_COLOR",
-                "info": "ACCENT_COLOR",
-                "ready": "TEXT_COLOR",
-            }
-            c_name = color_names.get(status_type, "TEXT_COLOR")
-            color = self.theme_manager.get_color(c_name)
-        else:
-            # Fallback values if theme_manager is not loaded
+        # Get current mode (dark/light) from mode_manager to select high-contrast status colors
+        mode = "dark"
+        if self.mode_manager is not None:
+            mode = self.mode_manager.get_current_mode()
+
+        if mode == "light":
             colors = {
-                "success": "#34d399",
-                "error": "#f87171",
-                "info": "#38bdf8",
-                "ready": "#f8fafc",
+                "success": "#10b981",  # Emerald Green (Clear in light mode)
+                "error": "#ef4444",  # Red (Clear in light mode)
+                "info": "#1d4ed8",  # Deep Blue (Clear in light mode)
+                "ready": "#64748b",  # Slate Gray (Readable, distinct, not black!)
             }
-            color = colors.get(status_type, "#f8fafc")
+        else:
+            colors = {
+                "success": "#a6e3a1",  # Catppuccin Green (Clear in dark mode)
+                "error": "#f38ba8",  # Catppuccin Red (Clear in dark mode)
+                "info": "#89b4fa",  # Catppuccin Blue (Clear in dark mode)
+                "ready": "#cdd6f4",  # Catppuccin Gray (Clear in dark mode)
+            }
+
+        color = colors.get(status_type, colors["ready"])
 
         self.status_msg_label.setStyleSheet(f"color: {color};")
         self.status_msg_label.setText(msg)
