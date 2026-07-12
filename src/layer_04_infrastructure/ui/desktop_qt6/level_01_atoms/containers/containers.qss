@@ -1,0 +1,11 @@
+QFrame[class="CardContainer"], QFrame#card_container {
+    background-color: {CARD_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+}
+
+QFrame[class="PanelContainer"], QFrame#panel_container {
+    background-color: {SIDEBAR_BG};
+    border: {BORDER_WIDTH} solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+}

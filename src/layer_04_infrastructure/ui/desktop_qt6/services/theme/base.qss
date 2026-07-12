@@ -65,19 +65,6 @@ QScrollArea > QWidget > QWidget {
 }
 
 /* --- Atom Buttons --- */
-QPushButton[class="PrimaryButton"], QPushButton#primary_btn {
-    background-color: {ACCENT_COLOR};
-    color: {SIDEBAR_BG};
-    font-size: 14px;
-    font-weight: bold;
-    padding: 8px 24px;
-    border-radius: {RADIUS};
-    border: 1px solid transparent;
-}
-QPushButton[class="PrimaryButton"]:hover, QPushButton#primary_btn:hover {
-    background-color: {ACCENT_HOVER};
-}
-
 QPushButton[class="NavButton"] {
     color: {TEXT_COLOR};
     background-color: transparent;
@@ -99,43 +86,8 @@ QPushButton[class="NavButton"]:checked {
     font-weight: bold;
 }
 
-QPushButton[class="SecondaryButton"], QPushButton#secondary_btn {
-    background-color: rgba(30, 41, 59, 0.4);
-    color: {ACCENT_COLOR};
-    border: 1px solid {BORDER_COLOR};
-    border-radius: {RADIUS};
-    padding: 8px 24px;
-    font-weight: bold;
-    font-size: 13px;
-}
-QPushButton[class="SecondaryButton"]:hover, QPushButton#secondary_btn:hover {
-    background-color: {ACCENT_COLOR};
-    color: {SIDEBAR_BG};
-    border-color: {ACCENT_COLOR};
-}
 QPushButton {
     outline: none;
-}
-QPushButton[class="DangerButton"], QPushButton#danger_btn {
-    background-color: {ERROR_COLOR};
-    color: {SIDEBAR_BG};
-    font-size: 14px;
-    font-weight: bold;
-    padding: 8px 24px;
-    border-radius: {RADIUS};
-    border: 1px solid transparent;
-}
-QPushButton[class="DangerButton"]:hover, QPushButton#danger_btn:hover {
-    background-color: #ef4444;
-}
-QPushButton[class="PrimaryButton"]:pressed, QPushButton#primary_btn:pressed {
-    background-color: {ACCENT_HOVER};
-}
-QPushButton[class="SecondaryButton"]:pressed, QPushButton#secondary_btn:pressed {
-    background-color: rgba(137, 180, 250, 0.12);
-}
-QPushButton[class="DangerButton"]:pressed, QPushButton#danger_btn:pressed {
-    background-color: #dc2626;
 }
 
 /* --- Disabled States (Material Design 3 State Tokens) --- */
@@ -152,18 +104,6 @@ QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QComboBox:disab
 
 
 /* --- Atom Inputs & Labels --- */
-QLineEdit[class="FormLineEdit"], QLineEdit#form_input {
-    background-color: {CARD_BG};
-    color: {TEXT_COLOR};
-    border: {BORDER_WIDTH} solid {BORDER_COLOR};
-    border-radius: {RADIUS};
-    padding: 8px 12px;
-    font-size: 13px;
-}
-QLineEdit[class="FormLineEdit"]:focus, QLineEdit#form_input:focus {
-    border: {BORDER_WIDTH} solid {ACCENT_COLOR};
-    background-color: {CARD_BG};
-}
 
 QLabel[class="HeaderLabel"], QLabel#header_lbl {
     font-size: 20px;
@@ -202,26 +142,6 @@ QCheckBox:disabled {
 }
 
 /* --- Settings Container & Combo --- */
-QComboBox {
-    background-color: {CARD_BG};
-    border: {BORDER_WIDTH} solid {BORDER_COLOR};
-    color: {TEXT_COLOR};
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: {RADIUS};
-}
-QComboBox:hover, QComboBox:focus {
-    border: {BORDER_WIDTH} solid {ACCENT_COLOR};
-}
-QComboBox QAbstractItemView {
-    background-color: {POPUP_BG};
-    color: {TEXT_COLOR};
-    selection-background-color: {ACCENT_COLOR};
-    selection-color: {SIDEBAR_BG};
-    border: {BORDER_WIDTH} solid {BORDER_COLOR};
-    border-radius: {RADIUS};
-    padding: 4px;
-}
 QFrame#settings_container {
     background-color: {CARD_BG};
     border: {BORDER_WIDTH} solid {BORDER_COLOR};
@@ -480,64 +400,4 @@ QMenu::separator {
     margin: 4px 0px;
 }
 
-/* Container Atoms Styling */
-QFrame[class="CardContainer"] {
-    background-color: {CARD_BG};
-    border: {BORDER_WIDTH} solid {BORDER_COLOR};
-    border-radius: {RADIUS};
-}
-QFrame[class="PanelContainer"] {
-    background-color: {SIDEBAR_BG};
-    border: {BORDER_WIDTH} solid {BORDER_COLOR};
-    border-radius: {RADIUS};
-}
 
-/* Table Widget Styling */
-QTableWidget {
-    background-color: transparent;
-    color: {TEXT_COLOR};
-    gridline-color: {BORDER_COLOR};
-    border: none;
-    font-family: {FONT_FAMILY};
-    font-size: 13px;
-}
-QTableWidget::item {
-    padding: 2px 8px;
-    border-bottom: 1px solid {BORDER_COLOR};
-}
-QTableWidget::item:selected {
-    background-color: rgba(137, 180, 250, 0.15); /* Accent color with opacity */
-    color: {ACCENT_COLOR};
-}
-QTableWidget QTableCornerButton::section {
-    background-color: {SIDEBAR_BG};
-    border: none;
-    border-bottom: 2px solid {BORDER_COLOR};
-}
-
-QHeaderView::section {
-    background-color: {SIDEBAR_BG};
-    color: {SUBTEXT_COLOR};
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 2px solid {BORDER_COLOR};
-    border-right: 1px solid {BORDER_COLOR};
-    font-weight: bold;
-    font-size: 12px;
-    text-align: left;
-}
-QHeaderView::section:last {
-    border-right: none;
-}
-
-/* Table Cell Embedded Inputs & Editors */
-QTableWidget QLineEdit, QTableWidget QLineEdit#form_input {
-    padding: 2px 8px;
-    font-size: 13px;
-    border-radius: {RADIUS};
-}
-QTableWidget QComboBox {
-    padding: 2px 24px 2px 8px;
-    font-size: 13px;
-    border-radius: {RADIUS};
-}

@@ -1,8 +1,11 @@
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt
+from typing import Any
 
 
 class HeaderLabel(QLabel):
+
     def __init__(self, text, parent=None):
         super().__init__(text, parent)
         self.setFont(QFont("Inter", 16, QFont.Weight.Bold))
@@ -11,15 +14,12 @@ class HeaderLabel(QLabel):
 
 
 class BodyLabel(QLabel):
+
     def __init__(self, text, parent=None):
         super().__init__(text, parent)
         self.setFont(QFont("Inter", 11))
         self.setProperty("class", "BodyLabel")
         self.setObjectName("body_lbl")
-
-
-from PyQt6.QtCore import Qt
-from typing import Any
 
 
 class ClickableLabel(QLabel):

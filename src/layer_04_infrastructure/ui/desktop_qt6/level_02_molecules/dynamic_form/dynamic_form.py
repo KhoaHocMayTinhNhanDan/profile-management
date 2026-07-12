@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
 )
 from PyQt6.QtCore import QDate
-from ..level_01_atoms.inputs import FormLineEdit
+from ...level_01_atoms import FormLineEdit
 
 
 class DynamicForm(QWidget):

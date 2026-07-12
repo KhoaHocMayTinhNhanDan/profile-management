@@ -1,0 +1,79 @@
+QPushButton[class="PrimaryButton"], QPushButton#primary_btn {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 24px;
+    border-radius: {RADIUS};
+    border: 1px solid transparent;
+}
+
+QPushButton[class="PrimaryButton"]:hover, QPushButton#primary_btn:hover {
+    background-color: {ACCENT_HOVER};
+}
+
+QPushButton[class="PrimaryButton"]:pressed, QPushButton#primary_btn:pressed {
+    background-color: {ACCENT_HOVER};
+}
+
+QPushButton[class="SecondaryButton"], QPushButton#secondary_btn {
+    background-color: rgba(30, 41, 59, 0.4);
+    color: {ACCENT_COLOR};
+    border: 1px solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+    padding: 8px 24px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+QPushButton[class="SecondaryButton"]:hover, QPushButton#secondary_btn:hover {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+    border-color: {ACCENT_COLOR};
+}
+
+QPushButton[class="SecondaryButton"]:pressed, QPushButton#secondary_btn:pressed {
+    background-color: rgba(137, 180, 250, 0.12);
+}
+
+QPushButton[class="DangerButton"], QPushButton#danger_btn {
+    background-color: {ERROR_COLOR};
+    color: {SIDEBAR_BG};
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 24px;
+    border-radius: {RADIUS};
+    border: 1px solid transparent;
+}
+
+QPushButton[class="DangerButton"]:hover, QPushButton#danger_btn:hover {
+    background-color: #ef4444;
+}
+
+QPushButton[class="DangerButton"]:pressed, QPushButton#danger_btn:pressed {
+    background-color: #dc2626;
+}
+
+QPushButton {
+    outline: none;
+}
+
+QPushButton:disabled {
+    background-color: rgba(49, 50, 68, 0.38);
+    color: rgba(205, 214, 244, 0.38);
+    border: 1px solid transparent;
+}
+
+/* Embedded Buttons inside Tables to prevent text clipping */
+QTableWidget QPushButton[class="SecondaryButton"],
+QTableWidget QPushButton[class="DangerButton"],
+QTableWidget QPushButton[class="PrimaryButton"],
+QTableWidget QPushButton#secondary_btn,
+QTableWidget QPushButton#danger_btn,
+QTableWidget QPushButton#primary_btn {
+    padding: 0px 8px;
+    font-size: 12px;
+    min-height: 24px;
+    max-height: 24px;
+    margin: 0px;
+}

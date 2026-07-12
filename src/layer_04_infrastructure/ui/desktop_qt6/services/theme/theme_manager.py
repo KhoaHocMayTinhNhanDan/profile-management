@@ -110,6 +110,26 @@ class ThemeManager:
             except Exception as e:
                 print(f"[ThemeManager] Lỗi đọc base QSS: {e}")
 
+        # Scan desktop_qt6 directory for all *.qss files from other directories
+        desktop_qt6_dir = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        component_qss_contents = []
+        for root, dirs, files in os.walk(desktop_qt6_dir):
+            if "services" in root and "theme" in root:
+                continue
+            for file in files:
+                if file.endswith(".qss"):
+                    qss_fpath = os.path.join(root, file)
+                    try:
+                        with open(qss_fpath, "r", encoding="utf-8") as f:
+                            component_qss_contents.append(f.read())
+                    except Exception as e:
+                        print(f"[ThemeManager] Lỗi đọc QSS từ {qss_fpath}: {e}")
+
+        if component_qss_contents:
+            qss_content += "\n\n" + "\n\n".join(component_qss_contents)
+
         qss = qss_content
         for key, val in final_palette.items():
             qss = qss.replace(f"{{{key}}}", str(val))
