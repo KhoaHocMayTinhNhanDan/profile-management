@@ -46,6 +46,10 @@ class DocumentManagerPage(BasePageTemplate):
         self.use_update_profile.profile_updated.connect(self._on_profile_updated)
         self.use_update_profile.error.connect(self._on_profile_error)
 
+        self.use_checkout.loading.connect(self._set_loading)
+        self.use_checkin.loading.connect(self._set_loading)
+        self.use_update_profile.loading.connect(self._set_loading)
+
         self.generate_controller = context.container.resolve(
             GenerateDocumentFromTemplateController
         )
@@ -82,6 +86,8 @@ class DocumentManagerPage(BasePageTemplate):
 
         self.btn_save_info = PrimaryButton("Lưu thông tin")
         self.btn_save_info.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_save_info.setShortcut("Ctrl+S")
+        self.btn_save_info.setToolTip("Lưu thông tin hồ sơ (Ctrl+S)")
         self.btn_save_info.clicked.connect(self._save_profile_info)
         self.left_layout.addWidget(self.btn_save_info)
 
@@ -202,6 +208,13 @@ class DocumentManagerPage(BasePageTemplate):
     @pyqtSlot(str)
     def _on_profile_error(self, err_msg: str):
         QMessageBox.critical(self, "Lỗi Nghiệp Vụ", err_msg)
+
+    @pyqtSlot(bool)
+    def _set_loading(self, is_loading: bool):
+        if is_loading:
+            self.setCursor(Qt.CursorShape.WaitCursor)
+        else:
+            self.unsetCursor()
 
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
