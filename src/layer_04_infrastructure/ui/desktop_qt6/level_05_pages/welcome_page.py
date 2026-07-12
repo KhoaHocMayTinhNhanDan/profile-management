@@ -11,16 +11,13 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QWidget,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSlot
 from typing import Any
 import os
-import shutil
 from src.shared.logger.app_logger import get_logger
 from ..level_01_atoms.labels import HeaderLabel, BodyLabel
 from ..level_04_templates.page_template import BasePageTemplate
-from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import (
-    SqliteDocumentStore,
-)
+from ..hooks.use_welcome_data import UseWelcomeData
 
 logger = get_logger(__name__)
 
@@ -43,7 +40,14 @@ class StatCard(QFrame):
 class WelcomePage(BasePageTemplate):
     def __init__(self, context):
         super().__init__("welcome", context)
-        self.store = SqliteDocumentStore()
+        self.profiles = []
+        self.templates = []
+
+        self.use_welcome_data = UseWelcomeData(context, self)
+        self.use_welcome_data.data_loaded.connect(self._on_data_loaded)
+        self.use_welcome_data.template_deleted.connect(self._on_template_deleted)
+        self.use_welcome_data.loading.connect(self._set_loading)
+        self.use_welcome_data.error.connect(self._on_error)
 
         # Quick stats layout
         self.stats_layout = QHBoxLayout()
@@ -178,12 +182,12 @@ class WelcomePage(BasePageTemplate):
         self.btn_create_template.clicked.connect(self._go_to_create_template)
         self.btn_create_profile.clicked.connect(self._go_to_create_profile)
 
-        self.refresh_data()
+        self.use_welcome_data.load_data()
 
     def refresh_data(self):
         # Update cards
-        profiles = self.store.list_documents("profiles")
-        templates = self.store.list_documents("profile_templates")
+        profiles = self.profiles
+        templates = self.templates
 
         self.total_profiles_card.value_label.setText(str(len(profiles)))
         self.total_templates_card.value_label.setText(str(len(templates)))
@@ -314,22 +318,8 @@ class WelcomePage(BasePageTemplate):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            # Delete from DB
-            self.store.delete_document("profile_templates", template_id)
-
-            # Clean up local templates folder
-            t_dir = os.path.join("appdata", "templates", template_id)
-            if os.path.exists(t_dir):
-                try:
-                    shutil.rmtree(t_dir)
-                except Exception as e:
-                    logger.error(f"Failed to delete templates folder {t_dir}: {e}")
-
-            msg = f"✓ Đã xóa mẫu hồ sơ '{template_name}' khỏi hệ thống thành công!"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 5000)
-            self.refresh_data()
+            self._deleting_template_name = template_name
+            self.use_welcome_data.delete_template(template_id)
 
     def _on_row_double_clicked(self, item: Any):
         row = item.row()
@@ -359,13 +349,48 @@ class WelcomePage(BasePageTemplate):
             self.refresh_data()
 
     def _go_to_next_page(self):
-        profiles = self.store.list_documents("profiles")
+        profiles = self.profiles
         total_pages = max(
             1, (len(profiles) + self.items_per_page - 1) // self.items_per_page
         )
         if self.current_page < total_pages:
             self.current_page += 1
             self.refresh_data()
+
+    @pyqtSlot(list, list)
+    def _on_data_loaded(self, profiles: list, templates: list):
+        self.profiles = profiles
+        self.templates = templates
+        self.refresh_data()
+
+    @pyqtSlot(str)
+    def _on_template_deleted(self, template_id: str):
+        del_name = getattr(self, "_deleting_template_name", template_id)
+        msg = f"✓ Đã xóa mẫu hồ sơ '{del_name}' khỏi hệ thống thành công!"
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "show_status_message"):
+            main_win.show_status_message(msg, "success", 5000)
+        self.use_welcome_data.load_data()
+
+    @pyqtSlot(bool)
+    def _set_loading(self, is_loading: bool):
+        main_win: Any = self.window()
+        if is_loading:
+            self.setCursor(Qt.CursorShape.WaitCursor)
+            self.btn_create_template.setEnabled(False)
+            self.btn_create_profile.setEnabled(False)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(True)
+        else:
+            self.unsetCursor()
+            self.btn_create_template.setEnabled(True)
+            self.btn_create_profile.setEnabled(True)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(False)
+
+    @pyqtSlot(str)
+    def _on_error(self, err_msg: str):
+        QMessageBox.critical(self, "Lỗi hệ thống", err_msg)
 
     def retranslate_ui(self, lang_code: str):
         self.total_profiles_card.title_label.setText(
