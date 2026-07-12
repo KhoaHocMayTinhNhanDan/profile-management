@@ -252,13 +252,20 @@ class DocumentManagerPage(BasePageTemplate):
                 main_win: Any = self.window()
                 if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
                     main_win.statusBar().showMessage(
-                        f"✓ Đã mở '{local_name}'. Hãy sửa trong Word, bấm Ctrl+S rồi bấm 'Hoàn thành sửa' để lưu.",
+                        f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
                         9000,
                     )
             except Exception as e:
                 QMessageBox.critical(self, "Lỗi", f"Không thể mở file bằng Word: {e}")
                 return
 
+            # Start Watching the temp file for automatic sync
+            self.watcher.start_watching(
+                temp_file_path,
+                lambda path, size, checksum: self._on_document_saved_watcher(
+                    doc_id, file_path, path, size, checksum
+                ),
+            )
             self.refresh_documents()
         else:
             QMessageBox.critical(self, "Lỗi Khóa Tài Liệu", res.get("message"))
@@ -393,6 +400,102 @@ class DocumentManagerPage(BasePageTemplate):
         self.refresh_dynamic_inputs()
         self.refresh_documents()
         logger.info("--- END _finish_editing_doc ---")
+
+    def _on_document_saved_watcher(
+        self,
+        doc_id: str,
+        original_path: str,
+        temp_path: str,
+        new_size: int,
+        new_checksum: str,
+    ):
+        logger.info(
+            f"--- WATCHER TRIGGERED: _on_document_saved_watcher for doc_id: {doc_id} ---"
+        )
+
+        # 1. Copy the file back on the background thread
+        import shutil
+        import time
+
+        copied = False
+        last_err = None
+        for attempt in range(5):
+            try:
+                shutil.copy2(temp_path, original_path)
+                copied = True
+                logger.info(f"Background thread copy2 succeeded on attempt {attempt+1}")
+                break
+            except Exception as e:
+                last_err = e
+                logger.warning(
+                    f"Background thread copy2 failed (attempt {attempt+1}): {e}"
+                )
+                time.sleep(0.5)
+
+        if not copied:
+            logger.error(f"Failed to copy back changed file: {last_err}")
+            QMetaObject.invokeMethod(
+                self,
+                "_on_watcher_sync_failed",
+                Qt.ConnectionType.QueuedConnection,
+                Q_ARG(str, f"Không thể đồng bộ vì tệp đang bị khóa: {last_err}"),
+            )
+            return
+
+        # 2. Run checkin on the background thread
+        new_url = "file:///" + os.path.abspath(original_path).replace("\\", "/")
+        req = {
+            "profile_id": self.profile_id,
+            "document_id": doc_id,
+            "user_id": "user_dong",
+            "new_url": new_url,
+            "new_size": new_size,
+            "new_checksum": new_checksum,
+        }
+
+        logger.info(f"Background thread executing checkin controller with: {req}")
+        res = asyncio.run(self.checkin_controller.handle_request(req))
+        logger.info(f"Background thread checkin result: {res.get('status')}")
+
+        # Stop watching after change detected
+        self.watcher.stop_watching(temp_path)
+
+        # 3. Clean up temp file
+        try:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+                logger.info(f"Cleaned up temp file: {temp_path}")
+        except Exception as e:
+            logger.warning(f"Could not delete temp file: {e}")
+
+        # 4. Safely trigger GUI refresh on the main thread
+        QMetaObject.invokeMethod(
+            self,
+            "_on_watcher_sync_completed",
+            Qt.ConnectionType.QueuedConnection,
+            Q_ARG(dict, res),
+        )
+
+    @pyqtSlot(dict)
+    def _on_watcher_sync_completed(self, res: dict):
+        logger.info("Main thread: _on_watcher_sync_completed received signal.")
+        if res.get("status") == "success":
+            msg = f"✓ Tự động đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
+            main_win: Any = self.window()
+            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+                main_win.statusBar().showMessage(msg, 6000)
+        else:
+            QMessageBox.critical(self, "Lỗi Đồng Bộ Tự Động", res.get("message"))
+        self.refresh_dynamic_inputs()
+        self.refresh_documents()
+
+    @pyqtSlot(str)
+    def _on_watcher_sync_failed(self, error_msg: str):
+        QMessageBox.warning(
+            self,
+            "Lỗi Khóa File",
+            f"{error_msg}\n\nVui lòng nhấn Lưu (Ctrl+S) trong Word, đóng Word lại rồi thử lại!",
+        )
 
     def _generate_from_template(self):
         # Get profile
