@@ -1,6 +1,6 @@
 QPushButton[class="PrimaryButton"], QPushButton#primary_btn {
     background-color: {ACCENT_COLOR};
-    color: {SIDEBAR_BG};
+    color: {ON_PRIMARY};
     font-size: 14px;
     font-weight: bold;
     padding: 8px 24px;
@@ -27,18 +27,20 @@ QPushButton[class="SecondaryButton"], QPushButton#secondary_btn {
 }
 
 QPushButton[class="SecondaryButton"]:hover, QPushButton#secondary_btn:hover {
-    background-color: {ACCENT_COLOR};
-    color: {SIDEBAR_BG};
+    background-color: {SECONDARY_HOVER};
+    color: {ACCENT_COLOR};
     border-color: {ACCENT_COLOR};
 }
 
 QPushButton[class="SecondaryButton"]:pressed, QPushButton#secondary_btn:pressed {
-    background-color: rgba(137, 180, 250, 0.12);
+    background-color: {SECONDARY_PRESSED};
+    color: {ACCENT_COLOR};
+    border-color: {ACCENT_COLOR};
 }
 
 QPushButton[class="DangerButton"], QPushButton#danger_btn {
     background-color: {ERROR_COLOR};
-    color: {SIDEBAR_BG};
+    color: {ON_ERROR};
     font-size: 14px;
     font-weight: bold;
     padding: 8px 24px;

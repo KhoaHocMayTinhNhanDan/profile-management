@@ -165,6 +165,10 @@ class ThemeManager:
                 "RADIUS": "8px",
                 "BORDER_WIDTH": "1px",
                 "FONT_FAMILY": "Inter, Roboto, sans-serif",
+                "ON_PRIMARY": "#11111b",
+                "ON_ERROR": "#11111b",
+                "SECONDARY_HOVER": "rgba(137, 180, 250, 0.08)",
+                "SECONDARY_PRESSED": "rgba(137, 180, 250, 0.15)",
             },
             "light": {
                 "DARK_BG": "#f8f9fa",
@@ -180,5 +184,9 @@ class ThemeManager:
                 "RADIUS": "8px",
                 "BORDER_WIDTH": "1px",
                 "FONT_FAMILY": "Inter, Roboto, sans-serif",
+                "ON_PRIMARY": "#ffffff",
+                "ON_ERROR": "#ffffff",
+                "SECONDARY_HOVER": "rgba(79, 70, 229, 0.08)",
+                "SECONDARY_PRESSED": "rgba(79, 70, 229, 0.15)",
             },
         }
