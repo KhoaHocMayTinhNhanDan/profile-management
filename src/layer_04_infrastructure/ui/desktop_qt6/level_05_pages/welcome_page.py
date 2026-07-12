@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 
 
 from ..level_02_molecules.stat_card import StatCard
+from ..level_01_atoms.containers import CardContainer
 
 
 class WelcomePage(BasePageTemplate):
@@ -75,11 +76,12 @@ class WelcomePage(BasePageTemplate):
         self.current_page = 1
         self.items_per_page = 10
 
-        # Split Layout for List of Profiles and List of Templates (Vertical stacking)
-        # 1. Profiles Section
+        # 1. Profiles Section (Wrapped in CardContainer)
+        self.profiles_card = CardContainer(self)
+
         self.table_label = QLabel(self.i18n_manager.translate("lbl_profiles_list"))
         self.table_label.setObjectName("table_title_lbl")
-        self.content_layout.addWidget(self.table_label)
+        self.profiles_card.addWidget(self.table_label)
 
         self.table = QTableWidget()
         v_hdr = self.table.verticalHeader()
@@ -103,7 +105,7 @@ class WelcomePage(BasePageTemplate):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.itemDoubleClicked.connect(self._on_row_double_clicked)
-        self.content_layout.addWidget(self.table)
+        self.profiles_card.addWidget(self.table)
 
         # Pagination Layout under self.table
         self.pagination_layout = QHBoxLayout()
@@ -130,12 +132,15 @@ class WelcomePage(BasePageTemplate):
         self.pagination_layout.addWidget(self.btn_next_page)
         self.pagination_layout.addStretch()
 
-        self.content_layout.addLayout(self.pagination_layout)
+        self.profiles_card.addLayout(self.pagination_layout)
+        self.content_layout.addWidget(self.profiles_card)
 
-        # 2. Templates Section
+        # 2. Templates Section (Wrapped in CardContainer)
+        self.templates_card = CardContainer(self)
+
         self.templates_label = QLabel("Danh sách mẫu hồ sơ trong hệ thống:")
         self.templates_label.setObjectName("table_title_lbl")
-        self.content_layout.addWidget(self.templates_label)
+        self.templates_card.addWidget(self.templates_label)
 
         self.templates_table = QTableWidget()
         self.templates_table.setColumnCount(6)
@@ -164,7 +169,8 @@ class WelcomePage(BasePageTemplate):
         if v_hdr is not None:
             v_hdr.setDefaultSectionSize(38)
             v_hdr.setVisible(False)
-        self.content_layout.addWidget(self.templates_table)
+        self.templates_card.addWidget(self.templates_table)
+        self.content_layout.addWidget(self.templates_card)
 
         # Connect Actions
         self.btn_create_template.clicked.connect(self._go_to_create_template)
