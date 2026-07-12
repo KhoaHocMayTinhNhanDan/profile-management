@@ -315,13 +315,16 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
                     )
                     r_node = etree.SubElement(sdtContent, f"{{{w_ns}}}r", nsmap=nsmap)
 
-                    # Copy run properties from the matched run to the sdt Content run
+                    # Copy run properties from the matched run to sdtPr and r_node
                     run_el = getattr(run, "_r", None)
                     rPr = None
                     if run_el is not None:
                         rPr = run_el.find(f"{{{w_ns}}}rPr")
                         if rPr is not None:
-                            r_node.append(copy.deepcopy(rPr))
+                            # 1. Insert into sdtPr at index 0 to obey OpenXML schema order
+                            sdtPr.insert(0, copy.deepcopy(rPr))
+                            # 2. Insert into r_node at index 0
+                            r_node.insert(0, copy.deepcopy(rPr))
 
                     t_node = etree.SubElement(r_node, f"{{{w_ns}}}t", nsmap=nsmap)
                     t_node.text = f"[{field}]"
