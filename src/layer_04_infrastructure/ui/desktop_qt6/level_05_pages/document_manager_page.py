@@ -49,7 +49,6 @@ class DocumentManagerPage(BasePageTemplate):
 
         self.use_checkout.loading.connect(self._set_loading)
         self.use_checkin.loading.connect(self._set_loading)
-        self.use_update_profile.loading.connect(self._set_loading)
         self.use_generate.loading.connect(self._set_loading)
 
         self.profile_id = ""
@@ -230,9 +229,7 @@ class DocumentManagerPage(BasePageTemplate):
             self.btn_back.setEnabled(False)
             self.table.setEnabled(False)
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(
-                    "Đang xử lý tác vụ ngầm, vui lòng chờ...", 0
-                )
+                main_win.statusBar().showMessage("Đang xử lý, vui lòng chờ...", 0)
         else:
             self.unsetCursor()
             self.btn_save_info.setEnabled(True)
@@ -241,7 +238,7 @@ class DocumentManagerPage(BasePageTemplate):
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
                 if (
                     main_win.statusBar().currentMessage()
-                    == "Đang xử lý tác vụ ngầm, vui lòng chờ..."
+                    == "Đang xử lý, vui lòng chờ..."
                 ):
                     main_win.statusBar().clearMessage()
 
