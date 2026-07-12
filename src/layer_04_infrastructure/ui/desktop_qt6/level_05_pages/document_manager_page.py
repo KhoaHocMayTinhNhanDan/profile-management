@@ -213,8 +213,14 @@ class DocumentManagerPage(BasePageTemplate):
     def _set_loading(self, is_loading: bool):
         if is_loading:
             self.setCursor(Qt.CursorShape.WaitCursor)
+            self.btn_save_info.setEnabled(False)
+            self.btn_back.setEnabled(False)
+            self.table.setEnabled(False)
         else:
             self.unsetCursor()
+            self.btn_save_info.setEnabled(True)
+            self.btn_back.setEnabled(True)
+            self.table.setEnabled(True)
 
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
