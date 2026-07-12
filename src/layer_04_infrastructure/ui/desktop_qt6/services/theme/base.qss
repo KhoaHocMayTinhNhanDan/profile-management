@@ -417,3 +417,28 @@ QLabel[class="placeholder_success"] {
     font-weight: bold;
     color: {SUCCESS_COLOR};
 }
+
+/* QMessageBox & QDialog Theme Styling */
+QDialog, QMessageBox {
+    background-color: {DARK_BG};
+    color: {TEXT_COLOR};
+}
+QDialog QLabel, QMessageBox QLabel {
+    color: {TEXT_COLOR};
+    font-family: {FONT_FAMILY};
+}
+QDialog QPushButton, QMessageBox QPushButton {
+    background-color: {CARD_BG};
+    color: {TEXT_COLOR};
+    border: 1px solid {BORDER_COLOR};
+    border-radius: {RADIUS};
+    padding: 6px 16px;
+    font-weight: bold;
+    font-size: 13px;
+    min-width: 80px;
+}
+QDialog QPushButton:hover, QMessageBox QPushButton:hover {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+    border-color: {ACCENT_COLOR};
+}
