@@ -29,7 +29,7 @@ QComboBox QAbstractItemView {
     background-color: {POPUP_BG};
     color: {TEXT_COLOR};
     selection-background-color: {ACCENT_COLOR};
-    selection-color: {SIDEBAR_BG};
+    selection-color: {ON_PRIMARY};
     border: {BORDER_WIDTH} solid {BORDER_COLOR};
     border-radius: {RADIUS};
     padding: 4px;
