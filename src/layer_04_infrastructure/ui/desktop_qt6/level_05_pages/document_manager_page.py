@@ -213,7 +213,9 @@ class DocumentManagerPage(BasePageTemplate):
     def _on_generate_finished(self, success_count: int, total_count: int):
         if success_count > 0:
             msg = f"✓ Sinh tài liệu thành công: {success_count}/{total_count} file đã được đồng bộ!"
-            self.show_status_message(msg, "#a6e3a1", 5000)
+            main_win: Any = self.window()
+            if main_win and hasattr(main_win, "show_status_message"):
+                main_win.show_status_message(msg, "success", 5000)
         else:
             QMessageBox.critical(
                 self, "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
@@ -296,11 +298,13 @@ class DocumentManagerPage(BasePageTemplate):
     @pyqtSlot(dict)
     def _on_checkout_success(self, res: dict):
         local_name = res.get("local_filename", "")
-        self.show_status_message(
-            f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
-            "#89b4fa",
-            9000,
-        )
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "show_status_message"):
+            main_win.show_status_message(
+                f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
+                "info",
+                9000,
+            )
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
@@ -313,7 +317,9 @@ class DocumentManagerPage(BasePageTemplate):
     @pyqtSlot(dict)
     def _on_checkin_success(self, res: dict):
         msg = f"✓ Tự động đồng bộ thành công: Tài liệu đã được lưu lại hệ thống (Phiên bản mới: {res.get('new_version')})"
-        self.show_status_message(msg, "#a6e3a1", 6000)
+        main_win: Any = self.window()
+        if main_win and hasattr(main_win, "show_status_message"):
+            main_win.show_status_message(msg, "success", 6000)
         if self.profile_id:
             self.use_update_profile.load_profile(self.profile_id)
 
@@ -497,16 +503,3 @@ class DocumentManagerPage(BasePageTemplate):
             dynamic_data[f_name] = val
 
         self.use_update_profile.update_profile(self.profile_id, dynamic_data)
-
-    def show_status_message(
-        self, msg: str, color_type: str = "#a6e3a1", timeout_ms: int = 5000
-    ):
-        main_win: Any = self.window()
-        if main_win and hasattr(main_win, "show_status_message"):
-            # Map legacy hex color parameters to central status types
-            status_type = "success"
-            if color_type == "#89b4fa":
-                status_type = "info"
-            elif color_type == "#f38ba8":
-                status_type = "error"
-            main_win.show_status_message(msg, status_type, timeout_ms)
