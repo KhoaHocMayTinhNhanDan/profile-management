@@ -22,19 +22,7 @@ from ..hooks.use_welcome_data import UseWelcomeData
 logger = get_logger(__name__)
 
 
-class StatCard(QFrame):
-    def __init__(self, title: str, val: str, parent=None):
-        super().__init__(parent)
-        self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setProperty("class", "StatCard")
-        self.setObjectName("stat_card")
-        lay = QVBoxLayout(self)
-
-        self.title_label = BodyLabel(title)
-        self.value_label = HeaderLabel(val)
-
-        lay.addWidget(self.title_label)
-        lay.addWidget(self.value_label)
+from ..level_02_molecules.stat_card import StatCard
 
 
 class WelcomePage(BasePageTemplate):

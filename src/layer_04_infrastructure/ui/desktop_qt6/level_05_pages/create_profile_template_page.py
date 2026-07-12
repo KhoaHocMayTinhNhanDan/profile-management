@@ -28,22 +28,7 @@ from typing import Any
 logger = get_logger(__name__)
 
 
-class ClickableLabel(QLabel):
-    """Custom QLabel that executes a callback on left click, styled as an interactive link."""
-
-    def __init__(self, text="", parent=None):
-        super().__init__(text, parent)
-        self.callback: Any = None
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-
-    def mousePressEvent(self, ev):
-        if (
-            ev is not None
-            and ev.button() == Qt.MouseButton.LeftButton
-            and self.callback
-        ):
-            self.callback()
-        super().mousePressEvent(ev)
+from ..level_01_atoms.labels import ClickableLabel
 
 
 class RowSelectorFilter(QObject):
