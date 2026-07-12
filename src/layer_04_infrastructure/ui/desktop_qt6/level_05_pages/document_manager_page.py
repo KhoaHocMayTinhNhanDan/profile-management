@@ -147,49 +147,6 @@ class DocumentManagerPage(BasePageTemplate):
 
         self.info_widgets_map = {}
 
-        # Styled loading widget for status bar (including a pulsing indeterminate QProgressBar)
-        self.status_loading_widget = QFrame()
-        self.status_loading_widget.setObjectName("status_loading_container")
-        self.status_loading_widget.setStyleSheet(
-            "background: transparent; border: none;"
-        )
-
-        status_layout = QHBoxLayout(self.status_loading_widget)
-        status_layout.setContentsMargins(5, 0, 5, 0)
-        status_layout.setSpacing(10)
-
-        self.status_loading_label = QLabel("Đang xử lý, vui lòng chờ...")
-        self.status_loading_label.setStyleSheet(
-            "color: #cdd6f4; font-size: 13px; font-weight: bold;"
-        )
-
-        self.status_progress_bar = QProgressBar()
-        self.status_progress_bar.setRange(0, 0)  # Pulse animation
-        self.status_progress_bar.setTextVisible(False)
-        self.status_progress_bar.setFixedHeight(12)
-        self.status_progress_bar.setFixedWidth(120)
-        self.status_progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid rgba(137, 180, 250, 0.4);
-                border-radius: 6px;
-                background-color: rgba(30, 41, 59, 0.6);
-            }
-            QProgressBar::chunk {
-                background-color: #89b4fa;
-                border-radius: 5px;
-            }
-        """)
-
-        status_layout.addWidget(self.status_loading_label)
-        status_layout.addWidget(self.status_progress_bar)
-
-        # Styled message label for permanent status notifications (right-aligned)
-        self.status_msg_label = QLabel()
-        self.status_msg_label.setStyleSheet(
-            "color: #a6e3a1; font-size: 13px; font-weight: bold; background: transparent;"
-        )
-        self.status_msg_label.hide()
-
     def set_profile(self, profile_id: str):
         self.profile_id = profile_id
         self.lbl_subtitle.setText(f"Hồ sơ: {profile_id}")
@@ -271,19 +228,15 @@ class DocumentManagerPage(BasePageTemplate):
             self.btn_save_info.setEnabled(False)
             self.btn_back.setEnabled(False)
             self.table.setEnabled(False)
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().removeWidget(self.status_loading_widget)
-                main_win.statusBar().addPermanentWidget(self.status_loading_widget)
-                self.status_loading_widget.show()
-                main_win.statusBar().clearMessage()
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(True)
         else:
             self.unsetCursor()
             self.btn_save_info.setEnabled(True)
             self.btn_back.setEnabled(True)
             self.table.setEnabled(True)
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                self.status_loading_widget.hide()
-                main_win.statusBar().removeWidget(self.status_loading_widget)
+            if main_win and hasattr(main_win, "set_loading"):
+                main_win.set_loading(False)
 
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
@@ -540,28 +493,14 @@ class DocumentManagerPage(BasePageTemplate):
         self.use_update_profile.update_profile(self.profile_id, dynamic_data)
 
     def show_status_message(
-        self, msg: str, color: str = "#a6e3a1", timeout_ms: int = 5000
+        self, msg: str, color_type: str = "#a6e3a1", timeout_ms: int = 5000
     ):
         main_win: Any = self.window()
-        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-            # Style the label according to success (green) or info (blue)
-            self.status_msg_label.setStyleSheet(
-                f"color: {color}; font-size: 13px; font-weight: bold; background: transparent; padding-right: 10px;"
-            )
-            self.status_msg_label.setText(msg)
-
-            # Avoid duplicate addition
-            main_win.statusBar().removeWidget(self.status_msg_label)
-            main_win.statusBar().addPermanentWidget(self.status_msg_label)
-            self.status_msg_label.show()
-
-            # Use QTimer to hide it after timeout_ms
-            from PyQt6.QtCore import QTimer
-
-            QTimer.singleShot(timeout_ms, self._clear_status_message)
-
-    def _clear_status_message(self):
-        main_win: Any = self.window()
-        self.status_msg_label.hide()
-        if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-            main_win.statusBar().removeWidget(self.status_msg_label)
+        if main_win and hasattr(main_win, "show_status_message"):
+            # Map legacy hex color parameters to central status types
+            status_type = "success"
+            if color_type == "#89b4fa":
+                status_type = "info"
+            elif color_type == "#f38ba8":
+                status_type = "error"
+            main_win.show_status_message(msg, status_type, timeout_ms)
