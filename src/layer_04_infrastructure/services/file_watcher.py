@@ -106,7 +106,9 @@ class FileWatcherService(QObject):
         if dir_path not in self._watch_configs:
             return
 
-        for config in self._watch_configs[dir_path]:
+        # Sử dụng list() để copy danh sách cấu hình, tránh lỗi sửa đổi list khi đang lặp (RuntimeError)
+        # do hàm callback on_change có thể gọi stop_watching làm thay đổi size của list.
+        for config in list(self._watch_configs[dir_path]):
             if config["triggered"]:
                 continue
 
