@@ -502,7 +502,7 @@ QTableWidget {
     font-size: 13px;
 }
 QTableWidget::item {
-    padding: 8px;
+    padding: 2px 8px;
     border-bottom: 1px solid {BORDER_COLOR};
 }
 QTableWidget::item:selected {

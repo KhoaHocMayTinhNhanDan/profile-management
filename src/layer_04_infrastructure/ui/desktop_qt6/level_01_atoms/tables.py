@@ -20,7 +20,7 @@ class AppTable(QTableWidget):
         v_hdr = self.verticalHeader()
         if v_hdr is not None:
             v_hdr.setVisible(False)
-            v_hdr.setDefaultSectionSize(38)
+            v_hdr.setDefaultSectionSize(42)
 
         # Mặc định kéo dãn các cột
         h_hdr = self.horizontalHeader()
