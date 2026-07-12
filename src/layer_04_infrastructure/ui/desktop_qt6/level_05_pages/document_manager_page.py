@@ -290,11 +290,25 @@ class DocumentManagerPage(BasePageTemplate):
         temp_path = os.path.abspath(os.path.join(temp_dir, name))
 
         if not os.path.exists(temp_path):
-            QMessageBox.critical(
+            reply = QMessageBox.question(
                 self,
-                "Lỗi",
-                f"Không tìm thấy file tạm để đồng bộ tại: {temp_path}",
+                "Không tìm thấy file tạm",
+                f"Không tìm thấy file tạm để đồng bộ tại:\n{temp_path}\n\n"
+                "Bạn có muốn gỡ khóa (Unlock) tài liệu này để chuyển về trạng thái 'Mở file' bình thường không?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
             )
+            if reply == QMessageBox.StandardButton.Yes:
+                profile = self.store.get_document("profiles", self.profile_id)
+                if profile:
+                    for doc in profile.get("documents", []):
+                        if doc["document_id"] == doc_id:
+                            doc["is_locked"] = False
+                            doc["locked_by"] = ""
+                            break
+                    self.store.set_document("profiles", self.profile_id, profile)
+                self.refresh_dynamic_inputs()
+                self.refresh_documents()
             return
 
         # Attempt to copy file back
