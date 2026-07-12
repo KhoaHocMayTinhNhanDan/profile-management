@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
         status_layout = QHBoxLayout(self.status_loading_widget)
         status_layout.setContentsMargins(5, 0, 5, 0)
         status_layout.setSpacing(10)
+        status_layout.setSizeConstraint(QHBoxLayout.SizeConstraint.SetFixedSize)
 
         self.status_loading_label = QLabel("Đang xử lý, vui lòng chờ...")
         self.status_loading_label.setObjectName("status_loading_label")
@@ -70,8 +71,6 @@ class MainWindow(QMainWindow):
         self.status_progress_bar.setFixedHeight(12)
         self.status_progress_bar.setFixedWidth(120)
 
-        # Add stretch to push text and progress bar close to each other on the right
-        status_layout.addStretch(1)
         status_layout.addWidget(self.status_loading_label)
         status_layout.addWidget(self.status_progress_bar)
 
