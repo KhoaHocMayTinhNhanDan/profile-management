@@ -17,14 +17,12 @@ from PyQt6.QtCore import Qt, QMetaObject, Q_ARG, pyqtSlot
 from typing import Any
 from src.shared.logger.app_logger import get_logger
 from ..level_04_templates.page_template import BasePageTemplate
-from src.layer_04_infrastructure.databases.sqlite.sqlite_document_store import (
-    SqliteDocumentStore,
-)
 from src.layer_03_interface_adapters.controllers.desktop.generate_document_from_template import (
     GenerateDocumentFromTemplateController,
 )
 from ..hooks.use_checkout_document import UseCheckoutDocument
 from ..hooks.use_checkin_document import UseCheckinDocument
+from ..hooks.use_update_profile import UseUpdateProfile
 import os
 import asyncio
 
@@ -34,15 +32,19 @@ logger = get_logger(__name__)
 class DocumentManagerPage(BasePageTemplate):
     def __init__(self, context):
         super().__init__("document_manager", context)
-        self.store = SqliteDocumentStore()
-
         self.use_checkout = UseCheckoutDocument(context, self)
         self.use_checkin = UseCheckinDocument(context, self)
+        self.use_update_profile = UseUpdateProfile(context, self)
 
         self.use_checkout.finished.connect(self._on_checkout_success)
         self.use_checkout.error.connect(self._on_checkout_error)
         self.use_checkin.finished.connect(self._on_checkin_success)
         self.use_checkin.error.connect(self._on_checkin_error)
+
+        self.use_update_profile.profile_loaded.connect(self._on_profile_loaded)
+        self.use_update_profile.template_loaded.connect(self._on_template_loaded)
+        self.use_update_profile.profile_updated.connect(self._on_profile_updated)
+        self.use_update_profile.error.connect(self._on_profile_error)
 
         self.generate_controller = context.container.resolve(
             GenerateDocumentFromTemplateController
@@ -139,24 +141,70 @@ class DocumentManagerPage(BasePageTemplate):
         self.table.itemDoubleClicked.connect(self._on_row_double_clicked)
 
         self.info_widgets_map = {}
-        self.current_template = None
 
     def set_profile(self, profile_id: str):
         self.profile_id = profile_id
         self.lbl_subtitle.setText(f"Hồ sơ: {profile_id}")
-        self.refresh_dynamic_inputs()
-        self.refresh_documents()
+        self.use_update_profile.load_profile(profile_id)
 
-    def refresh_documents(self):
+    @pyqtSlot(dict)
+    def _on_profile_loaded(self, profile: dict):
+        self.current_profile = profile
+        self._render_documents(profile.get("documents", []))
+
+        t_id = profile.get("template_id", "")
+        if t_id:
+            self.use_update_profile.load_template(t_id)
+
+    @pyqtSlot(dict)
+    def _on_template_loaded(self, template: dict):
+        self.current_template = template
+        if hasattr(self, "current_profile") and self.current_profile:
+            self._render_dynamic_inputs(self.current_profile, template)
+
+    @pyqtSlot(dict)
+    def _on_profile_updated(self, res: dict):
+        if self.current_template:
+            t_dir = self.current_template.get("template_dir", "")
+            if t_dir and os.path.exists(t_dir):
+                docx_files = sorted(
+                    [
+                        f
+                        for f in os.listdir(t_dir)
+                        if f.endswith(".docx") and not f.startswith("~$")
+                    ]
+                )
+
+                success_count = 0
+                for f in docx_files:
+                    req = {
+                        "profile_id": self.profile_id,
+                        "template_doc_path": os.path.join(t_dir, f),
+                        "output_doc_name": f,
+                    }
+                    res_gen = asyncio.run(self.generate_controller.handle_request(req))
+                    if res_gen.get("status") == "success":
+                        success_count += 1
+
+                msg = f"✓ Đã lưu thông tin và cập nhật thành công {success_count}/{len(docx_files)} tài liệu hồ sơ!"
+                main_win: Any = self.window()
+                if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+                    main_win.statusBar().showMessage(msg, 5000)
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Thông báo",
+                    "Lưu thành công, nhưng không tìm thấy thư mục mẫu để cập nhật tài liệu.",
+                )
+
+        self.use_update_profile.load_profile(self.profile_id)
+
+    @pyqtSlot(str)
+    def _on_profile_error(self, err_msg: str):
+        QMessageBox.critical(self, "Lỗi Nghiệp Vụ", err_msg)
+
+    def _render_documents(self, docs: list):
         self.table.setRowCount(0)
-        if not self.profile_id:
-            return
-
-        profile = self.store.get_document("profiles", self.profile_id)
-        if not profile:
-            return
-
-        docs = profile.get("documents", [])
         for doc in docs:
             row = self.table.rowCount()
             self.table.insertRow(row)
@@ -213,12 +261,14 @@ class DocumentManagerPage(BasePageTemplate):
                 f"✓ Đã mở '{local_name}'. Tự động đồng bộ khi bạn lưu và đóng Word.",
                 9000,
             )
-        self.refresh_documents()
+        if self.profile_id:
+            self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_checkout_error(self, error_msg: str):
         QMessageBox.critical(self, "Lỗi Khóa Tài Liệu", error_msg)
-        self.refresh_documents()
+        if self.profile_id:
+            self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(dict)
     def _on_checkin_success(self, res: dict):
@@ -226,13 +276,14 @@ class DocumentManagerPage(BasePageTemplate):
         main_win: Any = self.window()
         if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
             main_win.statusBar().showMessage(msg, 6000)
-        self.refresh_dynamic_inputs()
-        self.refresh_documents()
+        if self.profile_id:
+            self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_checkin_error(self, error_msg: str):
         QMessageBox.critical(self, "Lỗi Đồng Bộ", error_msg)
-        self.refresh_documents()
+        if self.profile_id:
+            self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_watcher_sync_failed(self, error_msg: str):
@@ -243,13 +294,11 @@ class DocumentManagerPage(BasePageTemplate):
         )
 
     def _generate_from_template(self):
-        # Get profile
-        profile = self.store.get_document("profiles", self.profile_id)
+        profile = self.current_profile
         if not profile:
             return
 
-        t_id = profile.get("template_id", "")
-        template = self.store.get_document("profile_templates", t_id)
+        template = self.current_template
         if not template:
             QMessageBox.warning(self, "Thông báo", "Không tìm thấy cấu hình mẫu hồ sơ!")
             return
@@ -293,20 +342,11 @@ class DocumentManagerPage(BasePageTemplate):
                 QMessageBox.warning(
                     self,
                     "Thông báo",
-                    "Không tìm thấy file Word (.docx) mẫu nào trong thư mục cấu hình!",
+                    f"Thư mục mẫu hồ sơ trống! Hãy sao chép các file .docx mẫu vào:\n{t_dir}",
                 )
                 return
 
             # Generate all docx files in the directory
-            reply = QMessageBox.question(
-                self,
-                "Xác nhận sinh hồ sơ",
-                f"Phát hiện {len(docx_files)} file tài liệu mẫu trong thư mục cấu hình.\nBạn có muốn tự động sinh toàn bộ các tài liệu này?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            )
-            if reply == QMessageBox.StandardButton.No:
-                return
-
             reqs = []
             for f in docx_files:
                 reqs.append(
@@ -329,7 +369,8 @@ class DocumentManagerPage(BasePageTemplate):
             main_win: Any = self.window()
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
                 main_win.statusBar().showMessage(msg, 5000)
-            self.refresh_documents()
+            if self.profile_id:
+                self.use_update_profile.load_profile(self.profile_id)
         else:
             QMessageBox.critical(
                 self, "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
@@ -357,9 +398,10 @@ class DocumentManagerPage(BasePageTemplate):
                 self.i18n_manager.translate("tbl_doc_action"),
             ]
         )
-        self.refresh_documents()
+        if self.profile_id:
+            self.use_update_profile.load_profile(self.profile_id)
 
-    def refresh_dynamic_inputs(self):
+    def _render_dynamic_inputs(self, profile: dict, template: dict):
         # Clear previous layout widgets safely
         while self.info_form_layout.count() > 0:
             item = self.info_form_layout.takeAt(0)
@@ -370,19 +412,7 @@ class DocumentManagerPage(BasePageTemplate):
                     w.deleteLater()
         self.info_widgets_map = {}
 
-        if not self.profile_id:
-            return
-
-        profile = self.store.get_document("profiles", self.profile_id)
-        if not profile:
-            return
-
-        t_id = profile.get("template_id", "")
-        self.current_template = self.store.get_document("profile_templates", t_id)
-        if not self.current_template:
-            return
-
-        schema = self.current_template.get("fields_schema", [])
+        schema = template.get("fields_schema", [])
         dynamic_data = profile.get("dynamic_data", {})
 
         from PyQt6.QtCore import QDate
@@ -400,7 +430,7 @@ class DocumentManagerPage(BasePageTemplate):
                 label_text = f"{f_label} (*):"
             lbl = QLabel(label_text)
 
-            val = dynamic_data.get(f_name)
+            val = dynamic_data.get(f_name, None)
 
             if f_type == "boolean":
                 widget = QCheckBox()
@@ -425,10 +455,6 @@ class DocumentManagerPage(BasePageTemplate):
         if not self.profile_id:
             return
 
-        profile = self.store.get_document("profiles", self.profile_id)
-        if not profile:
-            return
-
         dynamic_data = {}
         for f_name, (widget, f_type, req) in self.info_widgets_map.items():
             if f_type == "boolean":
@@ -448,51 +474,4 @@ class DocumentManagerPage(BasePageTemplate):
 
             dynamic_data[f_name] = val
 
-        profile["dynamic_data"] = dynamic_data
-
-        # Save to database
-        self.store.set_document("profiles", self.profile_id, profile)
-
-        # Regenerate all documents using updated dynamic_data (App -> Doc)
-        t_id = profile.get("template_id", "")
-        template = self.store.get_document("profile_templates", t_id)
-        if template:
-            t_dir = template.get("template_dir", "")
-            if t_dir and os.path.exists(t_dir):
-                docx_files = sorted(
-                    [
-                        f
-                        for f in os.listdir(t_dir)
-                        if f.endswith(".docx") and not f.startswith("~$")
-                    ]
-                )
-
-                success_count = 0
-                for f in docx_files:
-                    req = {
-                        "profile_id": self.profile_id,
-                        "template_doc_path": os.path.join(t_dir, f),
-                        "output_doc_name": f,
-                    }
-                    res = asyncio.run(self.generate_controller.handle_request(req))
-                    if res.get("status") == "success":
-                        success_count += 1
-
-                msg = f"✓ Đã lưu thông tin và cập nhật thành công {success_count}/{len(docx_files)} tài liệu hồ sơ!"
-                main_win: Any = self.window()
-                if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                    main_win.statusBar().showMessage(msg, 5000)
-            else:
-                QMessageBox.warning(
-                    self,
-                    "Thông báo",
-                    "Lưu thành công, nhưng không tìm thấy thư mục mẫu để cập nhật tài liệu.",
-                )
-        else:
-            QMessageBox.warning(
-                self,
-                "Thông báo",
-                "Lưu thành công, nhưng mẫu hồ sơ không còn tồn tại để cập nhật tài liệu.",
-            )
-
-        self.refresh_documents()
+        self.use_update_profile.update_profile(self.profile_id, dynamic_data)
