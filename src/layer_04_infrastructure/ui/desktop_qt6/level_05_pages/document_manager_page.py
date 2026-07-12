@@ -17,14 +17,11 @@ from PyQt6.QtCore import Qt, QMetaObject, Q_ARG, pyqtSlot
 from typing import Any
 from src.shared.logger.app_logger import get_logger
 from ..level_04_templates.page_template import BasePageTemplate
-from src.layer_03_interface_adapters.controllers.desktop.generate_document_from_template import (
-    GenerateDocumentFromTemplateController,
-)
 from ..hooks.use_checkout_document import UseCheckoutDocument
 from ..hooks.use_checkin_document import UseCheckinDocument
 from ..hooks.use_update_profile import UseUpdateProfile
+from ..hooks.use_generate_document_from_template import UseGenerateDocumentFromTemplate
 import os
-import asyncio
 
 logger = get_logger(__name__)
 
@@ -35,6 +32,7 @@ class DocumentManagerPage(BasePageTemplate):
         self.use_checkout = UseCheckoutDocument(context, self)
         self.use_checkin = UseCheckinDocument(context, self)
         self.use_update_profile = UseUpdateProfile(context, self)
+        self.use_generate = UseGenerateDocumentFromTemplate(context, self)
 
         self.use_checkout.finished.connect(self._on_checkout_success)
         self.use_checkout.error.connect(self._on_checkout_error)
@@ -46,13 +44,13 @@ class DocumentManagerPage(BasePageTemplate):
         self.use_update_profile.profile_updated.connect(self._on_profile_updated)
         self.use_update_profile.error.connect(self._on_profile_error)
 
+        self.use_generate.finished.connect(self._on_generate_finished)
+        self.use_generate.error.connect(self._on_generate_error)
+
         self.use_checkout.loading.connect(self._set_loading)
         self.use_checkin.loading.connect(self._set_loading)
         self.use_update_profile.loading.connect(self._set_loading)
-
-        self.generate_controller = context.container.resolve(
-            GenerateDocumentFromTemplateController
-        )
+        self.use_generate.loading.connect(self._set_loading)
 
         self.profile_id = ""
 
@@ -181,46 +179,67 @@ class DocumentManagerPage(BasePageTemplate):
                     ]
                 )
 
-                success_count = 0
+                reqs = []
                 for f in docx_files:
-                    req = {
-                        "profile_id": self.profile_id,
-                        "template_doc_path": os.path.join(t_dir, f),
-                        "output_doc_name": f,
-                    }
-                    res_gen = asyncio.run(self.generate_controller.handle_request(req))
-                    if res_gen.get("status") == "success":
-                        success_count += 1
-
-                msg = f"✓ Đã lưu thông tin và cập nhật thành công {success_count}/{len(docx_files)} tài liệu hồ sơ!"
-                main_win: Any = self.window()
-                if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                    main_win.statusBar().showMessage(msg, 5000)
+                    reqs.append(
+                        {
+                            "profile_id": self.profile_id,
+                            "template_doc_path": os.path.join(t_dir, f),
+                            "output_doc_name": f,
+                        }
+                    )
+                self.use_generate.generate_documents(reqs)
             else:
                 QMessageBox.warning(
                     self,
                     "Thông báo",
                     "Lưu thành công, nhưng không tìm thấy thư mục mẫu để cập nhật tài liệu.",
                 )
-
-        self.use_update_profile.load_profile(self.profile_id)
+                self.use_update_profile.load_profile(self.profile_id)
+        else:
+            self.use_update_profile.load_profile(self.profile_id)
 
     @pyqtSlot(str)
     def _on_profile_error(self, err_msg: str):
         QMessageBox.critical(self, "Lỗi Nghiệp Vụ", err_msg)
 
+    @pyqtSlot(int, int)
+    def _on_generate_finished(self, success_count: int, total_count: int):
+        if success_count > 0:
+            msg = f"✓ Sinh tài liệu thành công: {success_count}/{total_count} file đã được đồng bộ!"
+            main_win: Any = self.window()
+            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+                main_win.statusBar().showMessage(msg, 5000)
+        else:
+            QMessageBox.critical(
+                self, "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
+            )
+        self.use_update_profile.load_profile(self.profile_id)
+
+    @pyqtSlot(str)
+    def _on_generate_error(self, err_msg: str):
+        QMessageBox.critical(self, "Lỗi Sinh Tài Liệu", err_msg)
+        self.use_update_profile.load_profile(self.profile_id)
+
     @pyqtSlot(bool)
     def _set_loading(self, is_loading: bool):
+        main_win: Any = self.window()
         if is_loading:
             self.setCursor(Qt.CursorShape.WaitCursor)
             self.btn_save_info.setEnabled(False)
             self.btn_back.setEnabled(False)
             self.table.setEnabled(False)
+            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+                main_win.statusBar().showMessage(
+                    "Đang xử lý tác vụ ngầm, vui lòng chờ...", 0
+                )
         else:
             self.unsetCursor()
             self.btn_save_info.setEnabled(True)
             self.btn_back.setEnabled(True)
             self.table.setEnabled(True)
+            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
+                main_win.statusBar().clearMessage()
 
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
@@ -376,24 +395,8 @@ class DocumentManagerPage(BasePageTemplate):
                     }
                 )
 
-        # Run requests
-        success_count = 0
-        for req in reqs:
-            res = asyncio.run(self.generate_controller.handle_request(req))
-            if res.get("status") == "success":
-                success_count += 1
-
-        if success_count > 0:
-            msg = f"✓ Đã sinh thành công {success_count}/{len(reqs)} tài liệu hồ sơ từ thư mục mẫu!"
-            main_win: Any = self.window()
-            if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().showMessage(msg, 5000)
-            if self.profile_id:
-                self.use_update_profile.load_profile(self.profile_id)
-        else:
-            QMessageBox.critical(
-                self, "Lỗi", "Không thể sinh tài liệu nào từ thư mục mẫu."
-            )
+        # Trigger asynchronous generation via hook!
+        self.use_generate.generate_documents(reqs)
 
     def _go_back(self):
         main_win: Any = self.window()
