@@ -239,7 +239,11 @@ class DocumentManagerPage(BasePageTemplate):
             self.btn_back.setEnabled(True)
             self.table.setEnabled(True)
             if main_win and hasattr(main_win, "statusBar") and main_win.statusBar():
-                main_win.statusBar().clearMessage()
+                if (
+                    main_win.statusBar().currentMessage()
+                    == "Đang xử lý tác vụ ngầm, vui lòng chờ..."
+                ):
+                    main_win.statusBar().clearMessage()
 
     def _render_documents(self, docs: list):
         self.table.setRowCount(0)
