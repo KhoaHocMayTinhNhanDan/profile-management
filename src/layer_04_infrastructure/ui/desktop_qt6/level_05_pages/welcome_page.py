@@ -174,6 +174,9 @@ class WelcomePage(BasePageTemplate):
         self.use_welcome_data.load_data()
 
     def refresh_data(self):
+        self.use_welcome_data.load_data()
+
+    def _render_data(self):
         # Update cards
         profiles = self.profiles
         templates = self.templates
@@ -335,7 +338,7 @@ class WelcomePage(BasePageTemplate):
     def _go_to_prev_page(self):
         if self.current_page > 1:
             self.current_page -= 1
-            self.refresh_data()
+            self._render_data()
 
     def _go_to_next_page(self):
         profiles = self.profiles
@@ -344,13 +347,13 @@ class WelcomePage(BasePageTemplate):
         )
         if self.current_page < total_pages:
             self.current_page += 1
-            self.refresh_data()
+            self._render_data()
 
     @pyqtSlot(list, list)
     def _on_data_loaded(self, profiles: list, templates: list):
         self.profiles = profiles
         self.templates = templates
-        self.refresh_data()
+        self._render_data()
 
     @pyqtSlot(str)
     def _on_template_deleted(self, template_id: str):

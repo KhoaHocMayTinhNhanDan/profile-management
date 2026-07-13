@@ -300,20 +300,20 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
                     # Update current run to hold the prefix
                     run.text = prefix
 
-                    # Construct sdt XML node using etree
-                    from lxml import etree  # type: ignore
+                    # Construct sdt XML node using OxmlElement
+                    from docx.oxml import OxmlElement
 
-                    sdt = etree.Element(f"{{{w_ns}}}sdt", nsmap=nsmap)
-                    sdtPr = etree.SubElement(sdt, f"{{{w_ns}}}sdtPr", nsmap=nsmap)
-                    tag = etree.SubElement(sdtPr, f"{{{w_ns}}}tag", nsmap=nsmap)
+                    sdt = OxmlElement('w:sdt')
+                    sdtPr = OxmlElement('w:sdtPr')
+                    tag = OxmlElement('w:tag')
                     tag.set(f"{{{w_ns}}}val", field)
-                    alias = etree.SubElement(sdtPr, f"{{{w_ns}}}alias", nsmap=nsmap)
+                    alias = OxmlElement('w:alias')
                     alias.set(f"{{{w_ns}}}val", field)
+                    sdtPr.append(tag)
+                    sdtPr.append(alias)
 
-                    sdtContent = etree.SubElement(
-                        sdt, f"{{{w_ns}}}sdtContent", nsmap=nsmap
-                    )
-                    r_node = etree.SubElement(sdtContent, f"{{{w_ns}}}r", nsmap=nsmap)
+                    sdtContent = OxmlElement('w:sdtContent')
+                    r_node = OxmlElement('w:r')
 
                     # Copy run properties from the matched run to sdtPr and r_node
                     run_el = getattr(run, "_r", None)
@@ -326,8 +326,13 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
                             # 2. Insert into r_node at index 0
                             r_node.insert(0, copy.deepcopy(rPr))
 
-                    t_node = etree.SubElement(r_node, f"{{{w_ns}}}t", nsmap=nsmap)
+                    t_node = OxmlElement('w:t')
                     t_node.text = f"[{field}]"
+                    r_node.append(t_node)
+                    sdtContent.append(r_node)
+
+                    sdt.append(sdtPr)
+                    sdt.append(sdtContent)
 
                     # Insert sdt after current run in paragraph XML element
                     if run_el is not None:
@@ -337,13 +342,12 @@ def upgrade_docx_placeholders(doc_path: str, fields: list, output_path: str) -> 
                             parent.insert(idx + 1, sdt)
 
                             if suffix:
-                                new_r_el = etree.Element(f"{{{w_ns}}}r", nsmap=nsmap)
+                                new_r_el = OxmlElement('w:r')
                                 if rPr is not None:
                                     new_r_el.append(copy.deepcopy(rPr))
-                                new_t_el = etree.SubElement(
-                                    new_r_el, f"{{{w_ns}}}t", nsmap=nsmap
-                                )
+                                new_t_el = OxmlElement('w:t')
                                 new_t_el.text = suffix
+                                new_r_el.append(new_t_el)
                                 parent.insert(idx + 2, new_r_el)
 
                     # Reset and loop again since structure changed
