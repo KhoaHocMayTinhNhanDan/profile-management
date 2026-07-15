@@ -47,6 +47,9 @@ class MoveModuleInteractor:
                 message=f"Successfully moved '{source_path}' into '{destination_dir}' and updated all imports!",
             )
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             return MoveModuleOutput(
                 success=False, message=f"Move refactoring failed: {e}"
             )

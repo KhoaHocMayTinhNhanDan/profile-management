@@ -17,6 +17,9 @@ class GenerateFeatureController:
         feature_name = args.name
         platforms = args.platforms.split(",") if args.platforms else []
         db_techs = args.db.split(",") if args.db else []
+        group_name = getattr(args, "group", "")
+        color_palette = getattr(args, "color_palette", "Catppuccin_Mocha")
+        theme = getattr(args, "theme", "default_theme")
 
         input_data = GenerateFeatureInput(
             feature_name=feature_name,
@@ -24,6 +27,9 @@ class GenerateFeatureController:
             db_techs=[db.strip() for db in db_techs if db.strip()],
             project_root_dir=project_root_dir,
             project_name=project_name,
+            group_name=group_name,
+            color_palette=color_palette,
+            theme=theme,
         )
 
         output = self._interactor.execute(input_data)

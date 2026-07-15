@@ -73,6 +73,13 @@ from scripts.util_dev.project_manager_app.layer_03_interface_adapters.controller
     DesktopSetupEnvironmentController,
 )
 
+from scripts.util_dev.project_manager_app.layer_02_usecases.usecases.delete_project.delete_project_interactor import (
+    DeleteProjectInteractor,
+)
+from scripts.util_dev.project_manager_app.layer_03_interface_adapters.controllers.desktop.delete_project import (
+    DesktopDeleteProjectController,
+)
+
 from scripts.util_dev.project_manager_app.layer_02_usecases.gateways_interface.i_file_repository import (
     IFileRepository,
 )
@@ -115,7 +122,11 @@ class AppContextDesktop:
         self.i18n_manager = I18nManager("en")
 
         # Data Sources & Repositories
-        project_data_source = FileSystemProjectDataSource()
+        import os
+
+        project_data_source = FileSystemProjectDataSource(
+            os.path.join(project_root, ".projects")
+        )
         project_repo = ProjectRepository(project_data_source)
         self.container.register(IProjectRepository, project_repo)
 
@@ -128,6 +139,7 @@ class AppContextDesktop:
         self.load_interactor = LoadProjectInteractor(project_repo)
         self.list_interactor = ListProjectsInteractor(project_repo)
         self.reset_interactor = ResetWorkspaceInteractor(project_repo, project_root)
+        self.delete_interactor = DeleteProjectInteractor(project_repo)
         self.generate_feature_interactor = GenerateFeatureInteractor(file_repo)
         self.check_imports_interactor = CheckImportsInteractor(file_repo)
 
@@ -141,6 +153,7 @@ class AppContextDesktop:
         self.load_controller = DesktopLoadProjectController(self.load_interactor)
         self.list_controller = DesktopListProjectsController(self.list_interactor)
         self.reset_controller = DesktopResetWorkspaceController(self.reset_interactor)
+        self.delete_controller = DesktopDeleteProjectController(self.delete_interactor)
         self.generate_feature_controller = DesktopGenerateFeatureController(
             self.generate_feature_interactor
         )

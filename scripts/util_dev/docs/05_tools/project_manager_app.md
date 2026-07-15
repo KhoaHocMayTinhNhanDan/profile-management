@@ -2,7 +2,7 @@
 
 A production-ready Clean Architecture template and automated scaffolding kit designed specifically for Python applications. 
 
-This kit enables you to build scalable, testable, and loosely-coupled applications supporting multiple platforms (CLI, Web API via FastAPI, Desktop via PyQt6, Mobile via Kivy) out of the box.
+This kit enables you to build scalable, testable, and loosely-coupled applications supporting multiple platforms (CLI, Web API via FastAPI, Desktop via PyQt6 or Tauri, Mobile via Kivy, Flutter, React Native, Jetpack Compose) out of the box.
 
 ---
 
@@ -29,13 +29,16 @@ learn/
 │   ├── layer_01_entities/                # Pure Business Entities & Validation
 │   ├── layer_02_usecases/                # Business Logic & Ports (Interfaces)
 │   ├── layer_03_interface_adapters/      # Adapters (Controllers, Presenters, Gateways)
-│   ├── layer_04_infrastructure/          # Concrete Frameworks (SQLite, PyQt6, FastAPI)
+│   ├── layer_04_infrastructure/          # Concrete Frameworks (SQLite, PyQt6, FastAPI, Tauri, Flutter, React Native, Compose)
 │   └── layer_05_bootstrap/               # Dependency Injection & Wiring
 │
 ├── scripts/                              # Helper Scripts
 │   ├── run/                              # Unified Execution Directory
 │   │   ├── cli/                          # CLI Runner Scripts
-│   │   └── desktop/                      # PyQt6 GUI Runner Scripts
+│   │   ├── desktop_qt6/                  # PyQt6 Desktop Runner Scripts
+│   │   ├── desktop_tauri/                # Tauri Desktop Runner Scripts
+│   │   ├── mobile_kivy/                  # Kivy Mobile Runner Scripts
+│   │   └── web_fastapi/                  # Web FastAPI Runner Scripts
 │   └── util_dev/                         # Developer Utilities & Project Manager App
 │       ├── project_manager_app/          # The Scaffolder Application (Clean Architecture)
 │       └── rename_module.py              # CLI tool to rename modules & auto-fix imports
@@ -65,13 +68,14 @@ The Project Manager handles all codebase operations under a unified, premium PyQ
      * `N` để tạo project mới (Ví dụ: `trading_bot`).
      * `L` để load khôi phục lại một project cũ đã lưu.
   2. **Giao diện Menu chính:** Sau khi kích hoạt project, CLI sẽ hiện danh sách chức năng từ `0` đến `9`. Bạn chỉ cần **gõ số tương ứng** và nhấn `Enter` để kích hoạt:
-     * `1` ➔ **Generate Feature:** Nhập tiếp tên feature (VD: `PlaceOrder`), nền tảng (VD: `web`), và cơ sở dữ liệu (VD: `sqlite`) khi được nhắc.
+     * `1` ➔ **Generate Feature:** Nhập tiếp tên feature (VD: `PlaceOrder`), nền tảng (VD: `web_fastapi,desktop_qt6,desktop_tauri`), và cơ sở dữ liệu (VD: `sqlite`) khi được nhắc.
      * `2` ➔ **Check Imports:** Tự động quét và báo cáo vi phạm ranh giới kiến trúc Clean Architecture.
      * `3` & `4` & `5` ➔ **Backup & Khôi phục:** Lưu trạng thái, khôi phục hoặc xem danh sách dự án.
      * `6` ➔ **Reset Workspace:** Quét sạch code rác để đưa workspace về trạng thái nguyên bản.
      * `7` ➔ **Refactor Module:** Đổi tên hoặc di chuyển tệp/thư mục và tự động cập nhật import toàn hệ thống.
      * `8` ➔ **Migrate Clean Code:** Tự động chuẩn hóa Protocol sang ABC và print sang app_logger.
      * `9` ➔ **Setup Environment:** Tự động cài đặt môi trường ảo `.venv` và pip packages.
+     * `10` ➔ **Delete Project:** Xóa dự án đã sao lưu khỏi ổ đĩa.
      * `0` ➔ **Thoát.**
 
 - **CLI Shell (Non-Interactive Mode - Dành cho AI & CI/CD):**
@@ -80,10 +84,13 @@ The Project Manager handles all codebase operations under a unified, premium PyQ
   ```
   *Chế độ này cho phép thực thi thẳng một hành động duy nhất thông qua các tham số dòng lệnh (Arguments/Flags), kết thúc ngay lập tức mà không hỏi thêm câu nào. Cực kỳ tối ưu cho các tác vụ tự động hóa và AI Agent:*
 
-  * **Kích hoạt dự án mới & sinh Feature:**
+  * **Kích hoạt dự án mới & sinh Feature (hỗ trợ gom nhóm Usecase và tùy chỉnh Theme/Color Palette):**
     ```bash
-    python scripts/util_dev/project_manager_app/run_project_manager_app/cli/run_cli.py --project-name trading_bot --generate-feature PlaceOrder --platforms web,desktop --db sqlite
+    python scripts/util_dev/project_manager_app/run_project_manager_app/cli/run_cli.py --project-name trading_bot --generate-feature PlaceOrder --platforms web_fastapi,desktop_qt6,desktop_tauri --theme default_theme --theme-preset Office_Navy --db sqlite --group order
     ```
+    *Các tùy chọn theme:*
+    * `--theme`: Tên theme hình học (RADIUS, FONT_FAMILY) tại `appdata/themes/` (mặc định: `default_theme`, các lựa chọn khác: `modern_round`, `flat_retro`).
+    * `--theme-preset` (hoặc `--color-palette`): Tên hệ màu tại `appdata/color_palettes/` (mặc định: `Catppuccin_Mocha`, các lựa chọn khác: `Dracula`, `Nord`, `Gruvbox`...).
   * **Kiểm tra vi phạm import ranh giới kiến trúc:**
     ```bash
     python scripts/util_dev/project_manager_app/run_project_manager_app/cli/run_cli.py --check-imports
@@ -103,6 +110,10 @@ The Project Manager handles all codebase operations under a unified, premium PyQ
   * **Khôi phục dự án cũ:**
     ```bash
     python scripts/util_dev/project_manager_app/run_project_manager_app/cli/run_cli.py --load-project trading_bot
+    ```
+  * **Xóa dự án cũ đã sao lưu:**
+    ```bash
+    python scripts/util_dev/project_manager_app/run_project_manager_app/cli/run_cli.py --delete-project trading_bot
     ```
   * **Xem danh sách dự án:**
     ```bash

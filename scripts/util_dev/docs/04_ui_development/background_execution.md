@@ -47,19 +47,35 @@ class AppExecutionDaemon:
                 })
 ```
 
-### Lựa chọn Vị trí Triển khai Kiến trúc (UI Hooks vs External Services)
-Dựa trên mục đích và phạm vi sử dụng, việc đặt mã nguồn chạy nền sẽ được phân chia vào hai vị trí cụ thể trong Tầng 4 (Infrastructure):
+### 📐 Cây Quyết định Chọn Vị trí Triển khai (Decision Tree)
 
-1. **Triển khai trực tiếp tại Custom Hooks (`layer_04_infrastructure/ui/<platform>/hooks/`):**
-   * **Trường hợp áp dụng:** Các tác vụ chạy nền có vòng đời ngắn, gắn liền với vòng đời của giao diện hiển thị (ví dụ: tải dữ liệu bất đồng bộ khi mở trang, đồng bộ nhẹ dữ liệu UI, chạy một bộ timer đếm ngược trên màn hình).
-   * **Cách thực hiện:** Sử dụng các công cụ luồng của chính nền tảng đồ họa đó (ví dụ: `QThread` / `QTimer` trong PyQt6, `Clock` / `threading` trong Kivy).
+Khi thiết kế tác vụ chạy nền, vị trí mã nguồn được quyết định theo sơ đồ sau:
 
-2. **Triển khai tại Dịch vụ ngoài (`layer_04_infrastructure/external_services/`):**
-   * **Trường hợp áp dụng:** Tác vụ chạy nền mang tính chất cốt lõi của ứng dụng, cần hoạt động liên tục 24/7 độc lập với việc giao diện UI đóng/mở, hoặc cần tái sử dụng chung cho nhiều loại giao diện đầu ra khác nhau (CLI, PyQt6, FastAPI, Kivy).
-   * **Cách thực hiện:** Triển khai bằng Python thuần (sử dụng module `threading` hoặc `multiprocessing` chuẩn) không phụ thuộc vào bất kỳ thư viện giao diện nào, sau đó liên kết với UI thông qua Callback Interface.
+```
+Tác vụ ngắn hạn & gắn chặt với vòng đời UI?
+     │
+  ┌──┴──┐
+  │     │
+ Yes    No ➔ Tác vụ cốt lõi 24/7 & độc lập với UI hoặc dùng chung cho nhiều loại giao diện (CLI/Web/Desktop)?
+  │               │
+  │            ┌──┴──┐
+  │            │     │
+  │           Yes    No ➔ Dùng Mô hình phối hợp Lai (Hybrid Model)
+  │            │
+  ▼            ▼
+[Vị trí 1]   [Vị trí 2]
+```
 
-3. **Mô hình Phối hợp Lai (Hybrid / Collaborative Model):**
-   * **Trường hợp áp dụng:** Đây là mô hình phổ biến và tối ưu nhất cho các ứng dụng phức tạp. Lõi xử lý nặng chạy liên tục dưới dạng **Dịch vụ ngoài (External Service)**, nhưng giao diện UI cần một **Custom Hook** đóng vai trò làm "cầu nối" (Bridge).
-   * **Cách hoạt động:**
-     * **External Service:** Duy trì vòng lặp dữ liệu/logic chính bằng luồng Python thuần.
-     * **UI Custom Hook:** Khởi chạy một tiến trình/luồng đồ họa của riêng UI (như `QThread` trong PyQt6) chỉ để đăng ký lắng nghe (subscribe) sự kiện từ External Service, chuyển đổi dữ liệu thô nhận được thành các UI Signals (`pyqtSignal` hoặc Kivy properties) để cập nhật giao diện một cách an toàn mà không gây xung đột xung nhịp giữa hai bên.
+#### 1. Vị trí 1: Custom Hooks (`layer_04_infrastructure/ui/<platform>/hooks/`)
+* **Điều kiện áp dụng:** Vòng đời ngắn, đi kèm với màn hình (tải dữ liệu bất đồng bộ khi mở trang, bộ timer đếm ngược...).
+* **Cách thực hiện:** Dùng công cụ luồng đồ họa của nền tảng (`QThread`/`QTimer` trong PyQt6, `Clock` trong Kivy).
+
+#### 2. Vị trí 2: Dịch vụ ngoài (`layer_04_infrastructure/external_services/`)
+* **Điều kiện áp dụng:** Tác vụ lõi chạy liên tục 24/7 độc lập với việc đóng/mở UI, hoặc tái sử dụng cho CLI, PyQt6, FastAPI, Kivy.
+* **Cách thực hiện:** Viết bằng Python thuần (`threading`/`multiprocessing`), liên kết với UI qua Event Callbacks/Interfaces.
+
+#### 3. Vị trí 3: Mô hình Phối hợp Lai (Hybrid Model)
+* **Điều kiện áp dụng:** Tác vụ cốt lõi, xử lý nặng liên tục nhưng cần cập nhật lên giao diện (UI) theo thời gian thực.
+* **Quy trình hoạt động:**
+  * **External Service:** Duy trì vòng lặp dữ liệu/logic chính bằng luồng Python thuần.
+  * **UI Custom Hook:** Bọc một tiến trình đồ họa (như `QThread`) đóng vai trò cầu nối (Bridge) lắng nghe (subscribe) sự kiện từ External Service, sau đó phát ra UI Signals (`pyqtSignal` / Kivy properties) để cập nhật màn hình an toàn.

@@ -18,3 +18,7 @@ class IProjectDataSource(ABC):
     @abstractmethod
     def clear_folder(self, folder_path: str) -> bool:
         pass
+
+    @abstractmethod
+    def delete_backup(self, backup_name: str) -> bool:
+        pass

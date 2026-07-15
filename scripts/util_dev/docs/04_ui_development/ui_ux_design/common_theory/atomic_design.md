@@ -1,5 +1,11 @@
 # 🧬 2. Phân Cấp Thiết Kế Hệ Thống (Atomic Design System)
 
+> [!IMPORTANT]
+> **QUY TẮC THÉP CHO AI & DEVELOPER (CẤM VI PHẠM):**
+> 1. **CẤM TUYỆT ĐỐI** import hoặc sử dụng bất kỳ Custom Hook nghiệp vụ, Controller, hay gọi API/Database trực tiếp bên trong các component từ **Level 1 (Atoms) đến Level 4 (Templates)**.
+> 2. **CHỈ CÓ THỂ** sử dụng Custom Hooks, gọi logic nghiệp vụ hoặc đăng ký callback tại **Level 5 (Pages)**.
+> 3. Mọi component ở Level 1, 2, 3 phải hoạt động theo cơ chế **Pure UI / Stateless** (chỉ nhận props từ trên xuống và đẩy signal/event ra ngoài).
+
 Mọi thành phần giao diện trong tầng Infrastructure UI (`layer_04_infrastructure/ui/`) phải được phân loại và sắp xếp nghiêm ngặt theo mô hình Atomic:
 
 ```
@@ -30,3 +36,28 @@ Mọi thành phần giao diện trong tầng Infrastructure UI (`layer_04_infras
 *   **Đặc điểm:** Là thực thể cuối cùng người dùng nhìn thấy, lắp ráp các Organisms và Molecules vào các ô trống của Template.
 *   **Thành phần:** `DashboardPage`, `SettingsPage`, `UserProfilePage`.
 *   **Quy định:** Đây là nơi duy nhất quản lý vòng đời khởi tạo của Custom Hook, phân phối luồng dữ liệu sạch và các callbacks từ Hook xuống các Organisms con.
+
+---
+
+## 🎨 Quy chuẩn tổ chức File và Stylesheet (Component Colocation)
+
+Để đảm bảo khả năng tái sử dụng, dễ bảo trì và mở rộng, toàn bộ các component thuộc từ **Level 1 (Atoms) đến Level 4 (Templates)** phải được thiết kế theo cấu trúc **Component Colocation**:
+
+1. **Một thư mục riêng cho mỗi component**: Mỗi Atom, Molecule, Organism, hay Template cụ thể phải nằm trong một thư mục con riêng biệt đặt tên theo snake_case của thành phần đó.
+2. **Đặt file style ngay cạnh file code logic**:
+   - File code (ví dụ: `buttons.py`, `sidebar.py`) và file stylesheet tương ứng (ví dụ: `buttons.qss`, `sidebar.qss`) bắt buộc phải nằm chung trong cùng thư mục của component đó.
+   - Tránh tuyệt đối việc nhét code CSS/QSS inline vào file Python hoặc gom tất cả vào một file stylesheet dùng chung khổng lồ.
+3. **Sử dụng tệp `__init__.py` để facade**:
+   - Ở cấp thư mục component (ví dụ `buttons/`): Dùng `__init__.py` để export các class bên trong ra ngoài.
+   - Ở cấp thư mục Level (ví dụ `level_01_atoms/`): Dùng `__init__.py` để expose toàn bộ các component con, giúp các tầng khác khi import chỉ cần chỉ định đến thư mục Level mà không cần import sâu vào từng folder vật lý con.
+   
+*Ví dụ cấu trúc chuẩn:*
+```text
+level_01_atoms/
+├── __init__.py                # from .buttons import PrimaryButton...
+└── buttons/
+    ├── __init__.py            # from .buttons import PrimaryButton
+    ├── buttons.py             # Logic của widget
+    └── buttons.qss            # Stylesheet của widget sử dụng biến màu {ACCENT_COLOR}...
+```
+

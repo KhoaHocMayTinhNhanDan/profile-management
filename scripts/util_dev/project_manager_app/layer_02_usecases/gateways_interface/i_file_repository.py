@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 
 class IFileRepository(ABC):
@@ -16,4 +17,16 @@ class IFileRepository(ABC):
 
     @abstractmethod
     def delete_file(self, path: str) -> None:
+        pass
+
+    @abstractmethod
+    def make_dir(self, path: str) -> None:
+        pass
+
+    @abstractmethod
+    def dir_exists(self, path: str) -> bool:
+        pass
+
+    @abstractmethod
+    def list_dir_recursive(self, path: str, pattern: str = "*") -> List[str]:
         pass

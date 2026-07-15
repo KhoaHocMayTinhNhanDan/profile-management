@@ -73,6 +73,13 @@ from scripts.util_dev.project_manager_app.layer_03_interface_adapters.controller
     CliSetupEnvironmentController,
 )
 
+from scripts.util_dev.project_manager_app.layer_02_usecases.usecases.delete_project.delete_project_interactor import (
+    DeleteProjectInteractor,
+)
+from scripts.util_dev.project_manager_app.layer_03_interface_adapters.controllers.cli.delete_project import (
+    CliDeleteProjectController,
+)
+
 from scripts.util_dev.project_manager_app.layer_02_usecases.gateways_interface.i_file_repository import (
     IFileRepository,
 )
@@ -100,7 +107,11 @@ class AppContextCLI:
         self.project_root = project_root
 
         # Data Sources & Repositories
-        project_data_source = FileSystemProjectDataSource()
+        import os
+
+        project_data_source = FileSystemProjectDataSource(
+            os.path.join(project_root, ".projects")
+        )
         project_repo = ProjectRepository(project_data_source)
         self.container.register(IProjectRepository, project_repo)
 
@@ -113,6 +124,7 @@ class AppContextCLI:
         self.load_interactor = LoadProjectInteractor(project_repo)
         self.list_interactor = ListProjectsInteractor(project_repo)
         self.reset_interactor = ResetWorkspaceInteractor(project_repo, project_root)
+        self.delete_interactor = DeleteProjectInteractor(project_repo)
         self.generate_feature_interactor = GenerateFeatureInteractor(file_repo)
         self.check_imports_interactor = CheckImportsInteractor(file_repo)
 
@@ -126,6 +138,7 @@ class AppContextCLI:
         self.load_controller = CliLoadProjectController(self.load_interactor)
         self.list_controller = CliListProjectsController(self.list_interactor)
         self.reset_controller = CliResetWorkspaceController(self.reset_interactor)
+        self.delete_controller = CliDeleteProjectController(self.delete_interactor)
         self.generate_feature_controller = GenerateFeatureController(
             self.generate_feature_interactor
         )

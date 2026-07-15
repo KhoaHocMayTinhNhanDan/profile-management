@@ -48,3 +48,13 @@ class FileSystemProjectDataSource(IProjectDataSource):
         else:
             os.makedirs(folder_path, exist_ok=True)
         return True
+
+    def delete_backup(self, backup_name: str) -> bool:
+        dest = os.path.join(self.backup_root, backup_name)
+        if os.path.exists(dest):
+            try:
+                shutil.rmtree(dest)
+                return True
+            except OSError:
+                return False
+        return True

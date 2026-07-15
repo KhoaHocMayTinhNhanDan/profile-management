@@ -6,7 +6,8 @@ from PyQt6.QtGui import QFont
 from ..level_01_atoms.labels import SubtitleLabel, BodyLabel
 from ..level_01_atoms.inputs import FormLineEdit, FormCheckBox
 from ..level_01_atoms.buttons import PrimaryButton
-from ..level_02_molecules.notification_dialog import NotificationDialog
+from ..level_02_molecules import NotificationDialog
+
 from ..level_04_templates.page_template import BasePageTemplate
 
 
@@ -35,6 +36,13 @@ class GeneratePage(BasePageTemplate):
         card_layout.addWidget(self.name_label)
         card_layout.addWidget(self.feature_name_input)
 
+        # Usecase Group Name
+        self.group_label = BodyLabel("Usecase Group (Optional, e.g. auth, order)")
+        self.group_input = FormLineEdit("e.g. auth, order")
+
+        card_layout.addWidget(self.group_label)
+        card_layout.addWidget(self.group_input)
+
         # Platforms selection
         self.plat_label = BodyLabel("Platforms / Presentation Channels")
         card_layout.addWidget(self.plat_label)
@@ -45,9 +53,18 @@ class GeneratePage(BasePageTemplate):
         platforms_layout.setSpacing(15)
 
         self.plat_cb = {}
-        for p in ["web", "desktop", "mobile", "cli"]:
-            cb = FormCheckBox(p.upper())
-            if p in ["web", "desktop"]:
+        for p in [
+            "web_fastapi",
+            "desktop_qt6",
+            "desktop_tauri",
+            "mobile_kivy",
+            "mobile_flutter",
+            "mobile_react_native",
+            "mobile_jetpack_compose",
+            "cli",
+        ]:
+            cb = FormCheckBox(p.upper().replace("_", " "))
+            if p in ["web_fastapi", "desktop_qt6"]:
                 cb.setChecked(True)
             self.plat_cb[p] = cb
             platforms_layout.addWidget(cb)
@@ -107,8 +124,12 @@ class GeneratePage(BasePageTemplate):
             )
             return
 
+        group = self.group_input.text().strip()
         args = argparse.Namespace(
-            name=name, platforms=",".join(platforms), db=",".join(db_techs)
+            name=name,
+            platforms=",".join(platforms),
+            db=",".join(db_techs),
+            group=group,
         )
 
         project_name = (
@@ -138,6 +159,7 @@ class GeneratePage(BasePageTemplate):
         if "✅ Success" in output or "generated successfully" in output:
             self.main_win.log_success(f"Feature '{name}' generated successfully!")
             self.feature_name_input.clear()
+            self.group_input.clear()
         else:
             self.main_win.log_error("Generation failed. See console output.")
 
@@ -147,6 +169,12 @@ class GeneratePage(BasePageTemplate):
         )
         self.feature_name_input.setPlaceholderText(
             self.i18n_manager.translate("Feature Name (PascalCase, e.g. PlaceOrder)")
+        )
+        self.group_label.setText(
+            self.i18n_manager.translate("Usecase Group (Optional, e.g. auth, order)")
+        )
+        self.group_input.setPlaceholderText(
+            self.i18n_manager.translate("e.g. auth, order")
         )
         self.plat_label.setText(self.i18n_manager.translate("Select Target Platforms"))
         self.db_label.setText(self.i18n_manager.translate("Select Database Technology"))

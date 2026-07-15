@@ -1,5 +1,5 @@
 import ast
-from pathlib import Path
+import os
 from typing import List, Tuple
 from scripts.util_dev.project_manager_app.layer_02_usecases.gateways_interface.i_file_repository import (
     IFileRepository,
@@ -31,14 +31,14 @@ class CheckImportsInteractor:
         self._file_repo = file_repo
 
     def execute(self, input_data: CheckImportsInput) -> CheckImportsOutput:
-        project_root = Path(input_data.project_root_dir)
-        src_dir = project_root / "src"
+        src_dir = os.path.join(input_data.project_root_dir, "src")
 
-        if not src_dir.exists():
+        if not self._file_repo.dir_exists(src_dir):
             return CheckImportsOutput("error", "src directory not found!", [])
 
         all_violations = []
-        for py_file in src_dir.rglob("*.py"):
+        py_files = self._file_repo.list_dir_recursive(src_dir, "*.py")
+        for py_file in py_files:
             violations = self._check_file(py_file)
             if violations:
                 all_violations.extend(violations)
@@ -52,17 +52,18 @@ class CheckImportsInteractor:
                 "ok", "No import violations found. Architecture is clean!", []
             )
 
-    def _get_layer_from_path(self, file_path: Path) -> int:
+    def _get_layer_from_path(self, file_path: str) -> int:
+        normalized_path = file_path.replace("\\", "/")
         for layer_name, layer_num in LAYERS.items():
-            if layer_name in str(file_path):
+            if layer_name in normalized_path:
                 return layer_num
         return 0
 
-    def _get_imported_modules(self, file_path: Path) -> List[str]:
-        if not self._file_repo.file_exists(str(file_path)):
+    def _get_imported_modules(self, file_path: str) -> List[str]:
+        if not self._file_repo.file_exists(file_path):
             return []
 
-        content = self._file_repo.read_file(str(file_path))
+        content = self._file_repo.read_file(file_path)
 
         try:
             tree = ast.parse(content)
@@ -93,7 +94,7 @@ class CheckImportsInteractor:
                 return layer_num
         return 0
 
-    def _check_file(self, file_path: Path) -> List[Tuple[str, int, int]]:
+    def _check_file(self, file_path: str) -> List[Tuple[str, int, int]]:
         violations = []
         current_layer = self._get_layer_from_path(file_path)
         if current_layer == 0:
@@ -105,5 +106,7 @@ class CheckImportsInteractor:
             if target_layer == 0:
                 continue
             if target_layer not in ALLOWED_IMPORTS.get(current_layer, []):
-                violations.append((file_path.name, current_layer, target_layer))
+                violations.append(
+                    (os.path.basename(file_path), current_layer, target_layer)
+                )
         return violations

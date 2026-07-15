@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QFrame, QLabel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from ..level_01_atoms.labels import SubtitleLabel, BodyLabel
-from ..level_02_molecules.notification_dialog import NotificationDialog
+from ..level_02_molecules import NotificationDialog
+
 from ..level_01_atoms.buttons import PrimaryButton
 from ..level_04_templates.page_template import BasePageTemplate
 

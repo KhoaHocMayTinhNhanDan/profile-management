@@ -172,7 +172,7 @@ class DashboardPage(BasePageTemplate):
 
         input_data = GenerateFeatureInput(
             feature_name="",
-            platforms=["desktop", "web"],
+            platforms=["desktop_qt6", "web_fastapi"],
             db_techs=["sqlite"],
             project_root_dir=self.root_dir,
             project_name=name,

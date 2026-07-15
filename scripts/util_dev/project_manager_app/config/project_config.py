@@ -8,10 +8,7 @@ CONFIG_FILENAME = "project_config.json"
 def _config_path(root_dir: str) -> str:
     return os.path.join(
         root_dir,
-        "scripts",
-        "util_dev",
-        "project_manager_app",
-        "appdata",
+        ".projects",
         CONFIG_FILENAME,
     )
 
@@ -45,12 +42,22 @@ def read_project_name(root_dir: str) -> str:
     return ""
 
 
+def read_project_branding(root_dir: str) -> dict:
+    config = _read_json(_config_path(root_dir))
+    branding = config.get("branding")
+    if isinstance(branding, dict):
+        return branding
+    return {}
+
+
 def write_project_name(root_dir: str, project_name: str) -> bool:
     try:
         path = _config_path(root_dir)
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        config = _read_json(path)
+        config["project_name"] = project_name
         with open(path, "w", encoding="utf-8") as file:
-            json.dump({"project_name": project_name}, file, indent=4)
+            json.dump(config, file, indent=4)
         return True
     except OSError:
         return False

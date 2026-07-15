@@ -100,9 +100,35 @@ class ThemeManager(QObject):
         if os.path.exists(self.qss_path):
             try:
                 with open(self.qss_path, "r", encoding="utf-8") as f:
-                    qss_content = f.read()
+                    qss_content = f.read() + "\n"
             except Exception as e:
                 print(f"[ThemeManager] Error reading base QSS: {e}")
+
+        # Quét đệ quy tìm toàn bộ các file .qss ở level_01 đến level_04
+        ui_root = os.path.dirname(os.path.dirname(self.base_dir))
+        levels = [
+            "level_01_atoms",
+            "level_02_molecules",
+            "level_03_organisms",
+            "level_04_templates",
+        ]
+        for lvl in levels:
+            lvl_path = os.path.join(ui_root, lvl)
+            if os.path.exists(lvl_path):
+                for root_dir, _, files in os.walk(lvl_path):
+                    for file in files:
+                        if file.endswith(".qss"):
+                            file_path = os.path.join(root_dir, file)
+                            try:
+                                with open(file_path, "r", encoding="utf-8") as f:
+                                    qss_content += (
+                                        f"\n/* --- Stylesheet: {lvl}/{file} --- */\n"
+                                    )
+                                    qss_content += f.read() + "\n"
+                            except Exception as e:
+                                print(
+                                    f"[ThemeManager] Error reading component QSS from {file_path}: {e}"
+                                )
 
         # Nạp và thay thế các từ khóa trong QSS với palette
         qss = qss_content

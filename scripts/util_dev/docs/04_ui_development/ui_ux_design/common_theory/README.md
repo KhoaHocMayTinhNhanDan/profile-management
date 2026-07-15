@@ -13,9 +13,10 @@ Hãy chọn đúng tài liệu hướng dẫn chuyên sâu cho từng khía cạ
 | **Các quy luật UX kinh điển** | [ux_laws.md](ux_laws.md) | 6 quy luật tâm lý học hành vi thiết kế giao diện trực quan và giảm tải nhận thức. |
 | **10 Nguyên lý Tiện dụng** | [usability_heuristics.md](usability_heuristics.md) | 10 quy tắc vàng kinh điển của Nielsen Norman để phòng tránh lỗi và tối ưu trải nghiệm. |
 | **Phân cấp Hệ thống** | [atomic_design.md](atomic_design.md) | Quy định sắp xếp cấu trúc UI theo mô hình Atomic (Atoms, Molecules, Organisms...). |
-| **Theme & Màu sắc** | [color_system.md](color_system.md) | Design Tokens, phân bổ tỉ lệ 60-30-10, State Tokens, Surface Elevation và nhất quán họ màu. |
+| **Hệ thống Theme** | [theme_system.md](theme_system.md) | Định nghĩa 6 trụ cột của Theme, W3C Design Tokens và các trục thích ứng môi trường. |
+| **Màu sắc & Bề mặt** | [color_system.md](color_system.md) | Thiết kế màu sắc, phân bổ tỉ lệ 60-30-10, State Tokens, Surface Elevation và nhất quán họ màu. |
 | **Quốc tế hóa (i18n)** | [i18n.md](i18n.md) | Quy chuẩn viết code đa ngôn ngữ, định dạng địa phương và layout co giãn tự động. |
-| **Layout & Khả năng tiếp cận** | [spacing_typography.md](spacing_typography.md) | Hệ lưới 8pt, độ tương phản text/border và nguyên tắc phi màu sắc (Color Accessibility). |
+| **Layout & Khả năng tiếp cận** | [spacing_typography.md](spacing_typography.md) | Hệ lưới 8pt, hệ thống kiểu chữ, độ tương phản text/border và nguyên tắc phi màu sắc. |
 
 ---
 *Luôn tuân thủ quy chuẩn thiết kế để ứng dụng đạt trải nghiệm người dùng chuyên nghiệp nhất!*

@@ -1,0 +1,48 @@
+/* --- Atom Buttons --- */
+QPushButton[class="PrimaryButton"] {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+    font-size: 15px;
+    font-weight: bold;
+    padding: 12px 25px;
+    border-radius: {RADIUS};
+    border: none;
+}
+QPushButton[class="PrimaryButton"]:hover {
+    background-color: {ACCENT_HOVER};
+}
+
+QPushButton[class="NavButton"] {
+    color: {TEXT_COLOR};
+    background-color: transparent;
+    border: none;
+    border-left: 4px solid transparent;
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 14px;
+    border-radius: 0px;
+}
+QPushButton[class="NavButton"]:hover {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+}
+QPushButton[class="NavButton"]:checked {
+    background-color: {CARD_BG};
+    color: {ACCENT_COLOR};
+    border-left: 4px solid {ACCENT_COLOR};
+    font-weight: bold;
+}
+
+QPushButton[class="SecondaryButton"] {
+    background-color: transparent;
+    color: {ACCENT_COLOR};
+    border: 2px solid {ACCENT_COLOR};
+    border-radius: {RADIUS};
+    padding: 12px 25px;
+    font-weight: bold;
+    font-size: 14px;
+}
+QPushButton[class="SecondaryButton"]:hover {
+    background-color: {ACCENT_COLOR};
+    color: {SIDEBAR_BG};
+}

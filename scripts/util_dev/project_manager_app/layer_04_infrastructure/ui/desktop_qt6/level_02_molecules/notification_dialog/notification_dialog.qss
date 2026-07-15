@@ -1,0 +1,19 @@
+QFrame#notification_frame {
+    background-color: {DARK_BG};
+    border: 1px solid {BORDER_COLOR};
+    border-radius: 12px;
+}
+
+QPushButton#notification_no_btn {
+    background-color: {CARD_BG};
+    color: {TEXT_COLOR};
+    border: 1px solid {BORDER_COLOR};
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QPushButton#notification_no_btn:hover {
+    background-color: {BORDER_COLOR};
+}

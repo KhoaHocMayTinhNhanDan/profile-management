@@ -1,0 +1,10 @@
+/* --- Atom Labels --- */
+QLabel[class="HeaderLabel"] {
+    color: {TEXT_COLOR};
+}
+QLabel[class="SubtitleLabel"] {
+    color: {TEXT_COLOR};
+}
+QLabel[class="BodyLabel"] {
+    color: {SUBTEXT_COLOR};
+}

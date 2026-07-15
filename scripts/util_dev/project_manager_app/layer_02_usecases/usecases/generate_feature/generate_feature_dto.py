@@ -9,6 +9,9 @@ class GenerateFeatureInput:
     db_techs: List[str]
     project_root_dir: str
     project_name: str
+    group_name: str = ""
+    color_palette: str = "Catppuccin_Mocha"
+    theme: str = "default_theme"
 
 
 @dataclass

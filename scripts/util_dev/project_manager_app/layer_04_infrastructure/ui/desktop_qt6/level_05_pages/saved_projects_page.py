@@ -9,7 +9,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from ..level_01_atoms.labels import SubtitleLabel, BodyLabel
 from ..level_01_atoms.inputs import FormLineEdit
-from ..level_02_molecules.notification_dialog import NotificationDialog
+from ..level_02_molecules import NotificationDialog
+
 from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
 from ..level_04_templates.page_template import BasePageTemplate
 
@@ -76,9 +77,14 @@ class SavedProjectsPage(BasePageTemplate):
         self.project_list = QListWidget()
         load_layout.addWidget(self.project_list)
 
+        btn_layout = QHBoxLayout()
         self.load_btn = PrimaryButton("📂 Restore Selection")
         self.load_btn.clicked.connect(self.handle_load_project)
-        load_layout.addWidget(self.load_btn)
+        self.delete_btn = SecondaryButton("❌ Delete Selection")
+        self.delete_btn.clicked.connect(self.handle_delete_project)
+        btn_layout.addWidget(self.load_btn)
+        btn_layout.addWidget(self.delete_btn)
+        load_layout.addLayout(btn_layout)
         grid.addWidget(load_card, stretch=1)
 
         self.content_layout.addLayout(grid)
@@ -153,6 +159,31 @@ class SavedProjectsPage(BasePageTemplate):
             else:
                 self.main_win.log_error("Failed to restore project.")
 
+    def handle_delete_project(self):
+        selected_item = self.project_list.currentItem()
+        if (
+            not selected_item
+            or not selected_item.flags() & Qt.ItemFlag.ItemIsSelectable
+        ):
+            self.main_win.log_error("Select a project from the list to delete!")
+            return
+
+        text = selected_item.text()
+        reply = NotificationDialog.ask_question(
+            self,
+            "Confirm Delete",
+            f"Are you sure you want to delete '{text}'? This operation cannot be undone.",
+        )
+
+        if reply:
+            self.main_win.log_info(f"Deleting project '{text}'...")
+            success = self.app_ctx.delete_controller.execute(text)
+            if success:
+                self.main_win.log_success(f"Project '{text}' deleted successfully.")
+                self.refresh_project_list()
+            else:
+                self.main_win.log_error("Failed to delete project.")
+
     def retranslate_ui(self, lang_code: str):
         self.save_title.setText(self.i18n_manager.translate("Backup current workspace"))
         self.save_desc.setText(
@@ -168,4 +199,7 @@ class SavedProjectsPage(BasePageTemplate):
         )
         self.load_title.setText(self.i18n_manager.translate("Saved Backups:"))
         self.load_btn.setText(self.i18n_manager.translate("📂 Restore Selected Backup"))
+        self.delete_btn.setText(
+            self.i18n_manager.translate("❌ Delete Selected Backup")
+        )
         self.refresh_project_list()

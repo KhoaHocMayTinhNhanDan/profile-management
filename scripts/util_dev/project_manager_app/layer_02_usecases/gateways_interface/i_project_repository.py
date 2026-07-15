@@ -20,3 +20,7 @@ class IProjectRepository(ABC):
     @abstractmethod
     def reset_workspace(self, root_dir: str) -> bool:
         pass
+
+    @abstractmethod
+    def delete_project(self, project_name: str) -> bool:
+        pass

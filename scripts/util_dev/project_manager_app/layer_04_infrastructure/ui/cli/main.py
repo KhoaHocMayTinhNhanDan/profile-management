@@ -28,6 +28,7 @@ def print_menu(project_name: str):
     print("7. 🔄 Rename Module (Đổi tên/Di chuyển module)")
     print("8. 🪄 Migrate Clean Code (Chuyển Protocol ➔ ABC & print ➔ logger)")
     print("9. 🛠️ Setup Environment (Cài đặt môi trường ảo và packages)")
+    print("10. ❌ Delete Project (Xóa dự án đã lưu)")
     print("0. ❌ Thoát")
     print("==================================================")
 
@@ -149,6 +150,12 @@ def main():
             help="Khôi phục project đã sao lưu",
         )
         group.add_argument(
+            "--delete-project",
+            type=str,
+            metavar="NAME",
+            help="Xóa dự án đã sao lưu",
+        )
+        group.add_argument(
             "--list-projects",
             action="store_true",
             help="Xem danh sách các project đã lưu",
@@ -159,7 +166,7 @@ def main():
             "--platforms",
             type=str,
             default="web",
-            help="Các nền tảng (VD: web,desktop,mobile,cli) - dùng cho --generate-feature",
+            help="Các nền tảng (VD: web_fastapi,desktop_qt6,desktop_tauri,mobile_kivy,mobile_flutter,mobile_react_native,mobile_jetpack_compose,cli) - dùng cho --generate-feature",
         )
         parser.add_argument(
             "--db",
@@ -168,7 +175,39 @@ def main():
             help="Công nghệ Database (VD: sqlite,postgres,mongodb) - dùng cho --generate-feature",
         )
         parser.add_argument(
+            "--group",
+            type=str,
+            default="",
+            help="Nhóm Usecase (VD: auth, order) - dùng cho --generate-feature",
+        )
+        parser.add_argument(
             "--new-name", type=str, help="Tên mới của module - dùng cho --rename-module"
+        )
+        parser.add_argument(
+            "--theme-preset",
+            "--color-palette",
+            dest="color_palette",
+            type=str,
+            default="Catppuccin_Mocha",
+            choices=[
+                "Catppuccin_Mocha",
+                "Dracula",
+                "Nord",
+                "Gruvbox",
+                "Material",
+                "Tokyo_Night",
+                "One_Dark",
+                "Rose_Pine",
+                "Office_Navy",
+            ],
+            help="Theme preset mặc định (bao gồm cả hệ màu và cấu trúc hình học Atoms) - dùng cho --generate-feature",
+        )
+
+        parser.add_argument(
+            "--theme",
+            type=str,
+            default="default_theme",
+            help="Theme preset hình học (modern_round, flat_retro, default_theme) - dùng cho --generate-feature",
         )
 
         cli_args = parser.parse_args()
@@ -195,6 +234,9 @@ def main():
                 name=cli_args.generate_feature,
                 platforms=cli_args.platforms,
                 db=cli_args.db,
+                group=cli_args.group,
+                color_palette=cli_args.color_palette,
+                theme=cli_args.theme,
             )
             app_ctx.generate_feature_controller.execute(
                 gen_args, root_dir, active_project or "project"
@@ -264,6 +306,15 @@ def main():
                 print("❌ Lỗi khi khôi phục project!")
                 sys.exit(1)
 
+        elif cli_args.delete_project:
+            ok = app_ctx.delete_controller.execute(cli_args.delete_project)
+            if ok:
+                print(f"✅ Đã xóa dự án: [{cli_args.delete_project}]")
+                sys.exit(0)
+            else:
+                print("❌ Lỗi khi xóa dự án!")
+                sys.exit(1)
+
         elif cli_args.list_projects:
             projs = app_ctx.list_controller.execute()
             print("Các project đã lưu:", ", ".join(projs))
@@ -284,6 +335,9 @@ def main():
             name = input("Nhập tên feature (VD: CreateOrder): ").strip()
             if not name:
                 continue
+            group = input(
+                "Nhập Usecase Group (tùy chọn, VD: auth, order) [bỏ qua để để phẳng]: "
+            ).strip()
             plat_in = input(
                 "Nhập platforms (VD: web,desktop,mobile,cli) [bỏ qua để tạo web]: "
             ).strip()
@@ -293,7 +347,9 @@ def main():
             ).strip()
             db_techs = db_in if db_in else "sqlite"
 
-            args = argparse.Namespace(name=name, platforms=platforms, db=db_techs)
+            args = argparse.Namespace(
+                name=name, platforms=platforms, db=db_techs, group=group
+            )
             # Truyền project_name để sinh runner đúng tên dự án
             app_ctx.generate_feature_controller.execute(args, root_dir, project_name)
 
@@ -383,6 +439,30 @@ def main():
             if confirm == "y":
                 res = app_ctx.setup_environment_controller.execute()
                 print(f"[{'SUCCESS' if res.success else 'ERROR'}] {res.message}")
+
+        elif choice == "10":
+            projs = app_ctx.list_controller.execute()
+            if not projs:
+                print("❌ Chưa có dự án nào được lưu!")
+                continue
+            print("Các dự án đã lưu:", ", ".join(projs))
+            proj = input("Nhập tên dự án muốn xóa: ").strip()
+            if proj in projs:
+                confirm = (
+                    input(
+                        f"⚠️ Bạn có chắc muốn xóa dự án '{proj}'? Thao tác này không thể khôi phục! (y/N): "
+                    )
+                    .strip()
+                    .lower()
+                )
+                if confirm == "y":
+                    ok = app_ctx.delete_controller.execute(proj)
+                    if ok:
+                        print(f"✅ Đã xóa dự án: [{proj}]")
+                    else:
+                        print("❌ Lỗi khi xóa dự án!")
+            else:
+                print("❌ Không tìm thấy dự án!")
 
         elif choice == "0":
             print("Tạm biệt!")

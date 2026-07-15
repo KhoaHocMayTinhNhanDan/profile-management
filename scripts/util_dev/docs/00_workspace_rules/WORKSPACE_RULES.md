@@ -18,22 +18,73 @@ Cách khởi chạy công cụ (Xem chi tiết tại [project_manager_app.md](..
 * **GUI:** `python scripts/util_dev/project_manager_app/run_project_manager_app/desktop/run_desktop.py`
 * **CLI:** `python scripts/util_dev/project_manager_app/run_project_manager_app/cli/run_cli.py`
 
-## 3. Quy trình làm việc bắt buộc của AI (Workflow)
-AI phải tuân thủ nghiêm ngặt quy trình làm việc tuyến tính theo các bước sau cho mọi yêu cầu phát triển hoặc chỉnh sửa có tính phức tạp:
+## 3. Quy trình làm việc & Quy tắc Đẩy mã nguồn của AI (AI Agent Decision Tree)
 
-1. **Lập Kế Hoạch (Planning):** 
-   - AI bắt buộc phải nghiên cứu codebase và tạo/cập nhật bản thiết kế chi tiết tại tệp `implementation_plan.md`.
-   - Bật cờ `RequestFeedback = True` trên bản kế hoạch để gửi yêu cầu phê duyệt đến lập trình viên.
-   - **BẮT BUỘC DỪNG LẠI** và đợi phản hồi. Tuyệt đối không được phép chỉnh sửa hoặc tạo bất kỳ tệp mã nguồn nào trước khi bản kế hoạch được phê duyệt chính thức.
-2. **Nghiên cứu tài liệu & Viết code:** 
-   - Trước khi viết code hoặc sửa đổi UI, AI phải đọc tệp [README.md](../README.md) của dự án để tìm và đọc đúng file hướng dẫn chi tiết của phân mục/layer có liên quan.
-   - **Chất lượng chú thích (Comments & Docstrings):** Giữ lại các comment và docstring cũ còn giá trị; đồng thời **chủ động cập nhật hoặc xóa bỏ** các chú thích đã lỗi thời, sai lệch để đảm bảo tài liệu trong code luôn phản ánh chính xác logic thực tế mới.
-3. **Kiểm tra chất lượng trước khi bàn giao:**
-   - Bắt buộc chạy định dạng code: `black src/` (hoặc `.venv/Scripts/black src/`).
-   - Bắt buộc chạy kiểm tra kiểu tĩnh: `.venv/Scripts/pyright` (chạy không kèm tham số trên Windows để Node parser tự động đọc tệp pyrightconfig.json và quét lỗi toàn diện dự án) hoặc `.venv/bin/pyright` (Linux/macOS).
-   - **Quy trình sửa lỗi lặp (Debugging Loop):** Nếu phát hiện bất kỳ lỗi kiểu tĩnh nào, AI bắt buộc phải tự động sửa đổi mã nguồn và chạy lại lệnh kiểm tra. Quy trình này phải được lặp đi lặp lại liên tục cho đến khi đạt kết quả sạch lỗi hoàn toàn (`0 errors, 0 warnings`) trên tất cả các tệp tạo mới cũng như các tệp cũ bị chỉnh sửa hoặc chịu tác động trực tiếp/gián tiếp mới được phép chuyển sang bước tiếp theo.
+Mọi hoạt động phát triển, kiểm thử, commit, và push mã nguồn của AI Agent bắt buộc phải tuân theo sơ đồ quyết định tuần tự sau:
 
-## 4. Quy tắc Commit & Push thay đổi code
-* **Commit:** Chỉ commit lại dưới môi trường local sau khi đã kiểm tra Pyright sạch lỗi.
-* **Tuyệt đối không tự ý Push:** AI chỉ được phép chạy lệnh push lên Remote Repository (`git push`) **khi và chỉ khi nhận được yêu cầu trực tiếp bằng văn bản từ lập trình viên** (ví dụ: *"hãy push lên repo"*, *"push code lên nhé"*).
-* **Squash Commit:** Trước khi push, bắt buộc gộp (Squash) toàn bộ các commit trung gian tại local thành một commit duy nhất rõ nghĩa bằng lệnh `git rebase -i HEAD~N` (với N là số lượng commit).
+```
+Nhận Yêu cầu ➔ Yêu cầu có tính phức tạp hoặc thay đổi cấu trúc không?
+                   │
+                ┌──┴──┐
+                │     │
+               Yes    No ➔ Trực tiếp Nghiên cứu & Viết code (Bước 2)
+                │
+                ▼
+      [Bước 1: Lập Kế hoạch (Planning)]
+        - Tạo/Cập nhật implementation_plan.md
+        - Gắn RequestFeedback = True và UserFacing = True
+        - BẮT BUỘC DỪNG LẠI và đợi Phản hồi phê duyệt từ Lập trình viên
+                   │
+                   ▼
+      [Bước 2: Nghiên cứu & Thực thi]
+        - Đọc README.md tài liệu để tìm đúng quy chuẩn layer
+        - BẮT BUỘC tuân thủ Atomic UI (nếu chạm vào UI)
+        - Cập nhật/dọn dẹp docstrings & comments lỗi thời
+                   │
+                   ▼
+      [Bước 3: Định dạng & Kiểm tra Kiểu (Pyright)]
+        - Định dạng code bằng black
+        - Chạy pyright kiểm tra kiểu tĩnh
+        - Pyright sạch lỗi (0 errors, 0 warnings)?
+                   │
+                ┌──┴──┐
+                │     │
+               No    Yes
+                │     │
+      Sửa lỗi & ┘     ▼
+      Chạy lại   [Bước 4: Commit cục bộ (Local Commit)]
+                      - Commit sau khi Pyright sạch lỗi
+                      - Lập trình viên yêu cầu push bằng văn bản trực tiếp?
+                                 │
+                              ┌──┴──┐
+                              │     │
+                             No    Yes
+                              │     │
+                    Dừng lại, ┘     ▼
+                    KHÔNG push    [Bước 5: Squash & Đẩy code (Push)]
+                                    - Gộp commit (Squash) bằng git rebase
+                                    - Chạy git push lên Remote
+```
+
+---
+
+### Mô tả Chi tiết Các Bước trong Cây Quyết định:
+
+#### 1. Bước 1: Lập Kế hoạch (Planning)
+* **Hành động:** Tạo/cập nhật `implementation_plan.md` làm tài liệu thiết kế. Gắn `RequestFeedback = True` trong Artifact Metadata để hiển thị nút "Proceed".
+* **Ràng buộc:** BẮT BUỘC dừng lại chờ phê duyệt của Lập trình viên trước khi tạo hoặc chỉnh sửa bất kỳ tệp mã nguồn nào.
+
+#### 2. Bước 2: Nghiên cứu & Thực thi
+* **Ràng buộc:** Mở [README.md](../README.md) để tìm đúng tài liệu layer. Khi sửa đổi UI, bắt buộc tuân thủ phân cấp ranh giới tại [atomic_design.md](../04_ui_development/ui_ux_design/common_theory/atomic_design.md).
+* **Bảo trì chú thích:** Giữ comment còn giá trị, chủ động cập nhật hoặc xóa các comment/docstring đã lỗi thời.
+
+#### 3. Bước 3: Định dạng & Kiểm tra Kiểu (Pyright)
+* **Công cụ:** Chạy `black src/` để format. Chạy `.venv/Scripts/pyright` (hoặc `.venv/bin/pyright`) không kèm tham số.
+* **Vòng lặp sửa lỗi (Debugging Loop):** Lặp liên tục việc sửa code và chạy lại pyright cho đến khi đạt trạng thái sạch lỗi (`0 errors, 0 warnings`) trên các tệp thay đổi mới được phép commit.
+
+#### 4. Bước 4: Commit cục bộ (Local Commit)
+* **Quy tắc:** Chỉ commit cục bộ sau khi đã chạy pyright sạch lỗi hoàn toàn.
+
+#### 5. Bước 5: Squash & Đẩy code (Push)
+* **Gộp commit:** Trước khi push, chạy `git rebase -i HEAD~N` để gộp các commit trung gian thành một commit duy nhất rõ nghĩa.
+* **Ràng buộc Push:** Chỉ chạy `git push` khi có yêu cầu bằng văn bản trực tiếp của Lập trình viên (Ví dụ: *"push code nhé"*, *"hãy push lên repo"*).

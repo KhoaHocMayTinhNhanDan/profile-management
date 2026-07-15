@@ -23,7 +23,8 @@ from ..theme import (
 from ..level_01_atoms.labels import HeaderLabel, SubtitleLabel, BodyLabel
 from ..level_01_atoms.inputs import FormLineEdit
 from ..level_01_atoms.buttons import PrimaryButton, SecondaryButton
-from ..level_02_molecules.notification_dialog import NotificationDialog
+from ..level_02_molecules import NotificationDialog
+
 from scripts.util_dev.project_manager_app.config.project_config import (
     write_project_name,
 )
@@ -46,14 +47,18 @@ class WelcomePage(QDialog):
         self.setModal(True)
         self.resize(520, 500)
 
+        border_width = app_ctx.theme_manager.get_color("BORDER_WIDTH")
+        radius = app_ctx.theme_manager.get_color("RADIUS")
+        radius_num = int(radius.replace("px", "")) if radius.endswith("px") else 8
+
         # Outer frame
         self.frame = QFrame(self)
         self.frame.setGeometry(0, 0, 520, 500)
         self.frame.setStyleSheet(f"""
             QFrame {{
                 background-color: {DARK_BG};
-                border: 2px solid {BORDER_COLOR};
-                border-radius: 16px;
+                border: {border_width} solid {BORDER_COLOR};
+                border-radius: {radius};
             }}
         """)
 
@@ -89,13 +94,15 @@ class WelcomePage(QDialog):
         )
         layout.addWidget(line)
 
+        card_radius = f"{int(radius_num * 1.25)}px"
+
         # --- NEW PROJECT CARD ---
         new_card = QFrame()
         new_card.setStyleSheet(f"""
             QFrame {{
                 background-color: {CARD_BG};
-                border: 1px solid {BORDER_COLOR};
-                border-radius: 10px;
+                border: {border_width} solid {BORDER_COLOR};
+                border-radius: {card_radius};
             }}
             QLabel {{ border: none; background: transparent; }}
         """)
@@ -123,8 +130,8 @@ class WelcomePage(QDialog):
         load_card.setStyleSheet(f"""
             QFrame {{
                 background-color: {CARD_BG};
-                border: 1px solid {BORDER_COLOR};
-                border-radius: 10px;
+                border: {border_width} solid {BORDER_COLOR};
+                border-radius: {card_radius};
             }}
             QLabel {{ border: none; background: transparent; }}
         """)
@@ -137,17 +144,20 @@ class WelcomePage(QDialog):
         load_title.setStyleSheet(f"color: {SUCCESS_COLOR};")
         load_layout.addWidget(load_title)
 
+        list_radius = f"{int(radius_num * 0.75)}px"
+        item_radius = f"{int(radius_num * 0.5)}px"
+
         self.project_list = QListWidget()
         self.project_list.setMaximumHeight(100)
         self.project_list.setStyleSheet(f"""
             QListWidget {{
                 background-color: {DARK_BG};
-                border: 1px solid {BORDER_COLOR};
-                border-radius: 6px;
+                border: {border_width} solid {BORDER_COLOR};
+                border-radius: {list_radius};
                 color: {TEXT_COLOR};
                 padding: 4px;
             }}
-            QListWidget::item {{ padding: 6px 10px; border-radius: 4px; }}
+            QListWidget::item {{ padding: 6px 10px; border-radius: {item_radius}; }}
             QListWidget::item:selected {{ background-color: {BORDER_COLOR}; color: {ACCENT_COLOR}; }}
         """)
         self._load_saved_projects()

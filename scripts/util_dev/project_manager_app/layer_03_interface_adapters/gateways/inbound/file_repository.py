@@ -1,3 +1,4 @@
+from typing import List
 from scripts.util_dev.project_manager_app.layer_02_usecases.gateways_interface.i_file_repository import (
     IFileRepository,
 )
@@ -21,3 +22,12 @@ class FileRepository(IFileRepository):
 
     def delete_file(self, path: str) -> None:
         self._data_source.delete(path)
+
+    def make_dir(self, path: str) -> None:
+        self._data_source.make_dir(path)
+
+    def dir_exists(self, path: str) -> bool:
+        return self._data_source.dir_exists(path)
+
+    def list_dir_recursive(self, path: str, pattern: str = "*") -> List[str]:
+        return self._data_source.list_dir_recursive(path, pattern)

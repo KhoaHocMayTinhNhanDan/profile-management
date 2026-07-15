@@ -53,3 +53,6 @@ class ProjectRepository(IProjectRepository):
             os.path.join(root_dir, "scripts", "run")
         )
         return src_ok and tests_ok and run_ok
+
+    def delete_project(self, project_name: str) -> bool:
+        return self._data_source.delete_backup(project_name)
